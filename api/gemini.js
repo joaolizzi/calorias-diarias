@@ -52,11 +52,9 @@ async function authenticate(req) {
     return { error: 'Servidor sem SUPABASE_URL/SUPABASE_ANON_KEY configurados' };
   }
   const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-    auth: { persistSession: false, autoRefreshToken: false },
-    realtime: {
-      transport: WebSocket // <-- usa o polyfill para evitar erro de native WebSocket
-    }
-  });
+  auth: { persistSession: false, autoRefreshToken: false },
+  realtime: { enabled: false }   // desliga completamente
+});
   const { data, error } = await sb.auth.getUser(token);
   if (error || !data?.user) return { error: 'Sessão inválida' };
   return { user: data.user };
