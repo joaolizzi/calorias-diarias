@@ -16,11 +16,12 @@
 
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { createClient } from '@supabase/supabase-js';
+import WebSocket from 'ws'; // <-- POLYFILL para WebSocket
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-3.5-flash-lite';
+const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-1.5-flash'; // corrigido
 
 const TIMEOUT_MS = 15_000;
 
@@ -52,6 +53,9 @@ async function authenticate(req) {
   }
   const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
     auth: { persistSession: false, autoRefreshToken: false },
+    realtime: {
+      transport: WebSocket // <-- usa o polyfill para evitar erro de native WebSocket
+    }
   });
   const { data, error } = await sb.auth.getUser(token);
   if (error || !data?.user) return { error: 'Sessão inválida' };
@@ -100,7 +104,7 @@ Responda SOMENTE JSON válido, sem markdown, sem explicações, no esquema:
 Regras:
 - title: até 40 caracteres, em pt-BR, sem emoji obrigatório.
 - body: até 280 caracteres, 2-3 frases + 1 sugestão prática curta.
-- Seja direto e gentil. Semmoralismo.
+- Seja direto e gentil. Sem moralismo.
 - Se o consumo estiver dentro da meta, parabenize brevemente.
 
 Hoje: ${day}.
