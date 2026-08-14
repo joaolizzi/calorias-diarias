@@ -38,7 +38,7 @@ export default function AuthGate() {
 
   return (
     <div className="auth">
-      <h1>🍽️ Calorias & Água</h1>
+      <h1> Nutrix </h1>
       <div className="sub" style={{ textAlign: 'center' }}>
         {mode === 'login' ? 'Entre na sua conta' : 'Crie sua conta'}
       </div>
