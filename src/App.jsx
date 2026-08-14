@@ -9,9 +9,7 @@ import AdminPage from './pages/AdminPage.jsx';
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
-  if (loading) {
-    return <div className="route-loading">Carregando…</div>;
-  }
+  if (loading) return <div className="route-loading">Carregando…</div>;
   if (!user) return <AuthGate />;
   return children;
 }
@@ -24,6 +22,10 @@ function ProfileGate({ children }) {
 
   useEffect(() => {
     let active = true;
+    if (location.pathname === '/admin') {
+      setLoading(false);
+      return () => { active = false; };
+    }
     setLoading(true);
     getProfile(user.id).then((profile) => {
       if (!active) return;
@@ -36,6 +38,7 @@ function ProfileGate({ children }) {
     return () => { active = false; };
   }, [user.id, location.pathname]);
 
+  if (location.pathname === '/admin') return children;
   if (loading) return <div className="route-loading">Preparando seu plano…</div>;
   if (!complete && location.pathname !== '/goal') return <Navigate to="/goal" replace />;
   return children;
@@ -47,8 +50,8 @@ export default function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<ProtectedRoute><ProfileGate><Dashboard /></ProfileGate></ProtectedRoute>} />
-          <Route path="/goal" element={<ProtectedRoute><GoalPage /></ProtectedRoute>} />
-          <Route path="/admin" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
+          <Route path="/goal" element={<ProtectedRoute><ProfileGate><GoalPage /></ProfileGate></ProtectedRoute>} />
+          <Route path="/admin" element={<ProtectedRoute><ProfileGate><AdminPage /></ProfileGate></ProtectedRoute>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
