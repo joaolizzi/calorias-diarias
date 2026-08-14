@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useAuth } from '../contexts/AuthContext.jsx';
+import { supabase } from '../lib/supabase.js';
 import { toast } from '../components/Toast.jsx';
 
 const labels = {
@@ -15,26 +15,28 @@ function formatDate(value) {
 }
 
 export default function AdminPage() {
-  const { session } = useAuth();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const load = async () => {
     setLoading(true);
     try {
-      const token = session?.access_token || (await import('../lib/supabase.js')).supabase.auth.getSession().then(({ data: d }) => d.session?.access_token);
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData.session?.access_token;
+      if (!token) throw new Error('Sessão expirada');
       const response = await fetch('/api/admin', { headers: { Authorization: `Bearer ${token}` } });
       const payload = await response.json();
       if (!response.ok || !payload.ok) throw new Error(payload.error || 'Acesso negado');
       setData(payload.data);
     } catch (error) {
+      setData(null);
       toast(error.message || 'Não foi possível carregar o painel admin', { type: 'error' });
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => { load(); }, [session]);
+  useEffect(() => { load(); }, []);
 
   if (loading) return <div className="admin-shell"><div className="admin-loading">Carregando visão geral…</div></div>;
   if (!data) return <div className="admin-shell"><div className="card"><h2>Área administrativa</h2><p className="muted">Você não tem acesso a esta área.</p></div></div>;
@@ -71,8 +73,7 @@ export default function AdminPage() {
               {data.users.map((user) => (
                 <tr key={user.id}><td><strong>{user.display_name || 'Sem nome'}</strong><span>{user.email}</span></td><td><span className={user.onboarding_complete ? 'status-pill good' : 'status-pill'}>{labels[user.goal] || 'Pendente'}</span></td><td>{user.daily_kcal_goal ? `${user.daily_kcal_goal} kcal` : '—'}</td><td>{formatDate(user.created_at)}</td></tr>
               ))}
-            </tbody></table>
-          </div>
+            </tbody></table></div>
         </section>
       </div>
     </div>
