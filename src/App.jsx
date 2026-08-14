@@ -1,18 +1,43 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import { AuthProvider, useAuth } from './contexts/AuthContext.jsx';
+import { getProfile } from './lib/supabase.js';
 import AuthGate from './components/AuthGate.jsx';
 import Dashboard from './pages/Dashboard.jsx';
+import GoalPage from './pages/GoalPage.jsx';
+import AdminPage from './pages/AdminPage.jsx';
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
   if (loading) {
-    return (
-      <div style={{ padding: 60, textAlign: 'center', color: 'var(--muted)' }}>
-        Carregando…
-      </div>
-    );
+    return <div className="route-loading">Carregando…</div>;
   }
   if (!user) return <AuthGate />;
+  return children;
+}
+
+function ProfileGate({ children }) {
+  const { user } = useAuth();
+  const location = useLocation();
+  const [loading, setLoading] = useState(true);
+  const [complete, setComplete] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    setLoading(true);
+    getProfile(user.id).then((profile) => {
+      if (!active) return;
+      setComplete(Boolean(profile?.onboarding_complete));
+    }).catch(() => {
+      if (active) setComplete(false);
+    }).finally(() => {
+      if (active) setLoading(false);
+    });
+    return () => { active = false; };
+  }, [user.id, location.pathname]);
+
+  if (loading) return <div className="route-loading">Preparando seu plano…</div>;
+  if (!complete && location.pathname !== '/goal') return <Navigate to="/goal" replace />;
   return children;
 }
 
@@ -21,14 +46,9 @@ export default function App() {
     <AuthProvider>
       <BrowserRouter>
         <Routes>
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
+          <Route path="/" element={<ProtectedRoute><ProfileGate><Dashboard /></ProfileGate></ProtectedRoute>} />
+          <Route path="/goal" element={<ProtectedRoute><GoalPage /></ProtectedRoute>} />
+          <Route path="/admin" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
