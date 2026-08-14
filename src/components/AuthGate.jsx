@@ -2,11 +2,12 @@ import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext.jsx';
 
 export default function AuthGate() {
-  const { signIn, signUp } = useAuth();
+  const { signIn, signUp, signInAnonymously } = useAuth();
   const [mode, setMode] = useState('login'); // 'login' | 'signup'
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
+  const [guestBusy, setGuestBusy] = useState(false);
   const [err, setErr] = useState('');
 
   const submit = async (e) => {
@@ -20,6 +21,18 @@ export default function AuthGate() {
       setErr(e?.message || 'Falha ao autenticar');
     } finally {
       setBusy(false);
+    }
+  };
+
+  const enterAsGuest = async () => {
+    setErr('');
+    setGuestBusy(true);
+    try {
+      await signInAnonymously();
+    } catch (e) {
+      setErr(e?.message || 'Não foi possível entrar como visitante');
+    } finally {
+      setGuestBusy(false);
     }
   };
 
@@ -57,7 +70,7 @@ export default function AuthGate() {
 
         {err && <div className="err">{err}</div>}
 
-        <button className="btn primary submit" type="submit" disabled={busy}>
+        <button className="btn primary submit" type="submit" disabled={busy || guestBusy}>
           {busy ? 'Aguarde…' : mode === 'login' ? 'Entrar' : 'Criar conta'}
         </button>
       </form>
@@ -74,6 +87,26 @@ export default function AuthGate() {
             <button type="button" onClick={() => setMode('login')}>Entrar</button>
           </>
         )}
+      </div>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '18px 0', color: 'var(--muted, #888)', fontSize: 12 }}>
+        <span style={{ flex: 1, height: 1, background: 'currentColor', opacity: 0.25 }} />
+        ou
+        <span style={{ flex: 1, height: 1, background: 'currentColor', opacity: 0.25 }} />
+      </div>
+
+      <button
+        className="btn submit"
+        type="button"
+        onClick={enterAsGuest}
+        disabled={busy || guestBusy}
+        style={{ width: '100%' }}
+      >
+        {guestBusy ? 'Entrando…' : '🚀 Testar sem criar conta'}
+      </button>
+
+      <div className="sub" style={{ marginTop: 10, fontSize: 12, textAlign: 'center' }}>
+        Entre como visitante para testar o app sem informar email ou senha.
       </div>
 
       {mode === 'signup' && (
