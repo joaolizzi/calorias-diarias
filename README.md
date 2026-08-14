@@ -1,174 +1,131 @@
 # 🍽️ Calorias & Água
 
-App web para registrar calorias diárias e consumo de água, com login e
-sincronização na nuvem (Supabase) e busca automática de calorias via
-**Open Food Facts**.
+App web para registrar calorias diárias e consumo de água, com login, sincronização na nuvem (Supabase), metas personalizadas e painel administrativo.
 
 ## ✨ Recursos
 
-- 🔐 Login e cadastro (Supabase Auth)
-- 💧 Registro rápido de água (botões 100/200/250/500/700/1000 ml + custom)
-- 🍽️ Busca de alimentos via Open Food Facts (kcal/100g) com fallback manual
-- 🍳 Refeições separadas: café / almoço / jantar / lanche
-- 🎯 Metas diárias configuráveis (kcal e ml)
-- 📊 Histórico com gráfico de barras (kcal vs água) — 7 ou 30 dias
-- 🌙 Tema escuro inspirado em `agua-diaria/`
-- ☁️ Dados sincronizados em qualquer dispositivo (Postgres no Supabase)
+- 🔐 Login e cadastro com Supabase Auth
+- 🎯 Goal / onboarding profissional com peso, altura, idade, sexo, atividade e objetivo
+- 🧮 Estimativa automática de calorias usando Mifflin-St Jeor + nível de atividade
+- 💧 Meta de água estimada a partir do peso
+- ✏️ Ajuste manual das metas de kcal e água
+- 🍽️ Registro de refeições e alimentos
+- 📊 Histórico com gráfico de 7 ou 30 dias
+- 🧠 Insights via Gemini
+- 🛡️ Painel `/admin` protegido por e-mail e service role no servidor
+- 🌙 Interface dark responsiva
+- ☁️ Dados sincronizados em qualquer dispositivo
 
 ## 🚀 Como rodar
 
 ### 1. Instalar dependências
 
 ```bash
-cd calorias-diarias
 npm install
-```
-
-### 2. Criar projeto no Supabase
-
-1. Vá em https://supabase.com e crie um projeto gratuito (plano Free)
-2. Em **Settings → API**, copie:
-   - **Project URL** (algo como `https://xxxxx.supabase.co`)
-   - **anon public key** (a chave JWT `eyJ...`)
-3. Renomeie `.env.example` para `.env` e preencha:
-
-```env
-VITE_SUPABASE_URL=https://xxxxx.supabase.co
-VITE_SUPABASE_ANON_KEY=eyJhbGciOi...
-```
-
-### 3. Criar tabelas no banco
-
-1. No Supabase, vá em **SQL Editor → New query**
-2. Cole e rode o SQL abaixo:
-
-```sql
--- Tabela de perfil do usuário (1:1 com auth.users)
-create table public.profiles (
-  id uuid primary key references auth.users on delete cascade,
-  display_name text,
-  daily_kcal_goal int default 2000,
-  daily_water_goal_ml int default 2000,
-  created_at timestamptz default now()
-);
-
--- Entradas de água
-create table public.water_entries (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid references auth.users on delete cascade not null,
-  day date not null,
-  ml int not null check (ml > 0 and ml <= 5000),
-  consumed_at timestamptz default now()
-);
-create index on water_entries (user_id, day);
-
--- Entradas de comida
-create table public.food_entries (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid references auth.users on delete cascade not null,
-  day date not null,
-  meal text not null check (meal in ('breakfast','lunch','dinner','snack')),
-  name text not null,
-  kcal int not null check (kcal >= 0),
-  grams int,
-  consumed_at timestamptz default now()
-);
-create index on food_entries (user_id, day);
-
--- Segurança: cada usuário só vê/edita os próprios dados
-alter table profiles enable row level security;
-alter table water_entries enable row level security;
-alter table food_entries enable row level security;
-
-create policy "own profile" on profiles
-  for all using (auth.uid() = id) with check (auth.uid() = id);
-create policy "own water" on water_entries
-  for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
-create policy "own food" on food_entries
-  for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
-```
-
-3. (Opcional) **Authentication → Providers**: confirme que **Email** está
-   habilitado. Para testar localmente, **desative** "Confirm email" em
-   Authentication → Sign In/Up → Email.
-
-### 4. Rodar
-
-```bash
 npm run dev
 ```
 
-Abra http://localhost:5173
+### 2. Supabase
 
-## 🧪 Fluxo de teste
+Configure no `.env` do front:
 
-1. Criar conta (email + senha)
-2. Adicionar 3 copos d'água — barra de água sobe
-3. Buscar "banana" — ver resultados da Open Food Facts
-4. Adicionar "banana 100g café da manhã" — kcal somam
-5. Trocar meta para 1500 kcal — pill de status muda
-6. Recarregar página — dados persistem (vindos do Supabase)
-7. Abrir em outro navegador — login traz os mesmos dados
-
-## 📁 Estrutura
-
+```env
+VITE_SUPABASE_URL=https://SEU-PROJETO.supabase.co
+VITE_SUPABASE_ANON_KEY=sua_anon_key
+VITE_ADMIN_EMAIL=seu_email_admin
 ```
+
+Para as funções serverless:
+
+```env
+SUPABASE_URL=https://SEU-PROJETO.supabase.co
+SUPABASE_ANON_KEY=sua_anon_key
+SUPABASE_SERVICE_ROLE_KEY=sua_service_role_key
+ADMIN_EMAIL=seu_email_admin
+GEMINI_API_KEY=sua_chave
+GEMINI_MODEL=gemini-1.5-flash
+```
+
+**Nunca use `SUPABASE_SERVICE_ROLE_KEY` com prefixo `VITE_`.** Ela deve existir somente no ambiente server-side (ex.: Vercel).
+
+### 3. Banco de dados
+
+Rode primeiro o SQL original do projeto para criar `profiles`, `water_entries` e `food_entries`. Depois execute:
+
+```text
+supabase/migrations/20260814_goals_admin.sql
+```
+
+Essa migração adiciona os campos do Goal, a flag de onboarding e índices usados no painel administrativo.
+
+### 4. Vercel
+
+Cadastre no projeto da Vercel as mesmas variáveis de ambiente do `.env`, incluindo obrigatoriamente `SUPABASE_SERVICE_ROLE_KEY` e `ADMIN_EMAIL` para o painel administrativo.
+
+## 🎯 Fluxo do Goal
+
+Ao entrar pela primeira vez, o usuário vai para `/goal` e informa seus dados básicos. O app calcula uma meta inicial de calorias e água, mostra o resultado e permite substituir os valores manualmente.
+
+Depois do onboarding, o menu principal apresenta:
+
+- Dashboard
+- Meu Goal
+- Admin (somente para o e-mail configurado como administrador)
+
+## 🔐 Segurança do Admin
+
+O menu do admin é exibido no front apenas para `VITE_ADMIN_EMAIL`, mas a proteção real acontece em `api/admin.js`: o servidor valida o JWT do Supabase, compara o e-mail com `ADMIN_EMAIL` e só então usa `SUPABASE_SERVICE_ROLE_KEY` para ler a visão agregada dos usuários.
+
+Assim, um usuário comum não consegue obter os dados administrativos apenas alterando a interface do navegador.
+
+## 🧮 Cálculo das metas
+
+O cálculo inicial usa a equação de Mifflin-St Jeor para estimar o gasto basal, multiplica pelo nível de atividade e aplica um ajuste moderado de acordo com o objetivo:
+
+- Perder peso: -400 kcal/dia
+- Manter peso: 0 kcal/dia
+- Ganhar massa: +300 kcal/dia
+
+A hidratação inicial usa aproximadamente 35 ml/kg/dia, arredondada para uma meta prática.
+
+Essas estimativas são um ponto de partida e não substituem avaliação profissional individual.
+
+## 📁 Estrutura principal
+
+```text
 calorias-diarias/
-├── index.html              # Entry (Chart.js via CDN)
-├── vite.config.js
-├── package.json
-├── .env.example
+├── api/
+│   ├── admin.js
+│   └── gemini.js
+├── supabase/
+│   └── migrations/
+│       └── 20260814_goals_admin.sql
 ├── src/
-│   ├── main.jsx
-│   ├── App.jsx             # Router + AuthProvider
-│   ├── styles.css          # Tema dark + tokens
-│   ├── lib/
-│   │   ├── supabase.js     # Cliente + queries
-│   │   ├── foods.js        # Open Food Facts wrapper
-│   │   └── dates.js        # Helpers de data
+│   ├── components/
+│   │   ├── GoalSetup.jsx
+│   │   └── ...
 │   ├── contexts/
 │   │   └── AuthContext.jsx
-│   ├── components/
-│   │   ├── AuthGate.jsx
-│   │   ├── Header.jsx
-│   │   ├── ProgressCard.jsx
-│   │   ├── WaterTracker.jsx
-│   │   ├── FoodSearch.jsx
-│   │   ├── AddFoodModal.jsx
-│   │   ├── FoodSection.jsx
-│   │   ├── GoalsSettings.jsx
-│   │   ├── HistoryChart.jsx
-│   │   ├── StatTile.jsx
-│   │   └── Toast.jsx
-│   └── pages/
-│       └── Dashboard.jsx
+│   ├── lib/
+│   │   ├── calculations.js
+│   │   └── supabase.js
+│   ├── pages/
+│   │   ├── AdminPage.jsx
+│   │   ├── GoalPage.jsx
+│   │   └── Dashboard.jsx
+│   ├── professional.css
+│   └── styles.css
+└── ...
 ```
 
 ## 🛠 Stack
 
-- **React 18** + **Vite 5**
-- **React Router 6**
-- **Supabase JS 2** (Auth + Postgres)
-- **Open Food Facts** (busca de kcal, gratuita, sem chave)
-- **Chart.js 4** (via CDN)
-- Sem outras dependências externas
-
-## 🔒 Segurança
-
-A `anon key` do Supabase é pública por design (vai pro bundle JS). A segurança
-real vem do **Row Level Security (RLS)** que configuramos acima — cada query
-no Postgres verifica `auth.uid() = user_id`, então mesmo com a chave pública
-um usuário só consegue ler/escrever os próprios dados.
-
-## ⚠️ Limitações conhecidas
-
-- Open Food Facts cobre bem produtos industrializados, mas pode falhar em
-  pratos caseiros. Por isso o app sempre oferece o botão
-  **"Não achei — adicionar manualmente"**.
-- Gráfico depende do Chart.js via CDN — sem internet, o app continua
-  funcional, só não mostra o histórico visual.
-- Não há recuperação de senha configurada (Supabase suporta, mas exige
-  template de email — fora do MVP).
+- React 18 + Vite 5
+- React Router 6
+- Supabase JS 2
+- Gemini via SDK oficial
+- Open Food Facts / TBCA
+- Chart.js
 
 ## 📜 Licença
 
