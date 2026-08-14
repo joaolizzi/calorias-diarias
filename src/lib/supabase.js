@@ -14,7 +14,7 @@ export const supabase = createClient(url || 'http://localhost', anonKey || 'publ
   auth: { persistSession: true, autoRefreshToken: true },
 });
 
-// ---------- queries ----------
+// ---------- perfil / metas ----------
 export const ensureProfile = async (userId) => {
   const { data: existing } = await supabase
     .from('profiles')
@@ -22,11 +22,13 @@ export const ensureProfile = async (userId) => {
     .eq('id', userId)
     .maybeSingle();
   if (!existing) {
-    await supabase.from('profiles').insert({
+    const { error } = await supabase.from('profiles').insert({
       id: userId,
       daily_kcal_goal: 2000,
       daily_water_goal_ml: 2000,
+      onboarding_complete: false,
     });
+    if (error && error.code !== '23505') throw error;
   }
 };
 
@@ -42,8 +44,8 @@ export const getProfile = async (userId) => {
 
 export const updateGoals = async (userId, { kcalGoal, waterGoal }) => {
   const updates = {};
-  if (kcalGoal != null) updates.daily_kcal_goal = kcalGoal;
-  if (waterGoal != null) updates.daily_water_goal_ml = waterGoal;
+  if (kcalGoal != null) updates.daily_kcal_goal = Math.round(Number(kcalGoal));
+  if (waterGoal != null) updates.daily_water_goal_ml = Math.round(Number(waterGoal));
   const { error } = await supabase
     .from('profiles')
     .update(updates)
@@ -51,7 +53,27 @@ export const updateGoals = async (userId, { kcalGoal, waterGoal }) => {
   if (error) throw error;
 };
 
-// ---------- water ----------
+export const saveGoalProfile = async (userId, payload) => {
+  const updates = {
+    display_name: payload.displayName || null,
+    weight_kg: Number(payload.weightKg),
+    height_cm: Number(payload.heightCm),
+    age: Number(payload.age),
+    sex: payload.sex,
+    activity_level: payload.activity,
+    goal: payload.goal,
+    daily_kcal_goal: Math.round(Number(payload.kcalGoal)),
+    daily_water_goal_ml: Math.round(Number(payload.waterGoal)),
+    onboarding_complete: true,
+  };
+  const { error } = await supabase
+    .from('profiles')
+    .update(updates)
+    .eq('id', userId);
+  if (error) throw error;
+};
+
+// ---------- água ----------
 export const getWaterForDay = async (userId, day) => {
   const { data, error } = await supabase
     .from('water_entries')
@@ -87,7 +109,7 @@ export const clearWaterDay = async (userId, day) => {
   if (error) throw error;
 };
 
-// ---------- food ----------
+// ---------- comida ----------
 export const getFoodForDay = async (userId, day) => {
   const { data, error } = await supabase
     .from('food_entries')
