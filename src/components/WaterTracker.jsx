@@ -4,7 +4,7 @@ import { addWater, clearWaterDay } from '../lib/supabase.js';
 import { today, fmtTime } from '../lib/dates.js';
 import { toast } from './Toast.jsx';
 
-const QUICK = [100, 200, 250, 500, 700, 1000];
+const QUICK = [100, 200, 250, 500, 600, 700, 1000];
 
 export default function WaterTracker({ entries, onChange }) {
   const { user } = useAuth();
