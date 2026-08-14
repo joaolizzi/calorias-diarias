@@ -50,6 +50,10 @@ export function AuthProvider({ children }) {
       const { error } = await supabase.auth.signUp({ email, password });
       if (error) throw error;
     },
+    signInAnonymously: async () => {
+      const { error } = await supabase.auth.signInAnonymously();
+      if (error) throw error;
+    },
     signOut: async () => {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
