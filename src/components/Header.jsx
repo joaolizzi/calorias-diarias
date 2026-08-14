@@ -10,7 +10,7 @@ export default function Header({ subtitle }) {
   return (
     <header className="app-header">
       <div className="brand-block">
-        <NavLink to="/" className="brand-link"><span className="brand-mark">C</span><span>Calorias<span className="brand-accent">.</span></span></NavLink>
+        <NavLink to="/" className="brand-link"><span className="brand-mark">N</span><span>Nutrix<span className="brand-accent">.</span></span></NavLink>
         {subtitle && <div className="sub">{subtitle}</div>}
       </div>
       {user && (
