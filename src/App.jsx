@@ -7,6 +7,23 @@ import Dashboard from './pages/Dashboard.jsx';
 import GoalPage from './pages/GoalPage.jsx';
 import AdminPage from './pages/AdminPage.jsx';
 
+const THEME_KEY = 'nutrix-theme';
+const ACCENT_KEY = 'nutrix-accent';
+
+function ThemeProvider({ children }) {
+  const [theme, setTheme] = useState(() => localStorage.getItem(THEME_KEY) || 'dark');
+  const [accent, setAccent] = useState(() => localStorage.getItem(ACCENT_KEY) || 'green');
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    document.documentElement.dataset.accent = accent;
+    localStorage.setItem(THEME_KEY, theme);
+    localStorage.setItem(ACCENT_KEY, accent);
+  }, [theme, accent]);
+
+  return children({ theme, accent, setTheme, setAccent });
+}
+
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
   if (loading) return <div className="route-loading">Carregando…</div>;
@@ -48,12 +65,16 @@ export default function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<ProtectedRoute><ProfileGate><Dashboard /></ProfileGate></ProtectedRoute>} />
-          <Route path="/goal" element={<ProtectedRoute><ProfileGate><GoalPage /></ProfileGate></ProtectedRoute>} />
-          <Route path="/admin" element={<ProtectedRoute><ProfileGate><AdminPage /></ProfileGate></ProtectedRoute>} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+        <ThemeProvider>
+          {({ theme, accent, setTheme, setAccent }) => (
+            <Routes>
+              <Route path="/" element={<ProtectedRoute><ProfileGate><Dashboard theme={theme} accent={accent} setTheme={setTheme} setAccent={setAccent} /></ProfileGate></ProtectedRoute>} />
+              <Route path="/goal" element={<ProtectedRoute><ProfileGate><GoalPage /></ProfileGate></ProtectedRoute>} />
+              <Route path="/admin" element={<ProtectedRoute><ProfileGate><AdminPage /></ProfileGate></ProtectedRoute>} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          )}
+        </ThemeProvider>
       </BrowserRouter>
     </AuthProvider>
   );
