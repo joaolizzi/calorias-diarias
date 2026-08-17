@@ -13,16 +13,13 @@ const rateBucket = new Map();
 const RATE_WINDOW_MS = 60_000;
 const RATE_MAX = 10;
 
-function send(res, status, body) {
-  return res.status(status).json(body);
-}
+function send(res, status, body) { return res.status(status).json(body); }
 
 async function authenticate(req) {
   const auth = req.headers.authorization || '';
   const match = auth.match(/^Bearer\s+(.+)$/i);
   if (!match) return { error: 'Token ausente' };
   if (!SUPABASE_URL || !SUPABASE_ANON_KEY) return { error: 'Servidor sem Supabase configurado' };
-
   const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
     auth: { persistSession: false, autoRefreshToken: false },
     realtime: { enabled: false },
@@ -52,9 +49,7 @@ function extractJson(text) {
   const value = String(text).trim();
   try { return JSON.parse(value); } catch {}
   const block = value.match(/```(?:json)?\s*([\s\S]+?)\s*```/i);
-  if (block) {
-    try { return JSON.parse(block[1]); } catch {}
-  }
+  if (block) { try { return JSON.parse(block[1]); } catch {} }
   const first = value.indexOf('{');
   const last = value.lastIndexOf('}');
   if (first !== -1 && last > first) {
@@ -81,21 +76,25 @@ function shapeItems(parsed) {
 }
 
 function promptFor(meal) {
-  return `Você é um especialista em nutrição brasileira analisando uma foto de uma refeição. Identifique os alimentos visíveis e estime a porção com base no tamanho aparente, densidade e contexto do prato.
+  return `Você é um especialista em nutrição brasileira analisando uma foto de uma refeição. Identifique apenas alimentos realmente visíveis e estime a porção com base no tamanho aparente, densidade e contexto do prato.
 
 Responda SOMENTE JSON válido, sem markdown, no esquema:
 {"items":[{"name":string,"grams":number,"kcal":number,"protein":number,"carbs":number,"fat":number,"confidence":number,"meal":"breakfast"|"lunch"|"dinner"|"snack"}]}
 
-Regras:
+REGRAS DE IDENTIFICAÇÃO:
+- Não invente ingredientes, marcas ou variedades que não sejam visualmente sustentadas.
+- Para frutas e alimentos que possuem variedades visualmente parecidas, NÃO adivinhe a variedade. Se não houver evidência visual forte, use o nome genérico. Exemplo: se parecer banana mas não for possível distinguir banana-prata, banana-nanica, banana-maçã etc., retorne apenas "banana".
+- Só use uma variedade específica (como "banana-maçã" ou "banana-nanica") quando características visuais claras justificarem isso. A aparência isolada de tamanho/cor não é suficiente para ter certeza.
+- Nunca transforme "banana" automaticamente em "banana-nanica".
 - Liste no máximo 10 alimentos claramente visíveis.
-- Não invente ingredientes escondidos. Se algo não puder ser identificado, não inclua.
+- Não inclua ingredientes escondidos ou presumidos.
 - grams é a porção total estimada daquele alimento na foto, entre 1 e 2000.
 - kcal, protein, carbs e fat são estimativas para a porção indicada.
-- confidence é de 0 a 100 e representa confiança na identificação/estimativa.
+- confidence é de 0 a 100 e representa confiança na identificação e na estimativa.
 - Use nomes curtos em pt-BR.
-- Se for um prato misto, tente separar componentes visíveis.
+- Se for um prato misto, tente separar apenas componentes visualmente distinguíveis.
 - Use "${meal}" como meal quando a refeição não puder ser inferida da imagem.
-- A estimativa deve ser prática e conservadora; não trate como medição exata.
+- A estimativa é aproximada e nunca deve ser apresentada como medição exata.
 
 Refeição informada pelo usuário: ${meal}`;
 }
