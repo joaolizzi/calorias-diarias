@@ -97,6 +97,41 @@
 .status-pill { display:inline-flex; padding:4px 8px; border-radius:999px; color:var(--muted); background:rgba(255,255,255,.04); border:1px solid var(--border); font-size:9px; font-weight:700; white-space:nowrap; }
 .status-pill.good { color:#86efac; background:rgba(52,211,153,.1); border-color:rgba(52,211,153,.18); }
 .admin-loading { min-height:60vh; display:grid; place-items:center; color:var(--muted); font-size:13px; }
+
+/* AI camera */
+.food-ai-actions { display:flex; flex-direction:column; gap:7px; margin-top:10px; }
+.camera-ai-btn { width:100%; justify-content:flex-start; min-height:58px; padding:10px 13px; background:linear-gradient(135deg,rgba(167,139,250,.12),rgba(56,189,248,.06)); border-color:rgba(167,139,250,.22); }
+.camera-ai-btn:hover { border-color:rgba(167,139,250,.42); background:linear-gradient(135deg,rgba(167,139,250,.17),rgba(56,189,248,.09)); }
+.camera-ai-icon { display:grid; place-items:center; width:34px; height:34px; border-radius:10px; background:var(--ai-soft); font-size:17px; }
+.camera-ai-btn strong,.camera-ai-btn small { display:block; text-align:left; }
+.camera-ai-btn strong { font-size:12px; }
+.camera-ai-btn small { margin-top:2px; color:var(--muted); font-size:10px; font-weight:500; }
+.camera-modal { width:min(100%,520px); max-height:min(90vh,760px); overflow:auto; }
+.camera-heading { display:flex; justify-content:space-between; gap:14px; align-items:flex-start; margin-bottom:16px; }
+.camera-heading h3 { margin:6px 0 4px; font-size:20px; letter-spacing:-.5px; }
+.camera-heading p { margin:0; line-height:1.5; }
+.camera-close { flex:0 0 auto; }
+.camera-empty { min-height:300px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; padding:28px 18px; text-align:center; border:1px dashed rgba(167,139,250,.28); border-radius:18px; background:radial-gradient(circle at 50% 0,rgba(167,139,250,.09),transparent 55%); }
+.camera-empty strong { font-size:15px; }
+.camera-empty span { max-width:300px; color:var(--muted); font-size:11px; line-height:1.5; margin-bottom:6px; }
+.camera-icon { display:grid; place-items:center; width:62px; height:62px; margin-bottom:4px; border-radius:18px; color:#ddd6fe; background:var(--ai-soft); border:1px solid rgba(167,139,250,.2); font-size:30px; }
+.camera-preview-wrap { position:relative; overflow:hidden; border-radius:16px; background:#05070a; border:1px solid var(--border); }
+.camera-preview { display:block; width:100%; max-height:420px; object-fit:contain; }
+.camera-retake { position:absolute; right:10px; bottom:10px; padding:8px 10px; border:1px solid rgba(255,255,255,.16); border-radius:9px; color:#fff; background:rgba(0,0,0,.6); backdrop-filter:blur(8px); font-size:10px; font-weight:700; cursor:pointer; }
+.camera-result-head { display:flex; justify-content:space-between; gap:12px; align-items:center; margin:14px 0 8px; }
+.camera-result-head strong { display:block; font-size:13px; }
+.camera-result-head span { display:block; margin-top:3px; color:var(--muted); font-size:10px; }
+.camera-total { color:var(--food); font-size:22px; font-weight:800; white-space:nowrap; }
+.camera-results { max-height:245px !important; border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+.camera-results li { padding:10px 4px !important; }
+.camera-item-label { display:flex; align-items:flex-start; gap:10px; width:100%; cursor:pointer; }
+.camera-item-label input { margin-top:4px; accent-color:var(--accent-strong); }
+.camera-item-off { opacity:.45; }
+.camera-disclaimer { margin-top:10px; padding:9px 10px; color:#c9c2d9; background:rgba(167,139,250,.07); border:1px solid rgba(167,139,250,.12); border-radius:10px; font-size:10px; line-height:1.45; }
+.camera-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:13px; flex-wrap:wrap; }
+.camera-meal { margin-top:12px; padding-top:10px; border-top:1px solid var(--border); color:var(--muted); font-size:10px; }
+.camera-meal strong { color:var(--text-soft); }
+
 @media (max-width:900px) { .admin-stats{grid-template-columns:repeat(2,1fr)} .admin-grid{grid-template-columns:1fr} }
 @media (max-width:700px) {
   .goal-page-header,.admin-page-header{padding:20px 12px 0}
@@ -111,4 +146,7 @@
   .goal-grid.two,.goal-cards,.result-grid{grid-template-columns:1fr}
   .choice-row{align-items:flex-start; flex-direction:column}
   .activity-grid{grid-template-columns:1fr}
+  .camera-modal { width:calc(100vw - 24px); }
+  .camera-preview { max-height:330px; }
+  .camera-actions .btn { flex:1; }
 }
