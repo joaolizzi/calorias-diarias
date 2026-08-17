@@ -85,9 +85,9 @@ export default function DailyInsight({
 
   return (
     <div className="card">
-      <div className="row" style={{ marginBottom: insight ? 8 : 0 }}>
-        <h2>
-          <span className="pill ai" style={{ marginRight: 8 }}>IA</span>
+      <div className="card-head">
+        <h2 className="card-head-title">
+          <span className="pill ai">IA</span>
           Insight do dia
         </h2>
         {insight ? (
@@ -99,9 +99,9 @@ export default function DailyInsight({
 
       {!insight && (
         <>
-          <div className="muted" style={{ marginBottom: 10 }}>
-            Receba um resumo curto do seu dia com uma sugestão prática.
-          </div>
+          <p className="card-desc muted">
+            Receba um resumo do seu dia com uma sugestão prática e objetiva.
+          </p>
           <button
             className="btn primary"
             onClick={ask}
@@ -114,11 +114,9 @@ export default function DailyInsight({
       )}
 
       {insight && (
-        <div>
-          <div style={{ fontWeight: 600, marginBottom: 4 }}>{insight.title}</div>
-          <div className="muted" style={{ fontSize: 13, lineHeight: 1.4 }}>
-            {insight.body}
-          </div>
+        <div className="insight-content">
+          <div className="insight-title">{insight.title}</div>
+          <p className="insight-body">{insight.body}</p>
         </div>
       )}
     </div>

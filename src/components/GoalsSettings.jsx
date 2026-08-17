@@ -30,11 +30,13 @@ export default function GoalsSettings({ profile, onSaved }) {
   return (
     <div className="card">
       <h2>Metas diárias</h2>
-      <div className="row" style={{ gap: 16, alignItems: 'flex-start' }}>
-        <div className="goal-input" style={{ flex: 1 }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 4, width: '100%' }}>
-            <label className="muted">Calorias</label>
+
+      <div className="goals-settings-grid">
+        <div className="goal-field">
+          <label htmlFor="goal-kcal">Calorias</label>
+          <div className="goal-field-row">
             <input
+              id="goal-kcal"
               type="number"
               min="500"
               max="10000"
@@ -42,15 +44,19 @@ export default function GoalsSettings({ profile, onSaved }) {
               value={kcal}
               onChange={(e) => setKcal(e.target.value)}
               onBlur={save}
-              onKeyDown={(e) => { if (e.key === 'Enter') { e.target.blur(); } }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') e.target.blur();
+              }}
             />
+            <span className="goal-field-unit muted">kcal</span>
           </div>
-          <span className="muted">kcal</span>
         </div>
-        <div className="goal-input" style={{ flex: 1 }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 4, width: '100%' }}>
-            <label className="muted">Água</label>
+
+        <div className="goal-field">
+          <label htmlFor="goal-water">Água</label>
+          <div className="goal-field-row">
             <input
+              id="goal-water"
               type="number"
               min="250"
               max="10000"
@@ -58,15 +64,18 @@ export default function GoalsSettings({ profile, onSaved }) {
               value={water}
               onChange={(e) => setWater(e.target.value)}
               onBlur={save}
-              onKeyDown={(e) => { if (e.key === 'Enter') { e.target.blur(); } }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') e.target.blur();
+              }}
             />
+            <span className="goal-field-unit muted">ml</span>
           </div>
-          <span className="muted">ml</span>
         </div>
       </div>
-      <div className="muted" style={{ marginTop: 8, fontSize: 12 }}>
-        Salva automaticamente ao sair do campo.
-      </div>
+
+      <p className="goals-hint muted">
+        As alterações são salvas automaticamente ao sair do campo.
+      </p>
     </div>
   );
 }

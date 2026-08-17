@@ -72,8 +72,9 @@ export default function WaterTracker({ entries, onChange }) {
           Adicionar
         </button>
       </div>
-      <div className="muted" style={{ marginTop: 6 }}>
-        💡 1 copo ≈ 200–250 ml · 1 garrafa ≈ 500 ml
+      <div className="water-hint">
+        <span>1 copo ≈ 200–250 ml</span>
+        <span>1 garrafa ≈ 500 ml</span>
       </div>
 
       {items.length > 0 && (

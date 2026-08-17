@@ -16,24 +16,26 @@ export default function ProgressCard({
 
   return (
     <div className={`card progress-card progress-card-${variant}`}>
-      <div className="row">
-        <div>
-          <div className={`big num ${variant === 'food' ? 'food' : 'water'}`}>
-            {consumed} <span style={{ fontSize: 18, opacity: 0.7 }}>{unit}</span>
-          </div>
-          <div className="muted">
-            de <span className="num">{goal}</span> {unit}
-            {title ? ` · ${title}` : ''}
-          </div>
-        </div>
+      <div className="progress-card-head">
+        <span className="progress-card-label">{title}</span>
         <span className={`pill ${status.cls}`}>{status.label}</span>
+      </div>
+
+      <div className={`big num ${variant === 'food' ? 'food' : 'water'}`}>
+        {consumed.toLocaleString('pt-BR')}
+        <span className="unit">{unit}</span>
+      </div>
+
+      <div className="progress-card-meta">
+        Meta diária:{' '}
+        <span className="num">{goal.toLocaleString('pt-BR')}</span> {unit}
       </div>
 
       <div className={`progress progress-gradient ${isWater ? 'water-gradient' : 'kcal-gradient'}`}>
         <div className={fillClass} style={{ width: `${pct}%` }} />
         <div className="progress-label num">
           {over ? '🎉 ' : ''}
-          {pct}%{over ? ' (meta batida!)' : ''}
+          {pct}%{over ? ' — meta atingida' : ''}
         </div>
       </div>
 

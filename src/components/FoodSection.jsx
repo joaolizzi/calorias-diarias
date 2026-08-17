@@ -39,11 +39,9 @@ export default function FoodSection({ meal, entries, onChange }) {
 
   return (
     <div className="card">
-      <div className="row" style={{ marginBottom: 10 }}>
+      <div className="card-head">
         <h2>{MEAL_LABELS[meal]}</h2>
-        <span className="num" style={{ color: 'var(--food)', fontWeight: 700 }}>
-          {total} kcal
-        </span>
+        <span className="meal-total num">{total.toLocaleString('pt-BR')} kcal</span>
       </div>
 
       <FoodSearch onPick={(item) => setModalItem(item)} />
@@ -65,7 +63,7 @@ export default function FoodSection({ meal, entries, onChange }) {
           onClick={() => setShowManual(true)}
           style={{ width: '100%' }}
         >
-          Não achei — adicionar manualmente
+          Não encontrou? Adicionar manualmente
         </button>
         <button
           className="btn ghost"
@@ -73,8 +71,8 @@ export default function FoodSection({ meal, entries, onChange }) {
           style={{ width: '100%' }}
           title="Descreva o que comeu em uma frase e a IA separa os itens"
         >
-          <span className="pill ai" style={{ marginRight: 6 }}>IA</span>
-          Descrever refeição em texto
+          <span className="pill ai food-ai-pill">IA</span>
+          Descrever refeição por texto
         </button>
       </div>
 

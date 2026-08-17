@@ -88,7 +88,10 @@ export default function GoalSetup({ onComplete, compact = false }) {
         <section className="goal-section">
           <div className="section-heading">
             <span className="section-icon">01</span>
-            <div><strong>Seus dados</strong><span>Precisamos de informações básicas para a estimativa.</span></div>
+            <div>
+              <strong>Seus dados</strong>
+              <span>Precisamos de informações básicas para a estimativa.</span>
+            </div>
           </div>
           <div className="goal-grid two">
             <label className="field-modern"><span>Nome</span><input value={form.displayName} onChange={(e) => set('displayName', e.target.value)} placeholder="Como podemos te chamar?" /></label>
@@ -106,7 +109,13 @@ export default function GoalSetup({ onComplete, compact = false }) {
         </section>
 
         <section className="goal-section">
-          <div className="section-heading"><span className="section-icon">02</span><div><strong>Seu objetivo</strong><span>Escolha o resultado que quer priorizar.</span></div></div>
+          <div className="section-heading">
+            <span className="section-icon">02</span>
+            <div>
+              <strong>Seu objetivo</strong>
+              <span>Escolha o resultado que quer priorizar.</span>
+            </div>
+          </div>
           <div className="goal-cards">
             {GOALS.map((item) => (
               <button type="button" key={item.value} className={form.goal === item.value ? 'goal-card active' : 'goal-card'} onClick={() => set('goal', item.value)}>
@@ -118,7 +127,13 @@ export default function GoalSetup({ onComplete, compact = false }) {
         </section>
 
         <section className="goal-section">
-          <div className="section-heading"><span className="section-icon">03</span><div><strong>Nível de atividade</strong><span>Isso influencia sua necessidade diária.</span></div></div>
+          <div className="section-heading">
+            <span className="section-icon">03</span>
+            <div>
+              <strong>Nível de atividade</strong>
+              <span>Isso influencia sua necessidade diária.</span>
+            </div>
+          </div>
           <div className="activity-grid">
             {ACTIVITY_LEVELS.map((item) => (
               <button type="button" key={item.value} className={form.activity === item.value ? 'activity-card active' : 'activity-card'} onClick={() => set('activity', item.value)}>
@@ -130,7 +145,11 @@ export default function GoalSetup({ onComplete, compact = false }) {
         </section>
 
         <section className="goal-result">
-          <div><span className="eyebrow">ESTIMATIVA PARA {goalLabel.toUpperCase()}</span><h2>Seu plano diário</h2><p>Baseado nos dados informados. Não é uma recomendação médica.</p></div>
+          <div>
+            <span className="eyebrow">ESTIMATIVA PARA {goalLabel.toUpperCase()}</span>
+            <h2>Seu plano diário</h2>
+            <p>Baseado nos dados informados. Não substitui orientação médica ou nutricional.</p>
+          </div>
           <div className="result-grid">
             <div className="result-card"><span>Calorias</span><strong>{kcal.toLocaleString('pt-BR')}</strong><small>kcal / dia</small></div>
             <div className="result-card water-result"><span>Água</span><strong>{water.toLocaleString('pt-BR')}</strong><small>ml / dia</small></div>
