@@ -19,7 +19,7 @@ import Toast from '../components/Toast.jsx';
 
 const MEALS = ['breakfast', 'lunch', 'dinner', 'snack'];
 
-export default function Dashboard() {
+export default function Dashboard({ theme, accent, setTheme, setAccent }) {
   const { user } = useAuth();
   const day = today();
 
@@ -54,7 +54,6 @@ export default function Dashboard() {
   useEffect(() => {
     reloadProfile();
     reloadToday();
-    // pre-aquece TBCA em background; a primeira busca fica instantânea
     prefetchTBCA();
   }, [reloadProfile, reloadToday]);
 
@@ -65,45 +64,20 @@ export default function Dashboard() {
 
   return (
     <div className="app">
-      <Header subtitle={`${fmtDateLabel(day)} · hoje`} />
+      <Header subtitle={`${fmtDateLabel(day)} · hoje`} theme={theme} accent={accent} setTheme={setTheme} setAccent={setAccent} />
       <Toast />
 
-      <ProgressCard
-        title="Calorias"
-        unit="kcal"
-        consumed={kcalConsumed}
-        goal={kcalGoal}
-        variant="food"
-      />
-
-      <ProgressCard
-        title="Água"
-        unit="ml"
-        consumed={waterConsumed}
-        goal={waterGoal}
-        variant="water"
-      >
+      <ProgressCard title="Calorias" unit="kcal" consumed={kcalConsumed} goal={kcalGoal} variant="food" />
+      <ProgressCard title="Água" unit="ml" consumed={waterConsumed} goal={waterGoal} variant="water">
         <WaterTracker entries={waterEntries} onChange={reloadToday} />
       </ProgressCard>
 
       {MEALS.map((meal) => (
-        <FoodSection
-          key={meal}
-          meal={meal}
-          entries={foodEntries.filter((e) => e.meal === meal)}
-          onChange={reloadToday}
-        />
+        <FoodSection key={meal} meal={meal} entries={foodEntries.filter((e) => e.meal === meal)} onChange={reloadToday} />
       ))}
 
       <GoalsSettings profile={profile} onSaved={reloadProfile} />
-
-      <DailyInsight
-        foodEntries={foodEntries}
-        waterEntries={waterEntries}
-        kcalGoal={kcalGoal}
-        waterGoal={waterGoal}
-      />
-
+      <DailyInsight foodEntries={foodEntries} waterEntries={waterEntries} kcalGoal={kcalGoal} waterGoal={waterGoal} />
       <HistoryChart profile={profile} />
     </div>
   );
