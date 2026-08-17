@@ -1,34 +1,16 @@
 // api/gemini.js
-// Proxy serverless (Vercel) que:
-//  1. valida o JWT do Supabase no header Authorization
-//  2. roteia por intent: 'search' | 'parse' | 'insight'
-//  3. chama gemini-1.5-flash via SDK oficial
-//  4. devolve { ok, data } ou { ok: false, error }
-//
-// Variáveis de ambiente (NUNCA usar prefixo VITE_):
-//   GEMINI_API_KEY  - chave do Google AI Studio (https://aistudio.google.com/app/apikey)
-//   GEMINI_MODEL    - default 'gemini-1.5-flash'
-//   SUPABASE_URL    - já usado pelo Vite como VITE_SUPABASE_URL; server usa este nome
-//   SUPABASE_ANON_KEY - idem
-//
-// O front manda um access_token do Supabase em `Authorization: Bearer <jwt>`.
-// O servidor valida chamando supabase.auth.getUser(token) — sem persistir nada.
-
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { createClient } from '@supabase/supabase-js';
-import WebSocket from 'ws'; // <-- POLYFILL para WebSocket
+import WebSocket from 'ws';
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-1.5-flash'; // corrigido
-
+const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-1.5-flash';
 const TIMEOUT_MS = 15_000;
-
-// limita uso do Gemini por IP+intent (memória do processo — best-effort)
 const rateBucket = new Map();
 const RATE_WINDOW_MS = 60_000;
-const RATE_MAX = 30; // 30 chamadas / minuto por chave (suficiente para um usuário)
+const RATE_MAX = 30;
 
 function rateLimit(key) {
   const now = Date.now();
@@ -38,241 +20,120 @@ function rateLimit(key) {
   rateBucket.set(key, arr);
   return true;
 }
-
-function send(res, status, body) {
-  res.status(status).json(body);
-}
+function send(res, status, body) { return res.status(status).json(body); }
 
 async function authenticate(req) {
   const auth = req.headers.authorization || '';
   const m = auth.match(/^Bearer\s+(.+)$/i);
   if (!m) return { error: 'Token ausente' };
-  const token = m[1].trim();
-  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-    return { error: 'Servidor sem SUPABASE_URL/SUPABASE_ANON_KEY configurados' };
-  }
-  const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-  auth: { persistSession: false, autoRefreshToken: false },
-  realtime: { enabled: false }   // desliga completamente
-});
-  const { data, error } = await sb.auth.getUser(token);
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) return { error: 'Servidor sem SUPABASE_URL/SUPABASE_ANON_KEY configurados' };
+  const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: false, autoRefreshToken: false }, realtime: { enabled: false } });
+  const { data, error } = await sb.auth.getUser(m[1].trim());
   if (error || !data?.user) return { error: 'Sessão inválida' };
   return { user: data.user };
 }
 
-// ---- prompts ----
 function buildPromptSearch(q) {
-  return `Você é um assistente nutricional brasileiro. Dada a busca do usuário, estime kcal por 100g do alimento.
-
-Responda SOMENTE JSON válido, sem markdown, sem explicações, no esquema:
-{"items":[{"name": string, "kcalPer100g": number, "portion_suggestion_g": number}]}
-
-Regras:
-- Até 3 itens.
-- Nomes curtos em pt-BR (ex: "Arroz branco cozido", "Peito de frango grelhado").
-- kcal por 100g, número inteiro >= 0.
-- portion_suggestion_g é uma porção típica em gramas (opcional).
-- Se a busca for ambígua (ex: "suco"), devolva variações comuns (com açúcar / sem açúcar).
-
-Busca: "${q}"`;
+  return `Você é um assistente nutricional brasileiro. Dada a busca do usuário, estime kcal por 100g do alimento.\nResponda SOMENTE JSON válido, sem markdown, no esquema: {"items":[{"name": string, "kcalPer100g": number, "portion_suggestion_g": number}]}\nAté 3 itens. Nomes curtos em pt-BR. kcal por 100g >= 0.\nBusca: "${q}"`;
 }
-
 function buildPromptParse(q, defaultMeal) {
-  return `Você é um assistente nutricional brasileiro. Extraia os alimentos da frase do usuário.
-
-Responda SOMENTE JSON válido, sem markdown, sem explicações, no esquema:
-{"items":[{"name": string, "grams": number, "kcal": number, "meal": "breakfast"|"lunch"|"dinner"|"snack"}]}
-
-Regras:
-- gramas: número inteiro entre 1 e 2000. Estime se o usuário não disse.
-- kcal: número inteiro >= 0. Estime com base no alimento e na porção.
-- meal: se a refeição não for óbvia na frase, use "${defaultMeal}".
-- Nomes curtos em pt-BR.
-- Devolva 1 a 6 itens. Se a frase não descrever comida, devolva {"items":[]}.
-
-Frase: "${q}"`;
+  return `Você é um assistente nutricional brasileiro. Extraia os alimentos da frase do usuário.\nResponda SOMENTE JSON válido: {"items":[{"name": string, "grams": number, "kcal": number, "meal": "breakfast"|"lunch"|"dinner"|"snack"}]}\nEstime gramas e kcal quando necessário. 1 a 6 itens.\nRefeição padrão: ${defaultMeal}.\nFrase: "${q}"`;
 }
-
 function buildPromptInsight({ day, kcalConsumed, kcalGoal, waterConsumed, waterGoal, mealSummary }) {
-  return `Você é um assistente nutricional brasileiro. Gere um insight curto sobre o dia.
-
-Responda SOMENTE JSON válido, sem markdown, sem explicações, no esquema:
-{"title": string, "body": string}
-
-Regras:
-- title: até 40 caracteres, em pt-BR, sem emoji obrigatório.
-- body: até 280 caracteres, 2-3 frases + 1 sugestão prática curta.
-- Seja direto e gentil. Sem moralismo.
-- Se o consumo estiver dentro da meta, parabenize brevemente.
-
-Hoje: ${day}.
-Calorias: ${kcalConsumed} / ${kcalGoal} kcal.
-Água: ${waterConsumed} / ${waterGoal} ml.
-Refeições: ${mealSummary || 'sem registros'}.`;
+  return `Você é um assistente nutricional brasileiro. Gere um insight curto sobre o dia.\nResponda SOMENTE JSON: {"title": string, "body": string}.\nHoje: ${day}. Calorias: ${kcalConsumed}/${kcalGoal} kcal. Água: ${waterConsumed}/${waterGoal} ml. Refeições: ${mealSummary || 'sem registros'}.`;
+}
+function buildPromptWorkoutImport(text) {
+  return `Você é um assistente de academia brasileiro. Leia o treino do usuário e transforme em um plano semanal estruturado.\n\nResponda SOMENTE JSON válido, sem markdown, neste esquema exato:\n{"days":{"monday":{"name":string,"restSeconds":number,"exercises":[{"name":string,"muscle":string,"equipment":string,"notes":string,"sets":[{"kg":string,"reps":string}]}]},"tuesday":{},"wednesday":{},"thursday":{},"friday":{},"saturday":{},"sunday":{}}}\n\nRegras:\n- Os sete dias devem existir; dia sem treino usa name vazio e exercises [].\n- Entenda variações como "seg", "terça", "qua", "quinta", "sex", "sab", "dom".\n- Preserve o nome do treino quando existir; se não existir, crie um nome curto baseado no grupo muscular.\n- Extraia exercícios mesmo se vierem em listas, tabelas ou texto corrido.\n- Séries devem virar objetos; se aparecer "3x8-12", use 3 séries com reps "8-12".\n- kg deve ser vazio quando a carga não estiver informada.\n- notes é opcional e deve conter técnica, observações, descanso específico ou qualquer comentário do exercício.\n- restSeconds deve ser 45, 60, 90, 120 ou 180; use 90 quando não houver informação.\n- Não invente exercícios que não aparecem.\n\nTREINO:\n${text}`;
 }
 
-// chama Gemini com timeout via Promise.race
-async function callGemini(prompt, { signal } = {}) {
+async function callGemini(parts) {
   if (!GEMINI_API_KEY) throw new Error('GEMINI_API_KEY não configurada');
   const gen = new GoogleGenerativeAI(GEMINI_API_KEY);
-  const model = gen.getGenerativeModel({
-    model: GEMINI_MODEL,
-    generationConfig: { responseMimeType: 'application/json' },
-  });
-  const t = setTimeout(() => {
-    try { signal?.abort?.(); } catch {}
-  }, TIMEOUT_MS);
-  try {
-    const result = await model.generateContent(prompt);
-    const text = result.response.text();
-    return text;
-  } finally {
-    clearTimeout(t);
-  }
+  const model = gen.getGenerativeModel({ model: GEMINI_MODEL, generationConfig: { responseMimeType: 'application/json' } });
+  const result = await Promise.race([
+    model.generateContent(parts),
+    new Promise((_, reject) => setTimeout(() => reject(new Error('Tempo limite da IA excedido')), TIMEOUT_MS)),
+  ]);
+  return result.response.text();
 }
-
-// o Gemini às vezes embrulha em ```json ... ``` mesmo pedindo mimeType; limpamos
 function extractJson(text) {
   if (!text) return null;
   const t = String(text).trim();
-  // tenta parse direto
   try { return JSON.parse(t); } catch {}
-  // tenta extrair bloco ```json ... ```
   const m = t.match(/```(?:json)?\s*([\s\S]+?)\s*```/i);
-  if (m) {
-    try { return JSON.parse(m[1]); } catch {}
-  }
-  // tenta pegar do primeiro { ao último }
-  const first = t.indexOf('{');
-  const last = t.lastIndexOf('}');
-  if (first !== -1 && last !== -1 && last > first) {
-    try { return JSON.parse(t.slice(first, last + 1)); } catch {}
-  }
+  if (m) { try { return JSON.parse(m[1]); } catch {} }
+  const first = t.indexOf('{'); const last = t.lastIndexOf('}');
+  if (first !== -1 && last > first) { try { return JSON.parse(t.slice(first, last + 1)); } catch {} }
   return null;
 }
-
-// sanitiza itens retornados pelo Gemini para evitar kcal/gramas absurdos
-function sanitizeInt(v, min, max) {
-  const n = Math.round(Number(v));
-  if (!Number.isFinite(n)) return null;
-  return Math.min(max, Math.max(min, n));
-}
-
+function sanitizeInt(v, min, max) { const n = Math.round(Number(v)); return Number.isFinite(n) ? Math.min(max, Math.max(min, n)) : null; }
 function shapeSearch(parsed) {
   if (!parsed || !Array.isArray(parsed.items)) return [];
-  return parsed.items
-    .map((it) => {
-      const name = String(it.name || '').trim();
-      const kcal = sanitizeInt(it.kcalPer100g, 0, 900);
-      const portion = it.portion_suggestion_g != null
-        ? sanitizeInt(it.portion_suggestion_g, 1, 2000)
-        : null;
-      if (!name || kcal == null) return null;
-      return { name, kcalPer100g: kcal, portionSuggestionG: portion };
-    })
-    .filter(Boolean)
-    .slice(0, 3);
+  return parsed.items.map((it) => { const name=String(it.name||'').trim(); const kcal=sanitizeInt(it.kcalPer100g,0,900); const portion=it.portion_suggestion_g!=null?sanitizeInt(it.portion_suggestion_g,1,2000):null; return !name||kcal==null?null:{name,kcalPer100g:kcal,portionSuggestionG:portion}; }).filter(Boolean).slice(0,3);
 }
-
 function shapeParse(parsed) {
   if (!parsed || !Array.isArray(parsed.items)) return [];
-  const MEALS = new Set(['breakfast', 'lunch', 'dinner', 'snack']);
-  return parsed.items
-    .map((it) => {
-      const name = String(it.name || '').trim();
-      const grams = sanitizeInt(it.grams, 1, 2000);
-      const kcal = sanitizeInt(it.kcal, 0, 5000);
-      const meal = MEALS.has(it.meal) ? it.meal : null;
-      if (!name || grams == null || kcal == null || !meal) return null;
-      return { name, grams, kcal, meal };
-    })
-    .filter(Boolean)
-    .slice(0, 6);
+  const MEALS = new Set(['breakfast','lunch','dinner','snack']);
+  return parsed.items.map((it) => { const name=String(it.name||'').trim(); const grams=sanitizeInt(it.grams,1,2000); const kcal=sanitizeInt(it.kcal,0,5000); const meal=MEALS.has(it.meal)?it.meal:null; return !name||grams==null||kcal==null||!meal?null:{name,grams,kcal,meal}; }).filter(Boolean).slice(0,6);
+}
+function shapeInsight(parsed) { if (!parsed) return null; const title=String(parsed.title||'').trim().slice(0,60); const body=String(parsed.body||'').trim().slice(0,400); return title&&body?{title,body}:null; }
+
+function shapeWorkoutImport(parsed) {
+  const DAY_KEYS = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
+  if (!parsed?.days || typeof parsed.days !== 'object') return null;
+  const days = {};
+  for (const key of DAY_KEYS) {
+    const day = parsed.days[key] || {};
+    const restSeconds = [45,60,90,120,180].includes(Number(day.restSeconds)) ? Number(day.restSeconds) : 90;
+    const exercises = Array.isArray(day.exercises) ? day.exercises.slice(0,40).map((ex) => ({
+      name: String(ex?.name || '').trim().slice(0,120),
+      muscle: String(ex?.muscle || 'Geral').trim().slice(0,60),
+      equipment: String(ex?.equipment || 'Diversos').trim().slice(0,80),
+      notes: String(ex?.notes || '').trim().slice(0,400),
+      sets: Array.isArray(ex?.sets) ? ex.sets.slice(0,12).map((s) => ({ kg: String(s?.kg ?? '').trim().slice(0,30), reps: String(s?.reps ?? '').trim().slice(0,30), done: false })) : [],
+    })).filter((ex) => ex.name) : [];
+    days[key] = { name: String(day.name || '').trim().slice(0,80), restSeconds, exercises };
+  }
+  return days;
 }
 
-function shapeInsight(parsed) {
-  if (!parsed) return null;
-  const title = String(parsed.title || '').trim().slice(0, 60);
-  const body = String(parsed.body || '').trim().slice(0, 400);
-  if (!title || !body) return null;
-  return { title, body };
-}
-
-// ---- handler ----
 export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return send(res, 405, { ok: false, error: 'Método não permitido' });
-  }
-
-  const auth = await authenticate(req);
-  if (auth.error) return send(res, 401, { ok: false, error: auth.error });
-
+  if (req.method !== 'POST') return send(res, 405, { ok:false, error:'Método não permitido' });
+  const auth = await authenticate(req); if (auth.error) return send(res,401,{ok:false,error:auth.error});
   const intent = String(req.body?.intent || '').trim();
-  if (!['search', 'parse', 'insight'].includes(intent)) {
-    return send(res, 400, { ok: false, error: 'Intent inválido' });
-  }
+  if (!['search','parse','insight','workout_import'].includes(intent)) return send(res,400,{ok:false,error:'Intent inválido'});
+  if (!rateLimit(`${auth.user.id}:${intent}`)) return send(res,429,{ok:false,error:'Muitas requisições; tente em alguns segundos'});
 
-  if (!rateLimit(`${auth.user.id}:${intent}`)) {
-    return send(res, 429, { ok: false, error: 'Muitas requisições; tente em alguns segundos' });
-  }
-
-  let prompt;
+  let parts;
   try {
     if (intent === 'search') {
-      const q = String(req.body?.q || '').trim();
-      if (q.length < 2) return send(res, 400, { ok: false, error: 'q muito curto' });
-      prompt = buildPromptSearch(q);
+      const q=String(req.body?.q||'').trim(); if(q.length<2)return send(res,400,{ok:false,error:'q muito curto'}); parts=buildPromptSearch(q);
     } else if (intent === 'parse') {
-      const q = String(req.body?.q || '').trim();
-      const defaultMeal = String(req.body?.meal || 'snack');
-      if (q.length < 3) return send(res, 400, { ok: false, error: 'q muito curto' });
-      prompt = buildPromptParse(q, defaultMeal);
+      const q=String(req.body?.q||'').trim(); if(q.length<3)return send(res,400,{ok:false,error:'q muito curto'}); parts=buildPromptParse(q,String(req.body?.meal||'snack'));
+    } else if (intent === 'insight') {
+      parts=buildPromptInsight(req.body?.payload||{});
     } else {
-      const payload = req.body?.payload || {};
-      prompt = buildPromptInsight({
-        day: payload.day,
-        kcalConsumed: payload.kcalConsumed,
-        kcalGoal: payload.kcalGoal,
-        waterConsumed: payload.waterConsumed,
-        waterGoal: payload.waterGoal,
-        mealSummary: payload.mealSummary,
-      });
+      const text=String(req.body?.text||'').trim(); const image=req.body?.image;
+      if (!text && !image) return send(res,400,{ok:false,error:'Envie texto ou imagem do treino'});
+      const prompt=buildPromptWorkoutImport(text || 'O treino está na imagem enviada.');
+      parts=image ? [{ text: prompt }, { inlineData: { mimeType: String(image.mimeType||'image/jpeg'), data: String(image.data||'') } }] : prompt;
     }
-  } catch (e) {
-    return send(res, 400, { ok: false, error: 'Payload inválido: ' + e.message });
-  }
+  } catch(e) { return send(res,400,{ok:false,error:'Payload inválido: '+e.message}); }
 
-  const t0 = Date.now();
   try {
-    const text = await callGemini(prompt);
-    const parsed = extractJson(text);
-    if (!parsed) {
-      // log mínimo, sem conteúdo do prompt
-      console.warn(`[gemini] parse falhou (${Date.now() - t0}ms) user=${auth.user.id} intent=${intent}`);
-      return send(res, 502, { ok: false, error: 'Resposta do Gemini não é JSON válido' });
-    }
+    const parsed=extractJson(await callGemini(parts));
+    if(!parsed)return send(res,502,{ok:false,error:'Resposta do Gemini não é JSON válido'});
     let data;
-    if (intent === 'search') data = shapeSearch(parsed);
-    else if (intent === 'parse') data = shapeParse(parsed);
-    else data = shapeInsight(parsed);
-
-    if (intent === 'search' || intent === 'parse') {
-      if (!data || data.length === 0) {
-        return send(res, 200, { ok: true, data: [] });
-      }
-    } else {
-      if (!data) {
-        return send(res, 502, { ok: false, error: 'Insight vazio' });
-      }
-    }
-    return send(res, 200, { ok: true, data });
-  } catch (e) {
-    const msg = e?.message || 'Falha no Gemini';
-    // erros típicos: cota estourada (429), chave inválida (400), rede
-    const status = /429|quota|rate|exhausted/i.test(msg) ? 429
-                 : /API key|permission|401|403/i.test(msg) ? 502
-                 : 502;
-    console.warn(`[gemini] erro (${Date.now() - t0}ms) user=${auth.user.id} intent=${intent} status=${status} msg=${msg}`);
-    return send(res, status, { ok: false, error: msg });
+    if(intent==='search')data=shapeSearch(parsed);
+    else if(intent==='parse')data=shapeParse(parsed);
+    else if(intent==='insight')data=shapeInsight(parsed);
+    else data=shapeWorkoutImport(parsed);
+    if(intent==='insight'&&!data)return send(res,502,{ok:false,error:'Insight vazio'});
+    if(intent==='workout_import'&&!data)return send(res,502,{ok:false,error:'Não consegui identificar um treino válido'});
+    return send(res,200,{ok:true,data});
+  } catch(e) {
+    const msg=e?.message||'Falha no Gemini';
+    const status=/429|quota|rate|exhausted/i.test(msg)?429:/API key|permission|401|403/i.test(msg)?502:502;
+    return send(res,status,{ok:false,error:msg});
   }
 }
