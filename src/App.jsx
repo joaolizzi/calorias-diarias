@@ -1,3 +1,4 @@
+import './theme.css';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { AuthProvider, useAuth } from './contexts/AuthContext.jsx';
@@ -39,14 +40,10 @@ function ProfileGate({ children }) {
 
   useEffect(() => {
     let active = true;
-    if (location.pathname === '/admin') {
-      setLoading(false);
-      return () => { active = false; };
-    }
+    if (location.pathname === '/admin') { setLoading(false); return () => { active = false; }; }
     setLoading(true);
     getProfile(user.id).then((profile) => {
-      if (!active) return;
-      setComplete(Boolean(profile?.onboarding_complete));
+      if (active) setComplete(Boolean(profile?.onboarding_complete));
     }).catch(() => {
       if (active) setComplete(false);
     }).finally(() => {
@@ -62,20 +59,10 @@ function ProfileGate({ children }) {
 }
 
 export default function App() {
-  return (
-    <AuthProvider>
-      <BrowserRouter>
-        <ThemeProvider>
-          {({ theme, accent, setTheme, setAccent }) => (
-            <Routes>
-              <Route path="/" element={<ProtectedRoute><ProfileGate><Dashboard theme={theme} accent={accent} setTheme={setTheme} setAccent={setAccent} /></ProfileGate></ProtectedRoute>} />
-              <Route path="/goal" element={<ProtectedRoute><ProfileGate><GoalPage /></ProfileGate></ProtectedRoute>} />
-              <Route path="/admin" element={<ProtectedRoute><ProfileGate><AdminPage /></ProfileGate></ProtectedRoute>} />
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-          )}
-        </ThemeProvider>
-      </BrowserRouter>
-    </AuthProvider>
-  );
+  return <AuthProvider><BrowserRouter><ThemeProvider>{({ theme, accent, setTheme, setAccent }) => <Routes>
+    <Route path="/" element={<ProtectedRoute><ProfileGate><Dashboard theme={theme} accent={accent} setTheme={setTheme} setAccent={setAccent} /></ProfileGate></ProtectedRoute>} />
+    <Route path="/goal" element={<ProtectedRoute><ProfileGate><GoalPage /></ProfileGate></ProtectedRoute>} />
+    <Route path="/admin" element={<ProtectedRoute><ProfileGate><AdminPage /></ProfileGate></ProtectedRoute>} />
+    <Route path="*" element={<Navigate to="/" replace />} />
+  </Routes>}</ThemeProvider></BrowserRouter></AuthProvider>;
 }
