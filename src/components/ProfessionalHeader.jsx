@@ -16,6 +16,7 @@ export default function ProfessionalHeader({ subtitle, theme, accent, setTheme, 
       {user && <div className="header-right">
         <nav className="main-nav" aria-label="Navegação principal">
           <NavLink to="/" end className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>Dashboard</NavLink>
+          <NavLink to="/treinos" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>🏋️ Treinos</NavLink>
           <NavLink to="/goal" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>Meu Goal</NavLink>
           {isAdmin && <NavLink to="/admin" className={({ isActive }) => isActive ? 'nav-link admin-link active' : 'nav-link admin-link'}>Admin</NavLink>}
         </nav>
