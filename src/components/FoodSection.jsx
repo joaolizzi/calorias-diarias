@@ -6,12 +6,14 @@ import { toast } from './Toast.jsx';
 import FoodSearch from './FoodSearch.jsx';
 import AddFoodModal from './AddFoodModal.jsx';
 import NaturalFoodModal from './NaturalFoodModal.jsx';
+import CameraFoodModal from './CameraFoodModal.jsx';
 
 export default function FoodSection({ meal, entries, onChange }) {
   const { user } = useAuth();
   const [modalItem, setModalItem] = useState(null);
   const [showManual, setShowManual] = useState(false);
   const [showNatural, setShowNatural] = useState(false);
+  const [showCamera, setShowCamera] = useState(false);
 
   const remove = async (id) => {
     try {
@@ -33,7 +35,6 @@ export default function FoodSection({ meal, entries, onChange }) {
     }
   };
 
-  // pode ter items de dias diferentes se ocorrer rollover — agrupar por dia
   const total = entries.reduce((s, e) => s + e.kcal, 0);
 
   return (
@@ -47,7 +48,18 @@ export default function FoodSection({ meal, entries, onChange }) {
 
       <FoodSearch onPick={(item) => setModalItem(item)} />
 
-      <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 6 }}>
+      <div className="food-ai-actions">
+        <button
+          className="btn camera-ai-btn"
+          onClick={() => setShowCamera(true)}
+          title="Fotografe a refeição e deixe a IA estimar os alimentos"
+        >
+          <span className="camera-ai-icon">📷</span>
+          <span>
+            <strong>Fotografar com IA</strong>
+            <small>Identificar alimentos e porções</small>
+          </span>
+        </button>
         <button
           className="btn ghost"
           onClick={() => setShowManual(true)}
@@ -89,13 +101,7 @@ export default function FoodSection({ meal, entries, onChange }) {
                   {e.day ? ` · ${e.day}` : ''}
                 </div>
               </div>
-              <button
-                className="x"
-                onClick={() => remove(e.id)}
-                title="Remover"
-              >
-                ×
-              </button>
+              <button className="x" onClick={() => remove(e.id)} title="Remover">×</button>
             </li>
           ))}
         </ul>
@@ -103,34 +109,21 @@ export default function FoodSection({ meal, entries, onChange }) {
 
       {entries.length > 0 && (
         <div style={{ marginTop: 10, display: 'flex', justifyContent: 'flex-end' }}>
-          <button className="btn danger" onClick={clearMeal}>
-            Limpar refeição
-          </button>
+          <button className="btn danger" onClick={clearMeal}>Limpar refeição</button>
         </div>
       )}
 
       {modalItem && (
-        <AddFoodModal
-          item={modalItem}
-          meal={meal}
-          onClose={() => setModalItem(null)}
-          onSaved={onChange}
-        />
+        <AddFoodModal item={modalItem} meal={meal} onClose={() => setModalItem(null)} onSaved={onChange} />
       )}
       {showManual && (
-        <AddFoodModal
-          item={null}
-          meal={meal}
-          onClose={() => setShowManual(false)}
-          onSaved={onChange}
-        />
+        <AddFoodModal item={null} meal={meal} onClose={() => setShowManual(false)} onSaved={onChange} />
       )}
       {showNatural && (
-        <NaturalFoodModal
-          meal={meal}
-          onClose={() => setShowNatural(false)}
-          onSaved={onChange}
-        />
+        <NaturalFoodModal meal={meal} onClose={() => setShowNatural(false)} onSaved={onChange} />
+      )}
+      {showCamera && (
+        <CameraFoodModal meal={meal} onClose={() => setShowCamera(false)} onSaved={onChange} />
       )}
     </div>
   );
