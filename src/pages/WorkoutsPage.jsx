@@ -8,12 +8,23 @@ import {
   getExerciseCatalog,
   getWorkoutPlan,
   saveWorkoutPlan,
+  localizeExerciseName,
 } from '../lib/workouts.js';
 import './WorkoutPlans.css';
 
 const makeSet = (source = {}) => ({ kg: source.kg ?? '', reps: source.reps ?? '', done: Boolean(source.done) });
 const clone = (value) => JSON.parse(JSON.stringify(value));
 const normalize = (value) => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+const prepareWorkoutText = (value) => String(value || '')
+  .replace(/\r\n?/g, '\n')
+  .replace(/[•●▪◦]/g, '-')
+  .replace(/\t+/g, ' ')
+  .replace(/[ ]{2,}/g, ' ')
+  .split('\n')
+  .map((line) => line.trim())
+  .filter((line) => line)
+  .join('\n')
+  .slice(0, 30000);
 
 function ExercisePicker({ catalog, selectedIds, onAdd, onClose }) {
   const [query, setQuery] = useState('');
@@ -87,7 +98,7 @@ function ImportWorkoutModal({ catalog, onImport, onClose }) {
     }
     try {
       const content = await file.text();
-      setText(content.slice(0, 30000));
+      setText(prepareWorkoutText(content));
       window.__nutrixWorkoutImportImage = null;
     } catch { setError('Não foi possível ler o arquivo. Use TXT ou JSON.'); }
   };
@@ -98,7 +109,7 @@ function ImportWorkoutModal({ catalog, onImport, onClose }) {
       const { data: sessionData } = await supabase.auth.getSession();
       const token = sessionData?.session?.access_token;
       if (!token) throw new Error('Sessão expirada. Entre novamente no aplicativo.');
-      const body = { intent: 'workout_import', text: text.trim() };
+      const body = { intent: 'workout_import', text: prepareWorkoutText(text) };
       if (window.__nutrixWorkoutImportImage) body.image = window.__nutrixWorkoutImportImage;
       const response = await fetch('/api/gemini', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify(body) });
       const payload = await response.json().catch(() => ({}));
@@ -195,11 +206,12 @@ export default function WorkoutsPage({ theme, accent, setTheme, setAccent }) {
         name: incoming.name || '',
         restSeconds: incoming.restSeconds || 90,
         exercises: (incoming.exercises || []).map((incomingExercise, index) => {
-          const key = normalize(incomingExercise.name);
+          const localizedName = localizeExerciseName(incomingExercise.name);
+          const key = normalize(localizedName);
           const match = exerciseCatalog.find((item) => normalize(item.name) === key)
             || exerciseCatalog.find((item) => normalize(item.name).includes(key) || key.includes(normalize(item.name)));
           return {
-            ...(match || { id: `import-${day.id}-${index}-${Date.now()}`, name: incomingExercise.name, muscle: incomingExercise.muscle || 'Geral', equipment: incomingExercise.equipment || 'Diversos' }),
+            ...(match || { id: `import-${day.id}-${index}-${Date.now()}`, name: localizedName, muscle: incomingExercise.muscle || 'Geral', equipment: incomingExercise.equipment || 'Diversos' }),
             notes: incomingExercise.notes || '',
             sets: (incomingExercise.sets?.length ? incomingExercise.sets : [makeSet(), makeSet(), makeSet()]).map(makeSet),
           };
