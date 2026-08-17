@@ -1,0 +1,29 @@
+.camera-item-content { min-width: 0; flex: 1; }
+.camera-editor { margin: 10px 0 2px 30px; padding: 12px; border: 1px solid var(--border); border-radius: 12px; background: rgba(255,255,255,.025); }
+.camera-edit-row { display: flex; align-items: end; gap: 8px; }
+.camera-edit-row label, .camera-replace { display: flex; flex-direction: column; gap: 6px; }
+.camera-edit-row label { flex: 0 0 150px; }
+.camera-edit-row label > span, .camera-replace > span { color: var(--muted); font-size: 10px; font-weight: 700; }
+.camera-grams-input { display: flex; align-items: center; overflow: hidden; border: 1px solid var(--border-hover); border-radius: 9px; background: #090f15; }
+.camera-grams-input input { width: 100%; min-width: 0; padding: 9px 10px; border: 0; outline: 0; color: var(--text); background: transparent; font-size: 13px; }
+.camera-grams-input b { padding-right: 9px; color: var(--muted); font-size: 10px; }
+.camera-replace { margin-top: 12px; }
+.camera-replace > input { width: 100%; padding: 9px 10px; color: var(--text); background: #090f15; border: 1px solid var(--border-hover); border-radius: 9px; outline: 0; font-size: 12px; }
+.camera-replace > input:focus { border-color: rgba(52,211,153,.55); box-shadow: 0 0 0 3px rgba(52,211,153,.07); }
+.camera-replace > small { color: var(--muted); font-size: 9px; }
+.camera-food-results { display: flex; flex-direction: column; max-height: 190px; overflow: auto; border: 1px solid var(--border); border-radius: 9px; }
+.camera-food-results button { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; width: 100%; padding: 9px 10px; border: 0; border-bottom: 1px solid rgba(255,255,255,.05); color: var(--text); background: transparent; text-align: left; cursor: pointer; }
+.camera-food-results button:last-child { border-bottom: 0; }
+.camera-food-results button:hover { background: rgba(52,211,153,.08); }
+.camera-food-results span { font-size: 11px; font-weight: 700; }
+.camera-food-results small { color: var(--muted); font-size: 9px; }
+.camera-edit-btn { display: inline-flex; margin: 8px 0 0 30px; padding: 5px 8px; border: 1px solid var(--border); border-radius: 7px; color: var(--muted); background: rgba(255,255,255,.025); font-size: 9px; font-weight: 700; cursor: pointer; }
+.camera-edit-btn:hover { color: var(--text); border-color: var(--border-hover); background: rgba(255,255,255,.05); }
+.camera-edit-cancel { margin-top: 9px; width: 100%; font-size: 10px; }
+@media (max-width: 520px) {
+  .camera-editor { margin-left: 0; }
+  .camera-edit-row { align-items: stretch; flex-direction: column; }
+  .camera-edit-row label { flex-basis: auto; }
+  .camera-edit-row .btn { width: 100%; }
+  .camera-edit-btn { margin-left: 0; width: 100%; justify-content: center; }
+}
