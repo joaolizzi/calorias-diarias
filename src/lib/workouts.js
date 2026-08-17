@@ -1,23 +1,54 @@
+import { supabase } from './supabase.js';
+
 export const WORKOUT_STORAGE_KEY = 'nutrix-workouts-v1';
+export const WORKOUT_PLAN_DAYS = [
+  { id: 'monday', label: 'Segunda' },
+  { id: 'tuesday', label: 'Terça' },
+  { id: 'wednesday', label: 'Quarta' },
+  { id: 'thursday', label: 'Quinta' },
+  { id: 'friday', label: 'Sexta' },
+  { id: 'saturday', label: 'Sábado' },
+  { id: 'sunday', label: 'Domingo' },
+];
 
 export const DEFAULT_EXERCISES = [
-  { id: 'chest-fly', name: 'Voador', muscle: 'Peito' },
-  { id: 'incline-press', name: 'Supino inclinado máquina', muscle: 'Peito' },
-  { id: 'chest-press', name: 'Supino reto máquina', muscle: 'Peito' },
-  { id: 'lat-pulldown', name: 'Puxada alta', muscle: 'Costas' },
-  { id: 'low-row', name: 'Remada baixa máquina', muscle: 'Costas' },
-  { id: 'tbar-row', name: 'T-Bar máquina', muscle: 'Costas' },
-  { id: 'lateral-raise', name: 'Elevação lateral', muscle: 'Ombros' },
-  { id: 'shoulder-press', name: 'Desenvolvimento de ombros máquina', muscle: 'Ombros' },
-  { id: 'reverse-fly', name: 'Reverse fly máquina', muscle: 'Ombros' },
-  { id: 'leg-press', name: 'Leg press', muscle: 'Pernas' },
-  { id: 'leg-extension', name: 'Cadeira extensora', muscle: 'Pernas' },
-  { id: 'leg-curl', name: 'Mesa/cadeira flexora', muscle: 'Pernas' },
-  { id: 'calf', name: 'Panturrilha máquina', muscle: 'Pernas' },
-  { id: 'scott', name: 'Rosca Scott máquina', muscle: 'Bíceps' },
-  { id: 'biceps-machine', name: 'Bíceps articulado', muscle: 'Bíceps' },
-  { id: 'triceps-machine', name: 'Tríceps máquina', muscle: 'Tríceps' },
-  { id: 'triceps-rope', name: 'Tríceps corda', muscle: 'Tríceps' },
+  { id: 'chest-fly', name: 'Voador', muscle: 'Peito', equipment: 'Máquina' },
+  { id: 'incline-press', name: 'Supino inclinado máquina', muscle: 'Peito', equipment: 'Máquina' },
+  { id: 'chest-press', name: 'Supino reto máquina', muscle: 'Peito', equipment: 'Máquina' },
+  { id: 'cable-crossover', name: 'Crossover na polia', muscle: 'Peito', equipment: 'Polia' },
+  { id: 'pec-deck', name: 'Peck deck', muscle: 'Peito', equipment: 'Máquina' },
+  { id: 'lat-pulldown', name: 'Puxada alta', muscle: 'Costas', equipment: 'Polia' },
+  { id: 'low-row', name: 'Remada baixa máquina', muscle: 'Costas', equipment: 'Máquina' },
+  { id: 'tbar-row', name: 'Remada T-Bar máquina', muscle: 'Costas', equipment: 'Máquina' },
+  { id: 'high-row', name: 'Remada alta máquina', muscle: 'Costas', equipment: 'Máquina' },
+  { id: 'pullover-machine', name: 'Pullover máquina', muscle: 'Costas', equipment: 'Máquina' },
+  { id: 'lateral-raise', name: 'Elevação lateral máquina', muscle: 'Ombros', equipment: 'Máquina' },
+  { id: 'cable-lateral', name: 'Elevação lateral na polia', muscle: 'Ombros', equipment: 'Polia' },
+  { id: 'shoulder-press', name: 'Desenvolvimento de ombros máquina', muscle: 'Ombros', equipment: 'Máquina' },
+  { id: 'reverse-fly', name: 'Crucifixo inverso máquina', muscle: 'Ombros', equipment: 'Máquina' },
+  { id: 'leg-press', name: 'Leg press', muscle: 'Quadríceps', equipment: 'Máquina' },
+  { id: 'hack-squat', name: 'Agachamento hack', muscle: 'Quadríceps', equipment: 'Máquina' },
+  { id: 'leg-extension', name: 'Cadeira extensora', muscle: 'Quadríceps', equipment: 'Máquina' },
+  { id: 'leg-curl', name: 'Mesa flexora', muscle: 'Posterior', equipment: 'Máquina' },
+  { id: 'seated-leg-curl', name: 'Cadeira flexora', muscle: 'Posterior', equipment: 'Máquina' },
+  { id: 'hip-thrust', name: 'Hip thrust máquina', muscle: 'Glúteos', equipment: 'Máquina' },
+  { id: 'abductor', name: 'Cadeira abdutora', muscle: 'Glúteos', equipment: 'Máquina' },
+  { id: 'adductor', name: 'Cadeira adutora', muscle: 'Adutores', equipment: 'Máquina' },
+  { id: 'calf', name: 'Panturrilha máquina', muscle: 'Panturrilhas', equipment: 'Máquina' },
+  { id: 'scott', name: 'Rosca Scott máquina', muscle: 'Bíceps', equipment: 'Máquina' },
+  { id: 'biceps-machine', name: 'Bíceps articulado', muscle: 'Bíceps', equipment: 'Máquina' },
+  { id: 'cable-curl', name: 'Rosca na polia', muscle: 'Bíceps', equipment: 'Polia' },
+  { id: 'triceps-machine', name: 'Tríceps máquina', muscle: 'Tríceps', equipment: 'Máquina' },
+  { id: 'triceps-rope', name: 'Tríceps corda', muscle: 'Tríceps', equipment: 'Polia' },
+  { id: 'triceps-bar', name: 'Tríceps barra na polia', muscle: 'Tríceps', equipment: 'Polia' },
+  { id: 'crunch-machine', name: 'Abdominal máquina', muscle: 'Abdômen', equipment: 'Máquina' },
+  { id: 'cable-crunch', name: 'Abdominal na polia', muscle: 'Abdômen', equipment: 'Polia' },
+];
+
+const cacheKey = 'nutrix-exercise-catalog-v2';
+const API_URLS = [
+  'https://wger.de/api/v2/exerciseinfo/?language=pt-br&limit=500',
+  'https://wger.de/api/v2/exerciseinfo/?language=pt&limit=500',
 ];
 
 const read = () => {
@@ -41,12 +72,72 @@ export const calculateWorkoutStats = (workout) => {
   return {
     exercises: workout.exercises?.length || 0,
     sets: sets.length,
-    volume: Math.round(sets.reduce((sum, s) => sum + (Number(s.weight) || 0) * (Number(s.reps) || 0), 0)),
+    volume: Math.round(sets.reduce((sum, s) => sum + (Number(s.weight ?? s.kg) || 0) * (Number(s.reps) || 0), 0)),
     duration: workout.startedAt && workout.finishedAt ? Math.max(1, Math.round((new Date(workout.finishedAt) - new Date(workout.startedAt)) / 60000)) : 0,
   };
 };
 
 export const getPersonalBest = (exerciseId) => {
   const sets = getExerciseHistory(exerciseId).flatMap(e => e.sets || []);
-  return sets.reduce((best, s) => (Number(s.weight) || 0) > (Number(best?.weight) || 0) ? s : best, null);
+  return sets.reduce((best, s) => (Number(s.weight ?? s.kg) || 0) > (Number(best?.weight ?? best?.kg) || 0) ? s : best, null);
+};
+
+const normalizeExercise = (exercise) => {
+  const translation = exercise.translations?.find((t) => /pt-br|pt/i.test(String(t.language || t.language_name || '')))
+    || exercise.translations?.find((t) => String(t.language) === 'Portuguese (Brazil)')
+    || exercise.translations?.[0];
+  const name = translation?.name || exercise.name || exercise.description?.slice(0, 50) || 'Exercício';
+  const muscle = exercise.muscles?.[0]?.name || exercise.muscles?.[0]?.name_en || exercise.primaryMuscles?.[0] || 'Geral';
+  const equipment = exercise.equipment?.map((e) => e.name || e.name_en).filter(Boolean).join(', ') || 'Diversos';
+  return {
+    id: `wger-${exercise.id}`,
+    sourceId: exercise.id,
+    name: name.trim(),
+    muscle: muscle.trim(),
+    equipment: equipment.trim(),
+    category: exercise.category?.name || 'Força',
+    image: exercise.images?.[0]?.image || exercise.images?.[0]?.url || null,
+  };
+};
+
+export const getExerciseCatalog = async () => {
+  try {
+    const cached = JSON.parse(localStorage.getItem(cacheKey) || 'null');
+    if (Array.isArray(cached) && cached.length >= DEFAULT_EXERCISES.length) return cached;
+  } catch {}
+
+  for (const url of API_URLS) {
+    try {
+      const response = await fetch(url, { headers: { Accept: 'application/json' } });
+      if (!response.ok) continue;
+      const payload = await response.json();
+      const remote = (payload.results || []).map(normalizeExercise).filter((e) => e.name);
+      const merged = [...remote, ...DEFAULT_EXERCISES].filter((item, index, all) => all.findIndex((x) => x.name.toLowerCase() === item.name.toLowerCase()) === index);
+      if (merged.length) {
+        localStorage.setItem(cacheKey, JSON.stringify(merged));
+        return merged;
+      }
+    } catch {}
+  }
+  return DEFAULT_EXERCISES;
+};
+
+export const emptyWorkoutPlan = () => Object.fromEntries(WORKOUT_PLAN_DAYS.map(day => [day.id, {
+  name: '',
+  restSeconds: 90,
+  exercises: [],
+}]));
+
+export const getWorkoutPlan = async (userId) => {
+  const { data, error } = await supabase.from('workout_plans').select('days').eq('user_id', userId).maybeSingle();
+  if (error) throw error;
+  const base = emptyWorkoutPlan();
+  const saved = data?.days && typeof data.days === 'object' ? data.days : {};
+  for (const day of WORKOUT_PLAN_DAYS) base[day.id] = { ...base[day.id], ...(saved[day.id] || {}) };
+  return base;
+};
+
+export const saveWorkoutPlan = async (userId, days) => {
+  const { error } = await supabase.from('workout_plans').upsert({ user_id: userId, days }, { onConflict: 'user_id' });
+  if (error) throw error;
 };
