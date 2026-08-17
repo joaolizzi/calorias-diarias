@@ -45,10 +45,10 @@ export const DEFAULT_EXERCISES = [
   { id: 'cable-crunch', name: 'Abdominal na polia', muscle: 'Abdômen', equipment: 'Polia' },
 ];
 
-const cacheKey = 'nutrix-exercise-catalog-v2';
+const cacheKey = 'nutrix-exercise-catalog-v3';
 const API_URLS = [
-  'https://wger.de/api/v2/exerciseinfo/?language=pt-br&limit=500',
-  'https://wger.de/api/v2/exerciseinfo/?language=pt&limit=500',
+  'https://wger.de/api/v2/exerciseinfo/?limit=500',
+  'https://wger.de/api/v2/exerciseinfo/?limit=1000',
 ];
 
 const read = () => {
@@ -82,18 +82,28 @@ export const getPersonalBest = (exerciseId) => {
   return sets.reduce((best, s) => (Number(s.weight ?? s.kg) || 0) > (Number(best?.weight ?? best?.kg) || 0) ? s : best, null);
 };
 
+const translationLanguageText = (translation) => {
+  const language = translation?.language;
+  if (!language) return '';
+  if (typeof language === 'string') return language;
+  if (typeof language === 'object') return [language.short_name, language.shortName, language.iso_code, language.code, language.name, language.full_name].filter(Boolean).join(' ');
+  return String(language);
+};
+
+const chooseTranslation = (translations = []) => translations.find((t) => /pt[_-]?br|portugu[eê]s\s*\(?brasil|brazilian\s*portuguese/i.test(translationLanguageText(t)))
+  || translations.find((t) => /^pt(?:\s|$)/i.test(translationLanguageText(t)))
+  || translations[0];
+
 const normalizeExercise = (exercise) => {
-  const translation = exercise.translations?.find((t) => /pt-br|pt/i.test(String(t.language || t.language_name || '')))
-    || exercise.translations?.find((t) => String(t.language) === 'Portuguese (Brazil)')
-    || exercise.translations?.[0];
-  const name = translation?.name || exercise.name || exercise.description?.slice(0, 50) || 'Exercício';
-  const muscle = exercise.muscles?.[0]?.name || exercise.muscles?.[0]?.name_en || exercise.primaryMuscles?.[0] || 'Geral';
+  const translation = chooseTranslation(exercise.translations);
+  const name = translation?.name || exercise.name || 'Exercício';
+  const muscle = exercise.muscles?.[0]?.name || exercise.muscles?.[0]?.name_en || 'Geral';
   const equipment = exercise.equipment?.map((e) => e.name || e.name_en).filter(Boolean).join(', ') || 'Diversos';
   return {
     id: `wger-${exercise.id}`,
     sourceId: exercise.id,
     name: name.trim(),
-    muscle: muscle.trim(),
+    muscle: String(muscle).trim(),
     equipment: equipment.trim(),
     category: exercise.category?.name || 'Força',
     image: exercise.images?.[0]?.image || exercise.images?.[0]?.url || null,
