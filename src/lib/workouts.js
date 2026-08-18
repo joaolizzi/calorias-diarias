@@ -66,5 +66,47 @@ export const getExerciseCatalog = async () => {
   return DEFAULT_EXERCISES;
 };
 export const emptyWorkoutPlan = () => Object.fromEntries(WORKOUT_PLAN_DAYS.map(day => [day.id, { name: '', restSeconds: 90, exercises: [] }]));
-export const getWorkoutPlan = async (userId) => { const { data, error } = await supabase.from('workout_plans').select('days').eq('user_id', userId).maybeSingle(); if (error) throw error; const base = emptyWorkoutPlan(); const saved = data?.days && typeof data.days === 'object' ? data.days : {}; for (const day of WORKOUT_PLAN_DAYS) base[day.id] = { ...base[day.id], ...(saved[day.id] || {}) }; return base; };
-export const saveWorkoutPlan = async (userId, days) => { const { error } = await supabase.from('workout_plans').upsert({ user_id: userId, days }, { onConflict: 'user_id' }); if (error) throw error; };
+
+// O plano semanal fica salvo no navegador e é recuperado antes do Supabase.
+const readWorkoutPlan = () => {
+  try {
+    const saved = JSON.parse(localStorage.getItem(WORKOUT_STORAGE_KEY) || 'null');
+    if (saved && typeof saved === 'object' && !Array.isArray(saved)) {
+      const base = emptyWorkoutPlan();
+      for (const day of WORKOUT_PLAN_DAYS) base[day.id] = { ...base[day.id], ...(saved[day.id] || {}) };
+      return base;
+    }
+  } catch {}
+  return null;
+};
+
+const cloneWorkoutPlan = (days) => JSON.parse(JSON.stringify(days || emptyWorkoutPlan()));
+
+export const getWorkoutPlan = async (userId) => {
+  const localPlan = readWorkoutPlan();
+  if (localPlan) return localPlan;
+
+  try {
+    const { data, error } = await supabase.from('workout_plans').select('days').eq('user_id', userId).maybeSingle();
+    if (!error) {
+      const base = emptyWorkoutPlan();
+      const saved = data?.days && typeof data.days === 'object' ? data.days : {};
+      for (const day of WORKOUT_PLAN_DAYS) base[day.id] = { ...base[day.id], ...(saved[day.id] || {}) };
+      if (data?.days) write(base);
+      return base;
+    }
+  } catch {}
+
+  return emptyWorkoutPlan();
+};
+
+export const saveWorkoutPlan = async (userId, days) => {
+  const plan = cloneWorkoutPlan(days);
+  // A gravação local acontece primeiro e não depende de internet ou Supabase.
+  write(plan);
+
+  // Sincronização opcional com o Supabase para preservar compatibilidade.
+  try {
+    await supabase.from('workout_plans').upsert({ user_id: userId, days: plan }, { onConflict: 'user_id' });
+  } catch {}
+};
