@@ -6,7 +6,6 @@ import { getProfile } from './lib/supabase.js';
 import AuthGate from './components/AuthGate.jsx';
 import Toast from './components/Toast.jsx';
 import Dashboard from './pages/Dashboard.jsx';
-import FinancePage from './pages/FinancePage.jsx';
 import GoalPage from './pages/GoalPage.jsx';
 import AdminPage from './pages/AdminPage.jsx';
 import WorkoutsPage from './pages/WorkoutsPage.jsx';
@@ -17,9 +16,7 @@ function ProtectedRoute({ children }) { const { user, loading } = useAuth(); if 
 function ProfileGate({ children }) { const { user } = useAuth(); const location = useLocation(); const [loading, setLoading] = useState(true); const [complete, setComplete] = useState(false); useEffect(() => { let active = true; if (location.pathname === '/admin') { setLoading(false); return () => { active = false; }; } setLoading(true); getProfile(user.id).then(profile => { if (active) setComplete(Boolean(profile?.onboarding_complete)); }).catch(() => { if (active) setComplete(false); }).finally(() => { if (active) setLoading(false); }); return () => { active = false; }; }, [user.id, location.pathname]); if (location.pathname === '/admin') return children; if (loading) return <div className="route-loading">Preparando seu plano…</div>; if (!complete && location.pathname !== '/goal') return <Navigate to="/goal" replace />; return children; }
 
 export default function App() { return <AuthProvider><BrowserRouter><ThemeProvider>{({ theme, accent, setTheme, setAccent }) => <><Toast /><Routes>
-  <Route path="/" element={<ProtectedRoute><FinancePage /></ProtectedRoute>} />
-  <Route path="/financas" element={<ProtectedRoute><FinancePage /></ProtectedRoute>} />
-  <Route path="/calorias" element={<ProtectedRoute><ProfileGate><Dashboard theme={theme} accent={accent} setTheme={setTheme} setAccent={setAccent} /></ProfileGate></ProtectedRoute>} />
+  <Route path="/" element={<ProtectedRoute><ProfileGate><Dashboard theme={theme} accent={accent} setTheme={setTheme} setAccent={setAccent} /></ProfileGate></ProtectedRoute>} />
   <Route path="/goal" element={<ProtectedRoute><ProfileGate><GoalPage theme={theme} accent={accent} setTheme={setTheme} setAccent={setAccent} /></ProfileGate></ProtectedRoute>} />
   <Route path="/treinos" element={<ProtectedRoute><ProfileGate><WorkoutsPage theme={theme} accent={accent} setTheme={setTheme} setAccent={setAccent} /></ProfileGate></ProtectedRoute>} />
   <Route path="/admin" element={<ProtectedRoute><ProfileGate><AdminPage theme={theme} accent={accent} setTheme={setTheme} setAccent={setAccent} /></ProfileGate></ProtectedRoute>} />
