@@ -168,3 +168,47 @@ export const getFoodRange = async (userId, fromDay, toDay) => {
   if (error) throw error;
   return data || [];
 };
+
+// ---------- histórico das descrições com IA ----------
+export const getAiFoodHistory = async (userId) => {
+  const { data, error } = await supabase
+    .from('ai_food_history')
+    .select('id, description, items, created_at, last_used_at')
+    .eq('user_id', userId)
+    .order('last_used_at', { ascending: false, nullsFirst: false })
+    .order('created_at', { ascending: false })
+    .limit(30);
+  if (error) throw error;
+  return data || [];
+};
+
+export const saveAiFoodHistory = async (userId, description, items) => {
+  const cleanItems = (items || []).map(({ selected, ...item }) => item);
+  const { data, error } = await supabase
+    .from('ai_food_history')
+    .insert({
+      user_id: userId,
+      description: description.trim(),
+      items: cleanItems,
+    })
+    .select('id, description, items, created_at, last_used_at')
+    .single();
+  if (error) throw error;
+  return data;
+};
+
+export const markAiFoodHistoryUsed = async (id) => {
+  const { error } = await supabase
+    .from('ai_food_history')
+    .update({ last_used_at: new Date().toISOString() })
+    .eq('id', id);
+  if (error) throw error;
+};
+
+export const deleteAiFoodHistory = async (id) => {
+  const { error } = await supabase
+    .from('ai_food_history')
+    .delete()
+    .eq('id', id);
+  if (error) throw error;
+};
