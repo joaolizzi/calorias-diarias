@@ -67,8 +67,15 @@ export default function NaturalFoodModal({ meal: defaultMeal, onClose, onSaved }
   };
 
   const useHistory = async (entry) => {
+    // A rotina salva é apenas um modelo dos alimentos/quantidades.
+    // Ao reutilizá-la, a refeição deve ser a refeição atualmente aberta,
+    // e nunca a refeição em que a rotina foi originalmente salva.
     setText(entry.description);
-    setItems((entry.items || []).map((it) => ({ ...it, selected: true })));
+    setItems((entry.items || []).map((it) => ({
+      ...it,
+      meal: defaultMeal,
+      selected: true,
+    })));
     setSavedCurrent(true);
     try {
       await markAiFoodHistoryUsed(entry.id);
@@ -128,7 +135,9 @@ export default function NaturalFoodModal({ meal: defaultMeal, onClose, onSaved }
       const day = today();
       for (const it of selected) {
         await addFood(user.id, day, {
-          meal: it.meal || defaultMeal,
+          // Sempre usa a refeição aberta. Isso também garante que uma
+          // rotina criada no almoço possa ser adicionada ao jantar, etc.
+          meal: defaultMeal,
           name: it.name,
           kcal: it.kcal,
           grams: it.grams,
