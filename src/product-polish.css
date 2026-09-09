@@ -1,0 +1,277 @@
+/* Product-first polish: restrained, editorial, software-like */
+.product-dashboard {
+  --product-line: rgba(149,169,163,.10);
+  --product-line-strong: rgba(149,169,163,.16);
+  --product-surface: #0c1519;
+  --product-surface-soft: #101a1f;
+  --product-accent: #71d6a6;
+  --product-shadow: 0 14px 34px rgba(0,0,0,.16);
+}
+
+.product-dashboard-header {
+  display:grid;
+  grid-template-columns:minmax(280px,.75fr) minmax(520px,1.25fr);
+  gap:28px;
+  align-items:end;
+  margin-top:18px;
+  padding:10px 2px 6px;
+}
+
+.product-dashboard-heading { min-width:0; }
+.product-dashboard-date {
+  display:block;
+  margin-bottom:8px;
+  color:var(--muted);
+  font-size:11px;
+  font-weight:650;
+  letter-spacing:.2px;
+}
+.product-dashboard-heading h1 {
+  margin:0;
+  font-size:clamp(34px,4vw,48px);
+  line-height:1;
+  letter-spacing:-2px;
+}
+.product-dashboard-heading p {
+  max-width:460px;
+  margin:12px 0 0;
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.6;
+}
+
+.product-summary-grid {
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  border:1px solid var(--product-line);
+  border-radius:18px;
+  background:var(--product-surface);
+  overflow:hidden;
+  box-shadow:var(--product-shadow);
+}
+
+.product-summary-item {
+  min-height:104px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  padding:16px 18px;
+  border-right:1px solid var(--product-line);
+}
+.product-summary-item:last-child { border-right:0; }
+.product-summary-item.primary { background:rgba(113,214,166,.045); }
+.product-summary-item span {
+  color:var(--muted);
+  font-size:9px;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.55px;
+}
+.product-summary-item strong {
+  margin:5px 0 4px;
+  color:var(--text);
+  font-size:25px;
+  line-height:1;
+  letter-spacing:-.9px;
+}
+.product-summary-item small { color:var(--muted-2); font-size:9px; }
+
+.product-section-label {
+  display:block;
+  color:var(--muted);
+  font-size:9px;
+  font-weight:750;
+  text-transform:uppercase;
+  letter-spacing:.8px;
+}
+
+/* Remove decorative/AI-looking visual language */
+.product-dashboard .dashboard-kicker,
+.product-dashboard .dashboard-hero-badges,
+.product-dashboard .premium-data-object { display:none !important; }
+
+.product-overview-grid { margin-top:16px; }
+.product-dashboard .dashboard-progress-grid-v3 .card,
+.product-dashboard .compact-streak-card,
+.product-dashboard .product-workspace {
+  border-color:var(--product-line);
+  background:var(--product-surface);
+  box-shadow:var(--product-shadow);
+}
+
+.product-dashboard .dashboard-progress-grid-v3 .card,
+.product-dashboard .compact-streak-card {
+  border-radius:17px;
+}
+
+.product-dashboard .compact-streak-main strong {
+  margin-top:9px;
+  font-size:34px;
+}
+
+.product-workspace {
+  border-radius:19px;
+  overflow:hidden;
+}
+.product-dashboard .dashboard-workspace-head {
+  padding:17px 19px;
+  background:#0b1418;
+}
+.product-dashboard .dashboard-workspace-head h2 {
+  margin:4px 0 0;
+  font-size:18px;
+  letter-spacing:-.5px;
+}
+.product-dashboard .dashboard-tabs {
+  gap:2px;
+  padding:3px;
+  border:1px solid var(--product-line);
+  border-radius:10px;
+  background:#091216;
+}
+.product-dashboard .dashboard-tabs button {
+  min-height:31px;
+  padding:0 13px;
+  border-radius:8px;
+  font-size:10px;
+}
+.product-dashboard .dashboard-tabs button.active {
+  color:var(--text);
+  background:#14231d;
+  box-shadow:none;
+}
+
+.product-meal-routine {
+  display:grid;
+  grid-template-columns:220px minmax(0,1fr);
+  gap:18px;
+  align-items:start;
+  padding:4px 2px 14px;
+}
+.product-meal-routine .meal-routine-copy strong {
+  display:block;
+  margin-top:5px;
+  color:var(--text);
+  font-size:15px;
+  letter-spacing:-.35px;
+}
+.product-meal-routine .meal-routine-copy small {
+  display:block;
+  margin-top:5px;
+  color:var(--muted);
+  font-size:10px;
+  line-height:1.5;
+}
+.product-dashboard .meal-routine-options {
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:8px;
+}
+.product-dashboard .meal-routine-option {
+  min-height:66px;
+  padding:10px 11px;
+  border:1px solid var(--product-line);
+  border-radius:12px;
+  background:#0c1519;
+  box-shadow:none;
+  transition:border-color .16s ease,background .16s ease;
+}
+.product-dashboard .meal-routine-option:hover {
+  transform:none;
+  border-color:var(--product-line-strong);
+  background:#101a1f;
+}
+.product-dashboard .meal-routine-option.active {
+  border-color:rgba(113,214,166,.28) !important;
+  background:#11231b !important;
+  box-shadow:inset 0 0 0 1px rgba(113,214,166,.05) !important;
+}
+.product-dashboard .meal-routine-icon {
+  background:#101a1f;
+  color:var(--text-soft);
+  box-shadow:none;
+}
+.product-dashboard .meal-routine-option.active .meal-routine-icon {
+  background:rgba(113,214,166,.10);
+  color:var(--product-accent);
+}
+
+.product-dashboard .active-meal-panel {
+  border-top:1px solid var(--product-line);
+  padding-top:14px;
+}
+.product-dashboard .active-meal-panel-head span {
+  color:var(--muted);
+  font-size:9px;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.7px;
+}
+
+/* Less shine, less generated-looking effects */
+.product-dashboard .card::after,
+.product-dashboard .streak-card::after,
+.product-dashboard .btn::after { display:none !important; }
+.product-dashboard .card:hover,
+.product-dashboard .compact-streak-card:hover { transform:none !important; }
+.product-dashboard .btn {
+  box-shadow:none;
+  transition:background .16s ease,border-color .16s ease,color .16s ease;
+}
+
+/* Sidebar: flatter and more mature */
+.app-sidebar {
+  background:#0a1317 !important;
+  box-shadow:0 20px 50px rgba(0,0,0,.22) !important;
+}
+.sidebar-premium-card { display:none; }
+.sidebar-context {
+  background:#0d171b !important;
+  border-color:rgba(149,169,163,.08) !important;
+}
+.sidebar-link.active {
+  background:#11221a !important;
+  border-color:rgba(113,214,166,.15) !important;
+  box-shadow:inset 2px 0 0 var(--accent) !important;
+}
+
+.nutrix-logo {
+  border-radius:11px !important;
+  background:#0f1b19 !important;
+  border-color:rgba(113,214,166,.13) !important;
+  box-shadow:none !important;
+}
+.nutrix-logo svg { filter:none !important; }
+
+@media (max-width:1180px) {
+  .product-dashboard-header { grid-template-columns:1fr; }
+}
+
+@media (max-width:760px) {
+  .product-summary-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .product-summary-item:nth-child(2) { border-right:0; }
+  .product-summary-item:nth-child(-n+2) { border-bottom:1px solid var(--product-line); }
+  .product-meal-routine { grid-template-columns:1fr; }
+  .product-dashboard .meal-routine-options { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+
+@media (max-width:520px) {
+  .product-dashboard-heading h1 { font-size:34px; }
+  .product-summary-item { min-height:88px; padding:13px; }
+  .product-summary-item strong { font-size:21px; }
+}
+
+html[data-theme='light'] .product-dashboard {
+  --product-line:rgba(46,76,66,.10);
+  --product-line-strong:rgba(46,76,66,.16);
+  --product-surface:#fbfdfc;
+  --product-surface-soft:#f5f9f7;
+  --product-shadow:0 12px 30px rgba(37,73,61,.07);
+}
+html[data-theme='light'] .product-dashboard .dashboard-workspace-head,
+html[data-theme='light'] .product-dashboard .dashboard-tabs,
+html[data-theme='light'] .product-dashboard .meal-routine-option { background:#f8fbf9; }
+html[data-theme='light'] .product-dashboard .dashboard-tabs button.active,
+html[data-theme='light'] .product-dashboard .meal-routine-option.active { background:#eaf6ef !important; }
+html[data-theme='light'] .app-sidebar { background:#fbfdfc !important; }
+html[data-theme='light'] .sidebar-context { background:#f5f9f7 !important; }
