@@ -1,0 +1,273 @@
+/* Appearance runtime fixes — loaded after premium-themes.css. */
+
+/* The sidebar itself must not clip the appearance popover. Navigation scrolls instead. */
+.app-sidebar {
+  overflow: visible !important;
+}
+
+.sidebar-nav-expanded {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 4px;
+  scrollbar-width: thin;
+}
+
+.sidebar-tools-top {
+  position: relative;
+  z-index: 300;
+  flex: 0 0 auto;
+  width: 100%;
+  margin: 0 0 14px !important;
+}
+
+.sidebar-tools-top .appearance-menu,
+.sidebar-tools-top .appearance-trigger {
+  width: 100%;
+}
+
+.sidebar-tools-top .appearance-trigger {
+  justify-content: flex-start !important;
+  min-height: 42px;
+  padding: 9px 11px;
+  border-color: var(--saas-border-soft, var(--border));
+  background: var(--saas-surface, var(--panel));
+}
+
+.sidebar-tools-top .appearance-trigger-label {
+  flex: 1;
+  text-align: left;
+}
+
+.sidebar-tools-top .appearance-chevron {
+  margin-left: auto;
+}
+
+/* Match the current JSX class names. */
+.appearance-popover-v2 {
+  z-index: 1000 !important;
+  width: 370px !important;
+  max-height: min(680px, calc(100vh - 32px));
+  overflow-y: auto;
+  padding: 14px !important;
+  border: 1px solid var(--saas-border, var(--border-hover)) !important;
+  background: var(--saas-sidebar, var(--panel-strong)) !important;
+  color: var(--saas-text, var(--text)) !important;
+  box-shadow: 0 22px 60px rgba(0,0,0,.34) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.appearance-presets {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.appearance-preset {
+  display: grid;
+  grid-template-columns: 48px minmax(0,1fr) 16px;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+  padding: 9px;
+  border: 1px solid var(--saas-border-soft, var(--border));
+  border-radius: 11px;
+  background: transparent;
+  color: var(--saas-text-2, var(--text-soft));
+  text-align: left;
+  cursor: pointer;
+}
+
+.appearance-preset:hover {
+  border-color: var(--saas-border, var(--border-hover));
+  background: var(--saas-surface-2, rgba(255,255,255,.035));
+}
+
+.appearance-preset.active {
+  border-color: color-mix(in srgb, var(--saas-accent, var(--accent)) 30%, transparent);
+  background: var(--saas-accent-soft, var(--accent-soft));
+}
+
+.appearance-preset-preview {
+  position: relative;
+  display: block;
+  width: 48px;
+  height: 34px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 8px;
+  background: var(--preview-bg);
+}
+
+.appearance-preset-preview i {
+  position: absolute;
+  inset: 5px 5px 5px 16px;
+  border-radius: 4px;
+  background: var(--preview-panel);
+}
+
+.appearance-preset-preview b {
+  position: absolute;
+  left: 5px;
+  top: 5px;
+  bottom: 5px;
+  width: 7px;
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--preview-panel) 84%, var(--preview-accent));
+}
+
+.appearance-preset-preview em {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  width: 13px;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--preview-accent);
+}
+
+.appearance-preset-copy {
+  min-width: 0;
+}
+
+.appearance-preset-copy strong,
+.appearance-preset-copy small {
+  display: block;
+}
+
+.appearance-preset-copy strong {
+  color: var(--saas-text, var(--text));
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.appearance-preset-copy small {
+  margin-top: 2px;
+  overflow: hidden;
+  color: var(--saas-muted, var(--muted));
+  font-size: 8px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.appearance-mode-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0,1fr));
+  gap: 6px;
+}
+
+.appearance-mode-option {
+  min-height: 36px;
+  border: 1px solid var(--saas-border-soft, var(--border));
+  border-radius: 9px;
+  background: transparent;
+  color: var(--saas-muted, var(--muted));
+  font-size: 9px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.appearance-mode-option span {
+  margin-right: 5px;
+}
+
+.appearance-mode-option:hover {
+  background: var(--saas-surface-2, rgba(255,255,255,.035));
+  color: var(--saas-text-2, var(--text-soft));
+}
+
+.appearance-mode-option.active {
+  border-color: var(--saas-border, var(--border-hover));
+  background: var(--saas-surface-3, rgba(255,255,255,.05));
+  color: var(--saas-text, var(--text));
+}
+
+/* Light mode now changes the product surfaces even when a preset is selected. */
+html[data-theme='light'][data-preset]:not([data-preset='paper']) {
+  --saas-bg: #f4f6f8;
+  --saas-sidebar: #ffffff;
+  --saas-surface: #ffffff;
+  --saas-surface-2: #f7f9fa;
+  --saas-surface-3: #edf1f3;
+  --saas-border: #dce3e7;
+  --saas-border-soft: rgba(30,48,58,.09);
+  --saas-text: #182127;
+  --saas-text-2: #35434d;
+  --saas-muted: #74818a;
+  --saas-muted-2: #9aa4ab;
+  --saas-shadow: 0 1px 2px rgba(20,35,45,.04), 0 8px 24px rgba(20,35,45,.05);
+  color-scheme: light;
+}
+
+html[data-theme='light'][data-preset]:not([data-preset='paper']) body {
+  background: var(--saas-bg) !important;
+  color: var(--saas-text) !important;
+}
+
+html[data-theme='light'][data-preset]:not([data-preset='paper']) .product-dashboard input,
+html[data-theme='light'][data-preset]:not([data-preset='paper']) .product-dashboard select,
+html[data-theme='light'][data-preset]:not([data-preset='paper']) .product-dashboard textarea,
+html[data-theme='light'][data-preset]:not([data-preset='paper']) .auth-field input {
+  background: #f8fafb !important;
+  color: var(--saas-text) !important;
+}
+
+@media (prefers-color-scheme: light) {
+  html[data-theme='system'][data-preset]:not([data-preset='paper']) {
+    --saas-bg: #f4f6f8;
+    --saas-sidebar: #ffffff;
+    --saas-surface: #ffffff;
+    --saas-surface-2: #f7f9fa;
+    --saas-surface-3: #edf1f3;
+    --saas-border: #dce3e7;
+    --saas-border-soft: rgba(30,48,58,.09);
+    --saas-text: #182127;
+    --saas-text-2: #35434d;
+    --saas-muted: #74818a;
+    --saas-muted-2: #9aa4ab;
+    --saas-shadow: 0 1px 2px rgba(20,35,45,.04), 0 8px 24px rgba(20,35,45,.05);
+    color-scheme: light;
+  }
+
+  html[data-theme='system'][data-preset]:not([data-preset='paper']) body {
+    background: var(--saas-bg) !important;
+    color: var(--saas-text) !important;
+  }
+}
+
+/* Visible keyboard focus. */
+.appearance-trigger:focus-visible,
+.appearance-preset:focus-visible,
+.appearance-mode-option:focus-visible,
+.accent-option:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--saas-accent, var(--accent)) 70%, transparent);
+  outline-offset: 2px;
+}
+
+@media (max-width: 980px) {
+  .app-sidebar {
+    overflow: hidden !important;
+  }
+
+  .sidebar-nav-expanded {
+    overflow-y: auto;
+  }
+
+  .sidebar-tools-top .appearance-popover-v2 {
+    position: fixed !important;
+    left: 12px !important;
+    right: 12px !important;
+    top: 76px !important;
+    bottom: auto !important;
+    width: auto !important;
+    max-height: calc(100vh - 92px);
+  }
+}
+
+@media (max-width: 560px) {
+  .appearance-presets {
+    grid-template-columns: 1fr;
+  }
+}
