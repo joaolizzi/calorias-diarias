@@ -19,76 +19,32 @@ import DailyInsight from '../components/DailyInsight.jsx';
 
 const MEALS = ['breakfast', 'lunch', 'dinner', 'snack'];
 
-function Streaks({ waterStreak, kcalStreak, waterDone, kcalDone }) {
+function PremiumDataObject({ kcalPct, waterPct, mealsLogged }) {
   return (
-    <section className="streak-card" aria-label="Sequência de metas">
-      <div className="streak-head">
-        <div>
-          <div className="streak-title">Sequência de metas</div>
-          <div className="muted streak-subtitle">
-            Complete suas metas diárias para manter o ritmo
+    <div className="premium-data-object" aria-hidden="true">
+      <div className="pdo-glow" />
+      <div className="pdo-platform">
+        <div className="pdo-platform-edge" />
+        <div className="pdo-screen">
+          <div className="pdo-screen-topline">
+            <span>NUTRIX</span>
+            <i />
+          </div>
+          <div className="pdo-ring" style={{ '--pdo-value': `${Math.max(kcalPct, 8)}%` }}>
+            <div>
+              <strong>{kcalPct}%</strong>
+              <span>energia</span>
+            </div>
+          </div>
+          <div className="pdo-mini-metrics">
+            <span><b>{waterPct}%</b> água</span>
+            <span><b>{mealsLogged}</b> refeições</span>
           </div>
         </div>
-        <div className="streak-count">
-          {Math.min(waterStreak, kcalStreak)}
-          <span className="muted streak-count-label">dias</span>
-        </div>
+        <div className="pdo-reflection" />
       </div>
-
-      <div className="streak-grid">
-        <div className={`streak-item ${waterDone ? 'done' : ''}`}>
-          <div className="streak-icon">💧</div>
-          <div>
-            <strong>{waterStreak} dias de hidratação</strong>
-            <span>
-              {waterDone
-                ? 'Meta de hoje concluída'
-                : 'Atinga a meta de água para continuar'}
-            </span>
-          </div>
-        </div>
-
-        <div className={`streak-item ${kcalDone ? 'done' : ''}`}>
-          <div className="streak-icon">🔥</div>
-          <div>
-            <strong>{kcalStreak} dias no limite calórico</strong>
-            <span>
-              {kcalDone
-                ? 'Meta de hoje concluída'
-                : 'Atinga a meta calórica para continuar'}
-            </span>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function NutritionCore3D() {
-  return (
-    <div className="nutrition-core-stage" aria-hidden="true">
-      <div className="nutrition-core-scene">
-        <div className="nutrition-core-aura aura-one" />
-        <div className="nutrition-core-aura aura-two" />
-        <div className="nutrition-core-grid" />
-        <div className="nutrition-core-shadow" />
-
-        <div className="nutrition-core-orbit orbit-one"><i /><i /><i /></div>
-        <div className="nutrition-core-orbit orbit-two"><i /><i /></div>
-        <div className="nutrition-core-orbit orbit-three"><i /><i /></div>
-
-        <div className="nutrition-core-sphere">
-          <span className="nutrition-core-shell shell-back" />
-          <span className="nutrition-core-shell shell-mid" />
-          <span className="nutrition-core-shell shell-front" />
-          <span className="nutrition-core-letter">N</span>
-        </div>
-
-        <div className="nutrition-core-chip core-chip-kcal"><strong>KCAL</strong><span>energia</span></div>
-        <div className="nutrition-core-chip core-chip-water"><strong>H₂O</strong><span>hidratação</span></div>
-        <div className="nutrition-core-chip core-chip-ai"><strong>AI</strong><span>insights</span></div>
-        <div className="nutrition-core-chip core-chip-protein"><strong>PRO</strong><span>proteína</span></div>
-      </div>
+      <div className="pdo-float-tag pdo-tag-one">LIVE</div>
+      <div className="pdo-float-tag pdo-tag-two">AI READY</div>
     </div>
   );
 }
@@ -98,50 +54,24 @@ function DashboardHero({ kcalConsumed, kcalGoal, waterConsumed, waterGoal, meals
   const waterPct = waterGoal > 0 ? Math.min(100, Math.round((waterConsumed / waterGoal) * 100)) : 0;
   const kcalPct = kcalGoal > 0 ? Math.min(100, Math.round((kcalConsumed / kcalGoal) * 100)) : 0;
 
-  const moveCore = (event) => {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    const stage = event.currentTarget.querySelector('.nutrition-core-stage');
-    if (!stage) return;
-    const rect = event.currentTarget.getBoundingClientRect();
-    const x = ((event.clientX - rect.left) / rect.width - 0.5) * 2;
-    const y = ((event.clientY - rect.top) / rect.height - 0.5) * 2;
-    stage.style.setProperty('--core-x', `${(x * 12).toFixed(2)}px`);
-    stage.style.setProperty('--core-y', `${(y * 8).toFixed(2)}px`);
-    stage.style.setProperty('--core-rx', `${(-y * 5).toFixed(2)}deg`);
-    stage.style.setProperty('--core-ry', `${(x * 7).toFixed(2)}deg`);
-    stage.style.setProperty('--core-light-x', `${50 + x * 24}%`);
-    stage.style.setProperty('--core-light-y', `${42 + y * 20}%`);
-  };
-
-  const resetCore = (event) => {
-    const stage = event.currentTarget.querySelector('.nutrition-core-stage');
-    if (!stage) return;
-    stage.style.setProperty('--core-x', '0px');
-    stage.style.setProperty('--core-y', '0px');
-    stage.style.setProperty('--core-rx', '0deg');
-    stage.style.setProperty('--core-ry', '0deg');
-    stage.style.setProperty('--core-light-x', '50%');
-    stage.style.setProperty('--core-light-y', '42%');
-  };
-
   return (
-    <section className="dashboard-hero" onPointerMove={moveCore} onPointerLeave={resetCore}>
-      <NutritionCore3D />
-
+    <section className="dashboard-hero dashboard-hero-v3">
       <div className="dashboard-hero-copy">
-        <span className="dashboard-kicker">SEU DIA EM FOCO</span>
-        <h1>Visão geral de hoje</h1>
+        <span className="dashboard-kicker">NUTRIX DAILY</span>
+        <h1>Seu dia, sem ruído.</h1>
         <p>
-          Acompanhe alimentação, hidratação e consistência em uma visão simples e objetiva.
+          Calorias, hidratação, refeições e consistência em uma visão mais direta e inteligente.
         </p>
         <div className="dashboard-hero-badges" aria-hidden="true">
-          <span><i /> Dados em tempo real</span>
+          <span><i /> Sincronizado</span>
           <span>Nutrix Intelligence</span>
         </div>
       </div>
 
-      <div className="dashboard-hero-stats">
-        <div className="hero-stat">
+      <PremiumDataObject kcalPct={kcalPct} waterPct={waterPct} mealsLogged={mealsLogged} />
+
+      <div className="dashboard-hero-stats dashboard-hero-stats-v3">
+        <div className="hero-stat hero-stat-primary">
           <span>Restante</span>
           <strong>{kcalRemaining.toLocaleString('pt-BR')}</strong>
           <small>kcal disponíveis</small>
@@ -166,6 +96,23 @@ function DashboardHero({ kcalConsumed, kcalGoal, waterConsumed, waterGoal, meals
   );
 }
 
+function CompactStreaks({ waterStreak, kcalStreak, waterDone, kcalDone }) {
+  const streak = Math.min(waterStreak, kcalStreak);
+  return (
+    <section className="compact-streak-card">
+      <div className="compact-streak-main">
+        <span className="dashboard-kicker">CONSISTÊNCIA</span>
+        <strong>{streak}</strong>
+        <small>dias de sequência</small>
+      </div>
+      <div className="compact-streak-status">
+        <span className={waterDone ? 'done' : ''}><i /> Água <b>{waterStreak}d</b></span>
+        <span className={kcalDone ? 'done' : ''}><i /> Calorias <b>{kcalStreak}d</b></span>
+      </div>
+    </section>
+  );
+}
+
 export default function Dashboard({ theme, accent, setTheme, setAccent }) {
   const { user } = useAuth();
   const day = today();
@@ -174,6 +121,7 @@ export default function Dashboard({ theme, accent, setTheme, setAccent }) {
   const [foodEntries, setFoodEntries] = useState([]);
   const [waterStreak, setWaterStreak] = useState(0);
   const [kcalStreak, setKcalStreak] = useState(0);
+  const [activePanel, setActivePanel] = useState('meals');
 
   const reloadProfile = useCallback(async () => {
     try {
@@ -244,7 +192,7 @@ export default function Dashboard({ theme, accent, setTheme, setAccent }) {
   const mealsLogged = MEALS.filter((meal) => foodEntries.some((entry) => entry.meal === meal)).length;
 
   return (
-    <div className="app premium-dashboard">
+    <div className="app premium-dashboard dashboard-v3">
       <ProfessionalHeader
         subtitle={`${fmtDateLabel(day)} — Hoje`}
         theme={theme}
@@ -261,75 +209,73 @@ export default function Dashboard({ theme, accent, setTheme, setAccent }) {
         mealsLogged={mealsLogged}
       />
 
-      <section className="dashboard-section">
-        <div className="dashboard-section-head">
-          <div>
-            <span className="dashboard-kicker">PROGRESSO</span>
-            <h2>Metas de hoje</h2>
-          </div>
-          <span className="dashboard-section-note">Atualizado em tempo real</span>
-        </div>
-
-        <div className="dashboard-progress-grid">
-          <ProgressCard
-            title="Calorias"
-            unit="kcal"
-            consumed={kcalConsumed}
-            goal={kcalGoal}
-            variant="food"
-          />
-
-          <ProgressCard
-            title="Água"
-            unit="ml"
-            consumed={waterConsumed}
-            goal={waterGoal}
-            variant="water"
-          >
+      <section className="dashboard-overview-grid">
+        <div className="dashboard-progress-grid dashboard-progress-grid-v3">
+          <ProgressCard title="Calorias" unit="kcal" consumed={kcalConsumed} goal={kcalGoal} variant="food" />
+          <ProgressCard title="Água" unit="ml" consumed={waterConsumed} goal={waterGoal} variant="water">
             <WaterTracker entries={waterEntries} onChange={reloadToday} />
           </ProgressCard>
         </div>
-      </section>
 
-      <Streaks
-        waterStreak={waterStreak}
-        kcalStreak={kcalStreak}
-        waterDone={waterConsumed >= waterGoal}
-        kcalDone={kcalConsumed >= kcalGoal}
-      />
-
-      <section className="dashboard-section dashboard-meals-section">
-        <div className="dashboard-section-head">
-          <div>
-            <span className="dashboard-kicker">ALIMENTAÇÃO</span>
-            <h2>Refeições do dia</h2>
-          </div>
-          <span className="dashboard-section-note">{foodEntries.length} itens registrados</span>
-        </div>
-
-        <div className="dashboard-meals-grid">
-          {MEALS.map((meal) => (
-            <FoodSection
-              key={meal}
-              meal={meal}
-              entries={foodEntries.filter((e) => e.meal === meal)}
-              onChange={reloadToday}
-            />
-          ))}
-        </div>
-      </section>
-
-      <section className="dashboard-lower-grid">
-        <GoalsSettings profile={profile} onSaved={reloadProfile} />
-        <DailyInsight
-          foodEntries={foodEntries}
-          waterEntries={waterEntries}
-          kcalGoal={kcalGoal}
-          waterGoal={waterGoal}
+        <CompactStreaks
+          waterStreak={waterStreak}
+          kcalStreak={kcalStreak}
+          waterDone={waterConsumed >= waterGoal}
+          kcalDone={kcalConsumed >= kcalGoal}
         />
       </section>
 
-      <HistoryChart profile={profile} />
+      <section className="dashboard-workspace">
+        <div className="dashboard-workspace-head">
+          <div>
+            <span className="dashboard-kicker">WORKSPACE</span>
+            <h2>Seu painel diário</h2>
+          </div>
+          <div className="dashboard-tabs" role="tablist" aria-label="Painéis do dashboard">
+            <button className={activePanel === 'meals' ? 'active' : ''} onClick={() => setActivePanel('meals')}>Refeições</button>
+            <button className={activePanel === 'insights' ? 'active' : ''} onClick={() => setActivePanel('insights')}>Insights</button>
+            <button className={activePanel === 'history' ? 'active' : ''} onClick={() => setActivePanel('history')}>Histórico</button>
+          </div>
+        </div>
+
+        <div className="dashboard-workspace-body">
+          {activePanel === 'meals' && (
+            <div className="dashboard-panel dashboard-panel-meals">
+              <div className="dashboard-panel-meta">{foodEntries.length} itens registrados hoje</div>
+              <div className="dashboard-meals-grid dashboard-meals-grid-v3">
+                {MEALS.map((meal) => (
+                  <FoodSection
+                    key={meal}
+                    meal={meal}
+                    entries={foodEntries.filter((e) => e.meal === meal)}
+                    onChange={reloadToday}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {activePanel === 'insights' && (
+            <div className="dashboard-panel dashboard-panel-insights">
+              <div className="dashboard-lower-grid dashboard-lower-grid-v3">
+                <GoalsSettings profile={profile} onSaved={reloadProfile} />
+                <DailyInsight
+                  foodEntries={foodEntries}
+                  waterEntries={waterEntries}
+                  kcalGoal={kcalGoal}
+                  waterGoal={waterGoal}
+                />
+              </div>
+            </div>
+          )}
+
+          {activePanel === 'history' && (
+            <div className="dashboard-panel dashboard-panel-history">
+              <HistoryChart profile={profile} />
+            </div>
+          )}
+        </div>
+      </section>
     </div>
   );
 }
