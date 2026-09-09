@@ -67,26 +67,28 @@ function Streaks({ waterStreak, kcalStreak, waterDone, kcalDone }) {
 function NutritionCore3D() {
   return (
     <div className="nutrition-core-stage" aria-hidden="true">
-      <div className="nutrition-core-aura aura-one" />
-      <div className="nutrition-core-aura aura-two" />
-      <div className="nutrition-core-grid" />
-      <div className="nutrition-core-shadow" />
+      <div className="nutrition-core-scene">
+        <div className="nutrition-core-aura aura-one" />
+        <div className="nutrition-core-aura aura-two" />
+        <div className="nutrition-core-grid" />
+        <div className="nutrition-core-shadow" />
 
-      <div className="nutrition-core-orbit orbit-one"><i /><i /><i /></div>
-      <div className="nutrition-core-orbit orbit-two"><i /><i /></div>
-      <div className="nutrition-core-orbit orbit-three"><i /><i /></div>
+        <div className="nutrition-core-orbit orbit-one"><i /><i /><i /></div>
+        <div className="nutrition-core-orbit orbit-two"><i /><i /></div>
+        <div className="nutrition-core-orbit orbit-three"><i /><i /></div>
 
-      <div className="nutrition-core-sphere">
-        <span className="nutrition-core-shell shell-back" />
-        <span className="nutrition-core-shell shell-mid" />
-        <span className="nutrition-core-shell shell-front" />
-        <span className="nutrition-core-letter">N</span>
+        <div className="nutrition-core-sphere">
+          <span className="nutrition-core-shell shell-back" />
+          <span className="nutrition-core-shell shell-mid" />
+          <span className="nutrition-core-shell shell-front" />
+          <span className="nutrition-core-letter">N</span>
+        </div>
+
+        <div className="nutrition-core-chip core-chip-kcal"><strong>KCAL</strong><span>energia</span></div>
+        <div className="nutrition-core-chip core-chip-water"><strong>H₂O</strong><span>hidratação</span></div>
+        <div className="nutrition-core-chip core-chip-ai"><strong>AI</strong><span>insights</span></div>
+        <div className="nutrition-core-chip core-chip-protein"><strong>PRO</strong><span>proteína</span></div>
       </div>
-
-      <div className="nutrition-core-chip core-chip-kcal"><strong>KCAL</strong><span>energia</span></div>
-      <div className="nutrition-core-chip core-chip-water"><strong>H₂O</strong><span>hidratação</span></div>
-      <div className="nutrition-core-chip core-chip-ai"><strong>AI</strong><span>insights</span></div>
-      <div className="nutrition-core-chip core-chip-protein"><strong>PRO</strong><span>proteína</span></div>
     </div>
   );
 }
@@ -96,8 +98,34 @@ function DashboardHero({ kcalConsumed, kcalGoal, waterConsumed, waterGoal, meals
   const waterPct = waterGoal > 0 ? Math.min(100, Math.round((waterConsumed / waterGoal) * 100)) : 0;
   const kcalPct = kcalGoal > 0 ? Math.min(100, Math.round((kcalConsumed / kcalGoal) * 100)) : 0;
 
+  const moveCore = (event) => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const stage = event.currentTarget.querySelector('.nutrition-core-stage');
+    if (!stage) return;
+    const rect = event.currentTarget.getBoundingClientRect();
+    const x = ((event.clientX - rect.left) / rect.width - 0.5) * 2;
+    const y = ((event.clientY - rect.top) / rect.height - 0.5) * 2;
+    stage.style.setProperty('--core-x', `${(x * 12).toFixed(2)}px`);
+    stage.style.setProperty('--core-y', `${(y * 8).toFixed(2)}px`);
+    stage.style.setProperty('--core-rx', `${(-y * 5).toFixed(2)}deg`);
+    stage.style.setProperty('--core-ry', `${(x * 7).toFixed(2)}deg`);
+    stage.style.setProperty('--core-light-x', `${50 + x * 24}%`);
+    stage.style.setProperty('--core-light-y', `${42 + y * 20}%`);
+  };
+
+  const resetCore = (event) => {
+    const stage = event.currentTarget.querySelector('.nutrition-core-stage');
+    if (!stage) return;
+    stage.style.setProperty('--core-x', '0px');
+    stage.style.setProperty('--core-y', '0px');
+    stage.style.setProperty('--core-rx', '0deg');
+    stage.style.setProperty('--core-ry', '0deg');
+    stage.style.setProperty('--core-light-x', '50%');
+    stage.style.setProperty('--core-light-y', '42%');
+  };
+
   return (
-    <section className="dashboard-hero">
+    <section className="dashboard-hero" onPointerMove={moveCore} onPointerLeave={resetCore}>
       <NutritionCore3D />
 
       <div className="dashboard-hero-copy">
