@@ -1,0 +1,74 @@
+/* Nutrix interactive 3D layer — additive and layout-safe */
+.nutrition-core-stage {
+  --core-x: 0px;
+  --core-y: 0px;
+  --core-rx: 0deg;
+  --core-ry: 0deg;
+  --core-light-x: 50%;
+  --core-light-y: 42%;
+}
+
+.nutrition-core-scene {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  transform:
+    translate3d(var(--core-x), var(--core-y), 0)
+    rotateX(var(--core-rx))
+    rotateY(var(--core-ry));
+  transition: transform 180ms cubic-bezier(.2,.8,.2,1);
+  will-change: transform;
+}
+
+.nutrition-core-stage::after {
+  content: '';
+  position: absolute;
+  inset: 20%;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(
+    circle at var(--core-light-x) var(--core-light-y),
+    rgba(255,255,255,.20),
+    color-mix(in srgb, var(--accent) 7%, transparent) 24%,
+    transparent 64%
+  );
+  filter: blur(18px);
+  mix-blend-mode: screen;
+  opacity: .75;
+  transition: background-position 180ms ease;
+}
+
+.nutrition-core-sphere {
+  transition: box-shadow 180ms ease, filter 180ms ease;
+  filter: saturate(1.05) contrast(1.02);
+}
+
+.premium-dashboard .dashboard-hero:hover .nutrition-core-sphere {
+  box-shadow:
+    inset -18px -18px 32px rgba(0,0,0,.34),
+    inset 13px 11px 24px rgba(255,255,255,.15),
+    0 20px 58px color-mix(in srgb, var(--accent) 34%, transparent),
+    0 0 78px color-mix(in srgb, var(--accent) 14%, transparent);
+}
+
+.nutrition-core-chip {
+  transition: border-color 180ms ease, background 180ms ease, box-shadow 180ms ease;
+}
+
+.premium-dashboard .dashboard-hero:hover .nutrition-core-chip {
+  border-color: color-mix(in srgb, var(--accent) 18%, rgba(255,255,255,.10));
+  box-shadow: 0 16px 34px rgba(0,0,0,.22), inset 0 1px rgba(255,255,255,.06);
+}
+
+@media (max-width: 1280px) {
+  .nutrition-core-scene {
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nutrition-core-scene {
+    transform: none !important;
+    transition: none !important;
+  }
+}
