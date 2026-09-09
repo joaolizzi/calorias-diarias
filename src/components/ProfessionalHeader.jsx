@@ -6,10 +6,29 @@ import NutrixLogo from './NutrixLogo.jsx';
 
 const ADMIN_EMAIL = String(import.meta.env.VITE_ADMIN_EMAIL || '').trim().toLowerCase();
 
-const baseItems = [
-  ['/', '⌂', 'Dashboard', 'Visão do dia'],
-  ['/treinos', '◇', 'Treinos', 'Plano semanal'],
-  ['/goal', '◎', 'Objetivo', 'Metas e cálculo'],
+const navigationGroups = [
+  {
+    label: 'Principal',
+    items: [
+      ['/', '⌂', 'Dashboard', 'Visão geral'],
+      ['/?panel=meals&focus=register', '+', 'Registrar', 'Adicionar refeição'],
+      ['/?panel=meals', '◫', 'Rotina', 'Refeições do dia'],
+    ],
+  },
+  {
+    label: 'Progresso',
+    items: [
+      ['/?panel=insights', '◎', 'Metas', 'Objetivos e análise'],
+      ['/?panel=history', '◷', 'Histórico', 'Evolução recente'],
+    ],
+  },
+  {
+    label: 'Planejamento',
+    items: [
+      ['/treinos', '◇', 'Treinos', 'Plano semanal'],
+      ['/goal', '◉', 'Objetivo', 'Cálculo e ajustes'],
+    ],
+  },
 ];
 
 export default function ProfessionalHeader({ subtitle, theme, accent, setTheme, setAccent }) {
@@ -21,14 +40,9 @@ export default function ProfessionalHeader({ subtitle, theme, accent, setTheme, 
     user?.email && ADMIN_EMAIL && user.email.toLowerCase() === ADMIN_EMAIL,
   );
 
-  const items = [
-    ...baseItems,
-    ...(isAdmin ? [['/admin', '⚙', 'Admin', 'Painel interno']] : []),
-  ];
-
   useEffect(() => {
     setMobileOpen(false);
-  }, [location.pathname]);
+  }, [location.pathname, location.search]);
 
   useEffect(() => {
     document.body.classList.toggle('sidebar-open', mobileOpen);
@@ -38,6 +52,13 @@ export default function ProfessionalHeader({ subtitle, theme, accent, setTheme, 
   if (!user) return null;
 
   const emailInitial = String(user.email || 'N').charAt(0).toUpperCase();
+  const currentUrl = `${location.pathname}${location.search}`;
+
+  const isShortcutActive = (to) => {
+    if (to === '/') return location.pathname === '/' && !location.search;
+    if (to.startsWith('/?')) return currentUrl === to || (to === '/?panel=meals' && currentUrl === '/?panel=meals&focus=register');
+    return location.pathname === to;
+  };
 
   return (
     <>
@@ -72,7 +93,7 @@ export default function ProfessionalHeader({ subtitle, theme, accent, setTheme, 
             <NutrixLogo className="brand-logo-mark" size={42} decorative />
             <span className="sidebar-brand-copy">
               <strong>Nutrix<span className="brand-accent">.</span></strong>
-              <small>Nutrition OS</small>
+              <small>Painel pessoal</small>
             </span>
           </NavLink>
 
@@ -89,34 +110,46 @@ export default function ProfessionalHeader({ subtitle, theme, accent, setTheme, 
           <strong>{subtitle || 'Seu painel pessoal'}</strong>
         </div>
 
-        <nav className="sidebar-nav" aria-label="Navegação principal">
-          <span className="sidebar-nav-label">Navegação</span>
-          {items.map(([to, icon, label, description]) => (
-            <NavLink
-              key={to}
-              to={to}
-              end={to === '/'}
-              className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
-            >
-              <span className="sidebar-link-icon">{icon}</span>
-              <span className="sidebar-link-copy">
-                <strong>{label}</strong>
-                <small>{description}</small>
-              </span>
-              <span className="sidebar-link-arrow">›</span>
-            </NavLink>
+        <nav className="sidebar-nav sidebar-nav-expanded" aria-label="Navegação principal">
+          {navigationGroups.map((group) => (
+            <div className="sidebar-nav-group" key={group.label}>
+              <span className="sidebar-nav-label">{group.label}</span>
+              {group.items.map(([to, icon, label, description]) => (
+                <NavLink
+                  key={to}
+                  to={to}
+                  className={`sidebar-link ${isShortcutActive(to) ? 'active' : ''}`}
+                >
+                  <span className="sidebar-link-icon">{icon}</span>
+                  <span className="sidebar-link-copy">
+                    <strong>{label}</strong>
+                    <small>{description}</small>
+                  </span>
+                  <span className="sidebar-link-arrow">›</span>
+                </NavLink>
+              ))}
+            </div>
           ))}
+
+          {isAdmin && (
+            <div className="sidebar-nav-group">
+              <span className="sidebar-nav-label">Sistema</span>
+              <NavLink
+                to="/admin"
+                className={`sidebar-link ${location.pathname === '/admin' ? 'active' : ''}`}
+              >
+                <span className="sidebar-link-icon">⚙</span>
+                <span className="sidebar-link-copy">
+                  <strong>Admin</strong>
+                  <small>Painel interno</small>
+                </span>
+                <span className="sidebar-link-arrow">›</span>
+              </NavLink>
+            </div>
+          )}
         </nav>
 
         <div className="sidebar-spacer" />
-
-        <div className="sidebar-premium-card">
-          <span className="sidebar-premium-dot" />
-          <div>
-            <strong>Nutrix Intelligence</strong>
-            <small>IA, histórico e metas em um só lugar.</small>
-          </div>
-        </div>
 
         <div className="sidebar-tools">
           <AppearanceMenu
