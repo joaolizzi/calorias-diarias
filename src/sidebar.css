@@ -1,0 +1,492 @@
+/* Nutrix premium sidebar */
+:root {
+  --sidebar-width: 268px;
+  --sidebar-gap: 24px;
+}
+
+.app-sidebar {
+  position: fixed;
+  inset: 16px auto 16px 16px;
+  z-index: 100;
+  width: var(--sidebar-width);
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 32px);
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.012)),
+    color-mix(in srgb, var(--panel-strong) 96%, transparent);
+  box-shadow: 0 24px 70px rgba(0,0,0,.25);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+}
+
+.sidebar-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.sidebar-brand,
+.mobile-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.sidebar-brand-copy {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.05;
+}
+
+.sidebar-brand-copy strong {
+  font-size: 18px;
+  letter-spacing: -.55px;
+}
+
+.sidebar-brand-copy small {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.1px;
+  text-transform: uppercase;
+}
+
+.sidebar-close {
+  display: none;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 22px;
+  cursor: pointer;
+}
+
+.sidebar-context {
+  margin: 20px 0 18px;
+  padding: 13px 14px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: linear-gradient(135deg, var(--accent-soft), rgba(255,255,255,.015));
+}
+
+.sidebar-context span,
+.sidebar-context strong {
+  display: block;
+}
+
+.sidebar-context span {
+  color: var(--accent);
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 1.1px;
+  text-transform: uppercase;
+}
+
+.sidebar-context strong {
+  margin-top: 5px;
+  color: var(--text-soft);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sidebar-nav-label {
+  margin: 0 8px 5px;
+  color: var(--muted-2);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 1.1px;
+  text-transform: uppercase;
+}
+
+.sidebar-link {
+  position: relative;
+  display: grid;
+  grid-template-columns: 38px 1fr 18px;
+  align-items: center;
+  gap: 10px;
+  min-height: 56px;
+  padding: 8px 10px;
+  border: 1px solid transparent;
+  border-radius: 14px;
+  color: var(--muted);
+  text-decoration: none;
+  transition: .18s ease;
+}
+
+.sidebar-link:hover {
+  color: var(--text);
+  background: rgba(255,255,255,.025);
+  border-color: var(--border);
+  transform: translateX(2px);
+}
+
+.sidebar-link.active {
+  color: var(--text);
+  border-color: color-mix(in srgb, var(--accent) 24%, var(--border));
+  background: linear-gradient(90deg, var(--accent-soft), rgba(255,255,255,.018));
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
+.sidebar-link-icon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 11px;
+  background: rgba(255,255,255,.035);
+  color: var(--text-soft);
+  font-size: 18px;
+}
+
+.sidebar-link.active .sidebar-link-icon {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.sidebar-link-copy {
+  min-width: 0;
+}
+
+.sidebar-link-copy strong,
+.sidebar-link-copy small {
+  display: block;
+}
+
+.sidebar-link-copy strong {
+  color: inherit;
+  font-size: 12px;
+}
+
+.sidebar-link-copy small {
+  margin-top: 3px;
+  color: var(--muted-2);
+  font-size: 9px;
+}
+
+.sidebar-link-arrow {
+  color: var(--muted-2);
+  font-size: 18px;
+  transition: transform .18s ease;
+}
+
+.sidebar-link:hover .sidebar-link-arrow,
+.sidebar-link.active .sidebar-link-arrow {
+  transform: translateX(2px);
+  color: var(--accent);
+}
+
+.sidebar-spacer { flex: 1; }
+
+.sidebar-premium-card {
+  display: grid;
+  grid-template-columns: 10px 1fr;
+  gap: 10px;
+  margin-top: 18px;
+  padding: 13px;
+  border: 1px solid color-mix(in srgb, var(--accent) 18%, var(--border));
+  border-radius: 14px;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 8%, transparent), rgba(255,255,255,.012));
+}
+
+.sidebar-premium-dot {
+  width: 8px;
+  height: 8px;
+  margin-top: 4px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 14px color-mix(in srgb, var(--accent) 65%, transparent);
+}
+
+.sidebar-premium-card strong,
+.sidebar-premium-card small {
+  display: block;
+}
+
+.sidebar-premium-card strong {
+  color: var(--text-soft);
+  font-size: 10px;
+}
+
+.sidebar-premium-card small {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 9px;
+  line-height: 1.4;
+}
+
+.sidebar-tools {
+  margin-top: 10px;
+}
+
+.sidebar-tools .appearance-menu,
+.sidebar-tools .appearance-trigger {
+  width: 100%;
+}
+
+.sidebar-tools .appearance-trigger {
+  justify-content: center;
+}
+
+.sidebar-tools .appearance-popover {
+  left: calc(100% + 10px);
+  right: auto;
+  top: auto;
+  bottom: 0;
+}
+
+.sidebar-account {
+  display: grid;
+  grid-template-columns: 36px 1fr 34px;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.sidebar-avatar {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 11px;
+  background: linear-gradient(135deg, var(--accent), #38bdf8);
+  color: #07120d;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.sidebar-account-copy {
+  min-width: 0;
+}
+
+.sidebar-account-copy strong,
+.sidebar-account-copy small {
+  display: block;
+}
+
+.sidebar-account-copy strong {
+  color: var(--text-soft);
+  font-size: 10px;
+}
+
+.sidebar-account-copy small {
+  overflow: hidden;
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 8px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sidebar-logout {
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: .18s ease;
+}
+
+.sidebar-logout:hover {
+  color: var(--text);
+  border-color: var(--border-hover);
+  background: rgba(255,255,255,.03);
+}
+
+.mobile-appbar,
+.sidebar-backdrop {
+  display: none;
+}
+
+/* Desktop content offset */
+@media (min-width: 981px) {
+  .premium-dashboard {
+    width: min(1120px, calc(100% - var(--sidebar-width) - 76px));
+    margin-left: calc(var(--sidebar-width) + 48px);
+    margin-right: auto;
+  }
+
+  .goal-screen,
+  .workouts-screen,
+  .admin-page {
+    padding-left: calc(var(--sidebar-width) + 32px);
+  }
+
+  .goal-screen .app-header,
+  .workouts-screen .app-header,
+  .admin-page-header {
+    width: 0 !important;
+    height: 0;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible;
+  }
+
+  .goal-screen .goal-page,
+  .workouts-page,
+  .admin-shell {
+    width: min(100% - 36px, 1120px);
+  }
+}
+
+html[data-theme='light'] .app-sidebar {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.96), rgba(250,252,255,.92)),
+    var(--panel);
+  box-shadow: 0 20px 55px rgba(15,23,42,.10);
+}
+
+html[data-theme='light'] .sidebar-link-icon {
+  background: rgba(15,23,42,.035);
+}
+
+@media (max-width: 980px) {
+  body.sidebar-open { overflow: hidden; }
+
+  .mobile-appbar {
+    position: sticky;
+    top: 0;
+    z-index: 80;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 68px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+  }
+
+  .mobile-brand {
+    font-size: 17px;
+    font-weight: 850;
+    letter-spacing: -.45px;
+  }
+
+  .mobile-brand .brand-mark {
+    width: 32px;
+    height: 32px;
+  }
+
+  .sidebar-mobile-toggle {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+    width: 40px;
+    height: 40px;
+    padding: 0 10px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--panel);
+    cursor: pointer;
+  }
+
+  .sidebar-mobile-toggle span {
+    display: block;
+    width: 100%;
+    height: 2px;
+    border-radius: 999px;
+    background: var(--text-soft);
+  }
+
+  .app-sidebar {
+    inset: 10px auto 10px 10px;
+    width: min(292px, calc(100vw - 28px));
+    min-height: calc(100vh - 20px);
+    transform: translateX(calc(-100% - 24px));
+    transition: transform .24s ease;
+  }
+
+  .app-sidebar.open {
+    transform: translateX(0);
+  }
+
+  .sidebar-close {
+    display: grid;
+    place-items: center;
+  }
+
+  .sidebar-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    display: block;
+    border: 0;
+    background: rgba(2,6,12,.62);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .2s ease;
+    backdrop-filter: blur(3px);
+  }
+
+  .sidebar-backdrop.show {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .sidebar-tools .appearance-popover {
+    position: fixed;
+    left: 14px;
+    right: 14px;
+    bottom: 14px;
+    top: auto;
+    width: auto;
+  }
+
+  .premium-dashboard,
+  .goal-screen,
+  .workouts-screen,
+  .admin-page {
+    padding-left: 0;
+  }
+
+  .premium-dashboard {
+    width: min(100% - 24px, 1120px);
+    margin: 0 auto;
+  }
+
+  .premium-dashboard > .professional-header,
+  .goal-screen .app-header,
+  .workouts-screen .app-header,
+  .admin-page-header {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+  }
+}
+
+@media (max-width: 560px) {
+  .mobile-appbar {
+    min-height: 62px;
+    padding-inline: 12px;
+  }
+
+  .app-sidebar {
+    padding: 14px;
+  }
+
+  .sidebar-premium-card {
+    display: none;
+  }
+}
