@@ -1,0 +1,596 @@
+/* Nutrix Experience — premium depth layer, scoped to existing surfaces */
+
+:root {
+  --xp-glass: rgba(255,255,255,.035);
+  --xp-line: rgba(255,255,255,.08);
+  --xp-line-strong: rgba(255,255,255,.13);
+  --xp-shadow-1: 0 12px 34px rgba(0,0,0,.12);
+  --xp-shadow-2: 0 24px 70px rgba(0,0,0,.24);
+  --xp-shadow-3: 0 34px 100px rgba(0,0,0,.34);
+  --xp-ease: cubic-bezier(.22,.8,.22,1);
+}
+
+/* Background atmosphere */
+body {
+  background:
+    radial-gradient(circle at 14% -8%, color-mix(in srgb, var(--accent) 10%, transparent), transparent 30%),
+    radial-gradient(circle at 92% 8%, rgba(56,189,248,.055), transparent 26%),
+    radial-gradient(circle at 55% 92%, rgba(167,139,250,.04), transparent 30%),
+    var(--bg);
+}
+
+/* Shared authenticated surfaces — visual only, no layout sizing */
+.premium-dashboard .card,
+.premium-dashboard .streak-card,
+.goal-screen .goal-section,
+.goal-screen .goal-result,
+.workouts-page .workout-card,
+.workouts-page .workouts-hero,
+.admin-page .admin-panel,
+.admin-page .admin-stat {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-color: var(--xp-line);
+  box-shadow: var(--xp-shadow-1);
+}
+
+.premium-dashboard .card::after,
+.premium-dashboard .streak-card::after,
+.goal-screen .goal-section::after,
+.goal-screen .goal-result::after,
+.workouts-page .workout-card::after,
+.admin-page .admin-panel::after,
+.admin-page .admin-stat::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(125deg, rgba(255,255,255,.035), transparent 24%, transparent 76%, rgba(255,255,255,.018));
+  opacity: .72;
+}
+
+.premium-dashboard .card,
+.premium-dashboard .streak-card,
+.goal-screen .goal-section,
+.goal-screen .goal-result,
+.workouts-page .workout-card,
+.admin-page .admin-panel,
+.admin-page .admin-stat {
+  transition: transform .24s var(--xp-ease), border-color .24s ease, box-shadow .24s ease;
+}
+
+@media (hover:hover) {
+  .premium-dashboard .card:hover,
+  .premium-dashboard .streak-card:hover,
+  .goal-screen .goal-section:hover,
+  .goal-screen .goal-result:hover,
+  .workouts-page .workout-card:hover,
+  .admin-page .admin-panel:hover,
+  .admin-page .admin-stat:hover {
+    transform: translateY(-3px);
+    border-color: color-mix(in srgb, var(--accent) 25%, var(--xp-line));
+    box-shadow: 0 18px 48px rgba(0,0,0,.18);
+  }
+}
+
+/* Buttons */
+.premium-dashboard .btn,
+.goal-screen .btn,
+.workouts-page .btn,
+.admin-page .btn,
+.auth-premium-shell .btn,
+.app-sidebar button {
+  position: relative;
+  overflow: hidden;
+}
+
+.premium-dashboard .btn::after,
+.goal-screen .btn::after,
+.workouts-page .btn::after,
+.admin-page .btn::after,
+.auth-premium-shell .btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(110deg, transparent 18%, rgba(255,255,255,.12) 48%, transparent 72%);
+  transform: translateX(-135%);
+  transition: transform .55s var(--xp-ease);
+}
+
+@media (hover:hover) {
+  .premium-dashboard .btn:hover::after,
+  .goal-screen .btn:hover::after,
+  .workouts-page .btn:hover::after,
+  .admin-page .btn:hover::after,
+  .auth-premium-shell .btn:hover::after {
+    transform: translateX(135%);
+  }
+}
+
+/* Sidebar luxury polish */
+.app-sidebar {
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--accent) 4%, transparent), transparent 24%),
+    linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.008)),
+    color-mix(in srgb, var(--panel) 96%, transparent);
+  box-shadow: 0 32px 90px rgba(0,0,0,.30), inset 0 1px rgba(255,255,255,.045);
+}
+
+.app-sidebar::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background:
+    radial-gradient(circle at 16% 0%, color-mix(in srgb, var(--accent) 9%, transparent), transparent 22%),
+    linear-gradient(90deg, transparent, rgba(255,255,255,.018), transparent);
+}
+
+.sidebar-brand,
+.sidebar-nav,
+.sidebar-context,
+.sidebar-premium-card,
+.sidebar-tools,
+.sidebar-account,
+.sidebar-spacer {
+  position: relative;
+  z-index: 1;
+}
+
+.sidebar-link {
+  overflow: hidden;
+}
+
+.sidebar-link::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at 15% 50%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 45%);
+  transition: opacity .18s ease;
+}
+
+.sidebar-link.active::before,
+.sidebar-link:hover::before {
+  opacity: 1;
+}
+
+.sidebar-premium-card {
+  box-shadow: inset 0 1px rgba(255,255,255,.04), 0 12px 30px rgba(0,0,0,.10);
+}
+
+/* Dashboard hero */
+.premium-dashboard .dashboard-hero {
+  isolation: isolate;
+  perspective: 1200px;
+  border-color: color-mix(in srgb, var(--accent) 14%, var(--xp-line));
+  box-shadow: var(--xp-shadow-2), inset 0 1px rgba(255,255,255,.045);
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--accent) 10%, transparent), transparent 42%),
+    radial-gradient(circle at 62% 48%, rgba(255,255,255,.028), transparent 22%),
+    linear-gradient(160deg, rgba(255,255,255,.04), rgba(255,255,255,.007)),
+    var(--panel);
+}
+
+.premium-dashboard .dashboard-hero::before {
+  content: '';
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  pointer-events: none;
+  opacity: .42;
+  background-image:
+    linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px);
+  background-size: 34px 34px;
+  mask-image: linear-gradient(90deg, transparent 28%, #000 55%, transparent 92%);
+}
+
+.premium-dashboard .dashboard-hero-copy,
+.premium-dashboard .dashboard-hero-stats {
+  position: relative;
+  z-index: 3;
+}
+
+.dashboard-hero-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.dashboard-hero-badges span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 28px;
+  padding: 0 10px;
+  border: 1px solid var(--xp-line);
+  border-radius: 999px;
+  background: rgba(255,255,255,.022);
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 750;
+  letter-spacing: .25px;
+  backdrop-filter: blur(10px);
+}
+
+.dashboard-hero-badges i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--accent) 70%, transparent);
+}
+
+/* 3D nutrition core */
+.nutrition-core-stage {
+  position: absolute;
+  z-index: 2;
+  left: 50%;
+  top: 50%;
+  width: 260px;
+  height: 260px;
+  transform: translate(-42%, -50%) rotateX(62deg) rotateZ(-12deg);
+  transform-style: preserve-3d;
+  pointer-events: none;
+  opacity: .92;
+}
+
+.nutrition-core-shadow {
+  position: absolute;
+  left: 50%;
+  top: 58%;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  transform: translate(-50%,-50%) translateZ(-45px) scaleY(.32);
+  background: color-mix(in srgb, var(--accent) 26%, transparent);
+  filter: blur(24px);
+}
+
+.nutrition-core-sphere {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  display: grid;
+  place-items: center;
+  width: 82px;
+  height: 82px;
+  border: 1px solid rgba(255,255,255,.22);
+  border-radius: 50%;
+  transform: translate(-50%,-50%) translateZ(45px) rotateZ(12deg) rotateX(-62deg);
+  background:
+    radial-gradient(circle at 32% 26%, rgba(255,255,255,.65), rgba(255,255,255,.08) 18%, transparent 32%),
+    linear-gradient(145deg, color-mix(in srgb, var(--accent) 92%, white 8%), #38bdf8 74%, #0f172a);
+  box-shadow:
+    inset -16px -18px 30px rgba(0,0,0,.30),
+    inset 12px 10px 24px rgba(255,255,255,.12),
+    0 18px 50px color-mix(in srgb, var(--accent) 24%, transparent);
+  animation: nutritionFloat 5.6s ease-in-out infinite;
+}
+
+.nutrition-core-sphere::after {
+  content: '';
+  position: absolute;
+  inset: 7px;
+  border: 1px solid rgba(255,255,255,.15);
+  border-radius: 50%;
+}
+
+.nutrition-core-sphere span {
+  color: rgba(4,12,11,.86);
+  font-size: 27px;
+  font-weight: 950;
+  letter-spacing: -1.3px;
+  text-shadow: 0 1px rgba(255,255,255,.18);
+}
+
+.nutrition-core-orbit {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  border: 1px solid color-mix(in srgb, var(--accent) 36%, rgba(255,255,255,.09));
+  border-radius: 50%;
+  transform-style: preserve-3d;
+}
+
+.nutrition-core-orbit::before {
+  content: '';
+  position: absolute;
+  inset: 5px;
+  border: 1px solid rgba(255,255,255,.035);
+  border-radius: inherit;
+}
+
+.orbit-one {
+  width: 190px;
+  height: 190px;
+  margin: -95px;
+  animation: orbitSpin 10s linear infinite;
+}
+
+.orbit-two {
+  width: 238px;
+  height: 122px;
+  margin: -61px -119px;
+  transform: rotateZ(66deg) rotateX(22deg);
+  animation: orbitSpinReverse 13s linear infinite;
+}
+
+.nutrition-core-orbit i {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 16px color-mix(in srgb, var(--accent) 72%, transparent);
+}
+
+.orbit-one i:nth-child(1) { left: 17px; top: 44px; }
+.orbit-one i:nth-child(2) { right: 8px; top: 88px; width: 7px; height: 7px; background: #38bdf8; }
+.orbit-one i:nth-child(3) { left: 82px; bottom: -5px; width: 6px; height: 6px; background: var(--accent); }
+.orbit-two i:nth-child(1) { left: 31px; top: 10px; width: 7px; height: 7px; background: var(--accent); }
+.orbit-two i:nth-child(2) { right: 21px; bottom: 10px; width: 6px; height: 6px; background: #38bdf8; }
+
+.nutrition-core-chip {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  min-width: 76px;
+  padding: 8px 10px;
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 11px;
+  background: rgba(7,12,18,.72);
+  box-shadow: 0 12px 30px rgba(0,0,0,.20);
+  backdrop-filter: blur(12px);
+  transform: rotateZ(12deg) rotateX(-62deg) translateZ(55px);
+}
+
+.nutrition-core-chip strong {
+  color: var(--text);
+  font-size: 9px;
+  letter-spacing: .7px;
+}
+
+.nutrition-core-chip span {
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 7px;
+}
+
+.core-chip-kcal { left: 8px; top: 31px; }
+.core-chip-water { right: -6px; top: 52px; }
+.core-chip-ai { left: 94px; bottom: 5px; }
+
+@keyframes orbitSpin {
+  to { transform: rotateZ(360deg); }
+}
+
+@keyframes orbitSpinReverse {
+  from { transform: rotateZ(66deg) rotateX(22deg); }
+  to { transform: rotateZ(-294deg) rotateX(22deg); }
+}
+
+@keyframes nutritionFloat {
+  0%,100% { transform: translate(-50%,-50%) translateZ(45px) rotateZ(12deg) rotateX(-62deg) translateY(0); }
+  50% { transform: translate(-50%,-50%) translateZ(58px) rotateZ(12deg) rotateX(-62deg) translateY(-5px); }
+}
+
+/* Dashboard stat cards get layered depth */
+.premium-dashboard .hero-stat {
+  transform-style: preserve-3d;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: inset 0 1px rgba(255,255,255,.04), 0 12px 28px rgba(0,0,0,.10);
+}
+
+@media (hover:hover) {
+  .premium-dashboard .hero-stat:hover {
+    transform: translateY(-4px) translateZ(10px);
+    box-shadow: 0 18px 42px rgba(0,0,0,.20), inset 0 1px rgba(255,255,255,.05);
+  }
+}
+
+/* Meal cards and logs */
+.premium-dashboard .dashboard-meals-grid > .card {
+  backdrop-filter: blur(8px);
+}
+
+.premium-dashboard .card-head {
+  padding-bottom: 12px;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
+}
+
+.premium-dashboard .log li {
+  border-radius: 12px;
+  transition: background .16s ease, transform .16s ease;
+}
+
+@media (hover:hover) {
+  .premium-dashboard .log li:hover {
+    background: rgba(255,255,255,.025);
+    transform: translateX(2px);
+  }
+}
+
+.premium-dashboard .camera-ai-btn {
+  border-color: color-mix(in srgb, var(--ai) 34%, var(--border));
+  background:
+    linear-gradient(120deg, color-mix(in srgb, var(--ai) 9%, transparent), transparent 64%),
+    rgba(255,255,255,.018);
+}
+
+/* Inputs */
+.goal-screen input,
+.goal-screen select,
+.goal-screen textarea,
+.workouts-page input,
+.workouts-page select,
+.workouts-page textarea,
+.premium-dashboard input,
+.premium-dashboard select,
+.premium-dashboard textarea,
+.auth-premium-shell input {
+  transition: border-color .18s ease, box-shadow .18s ease, background .18s ease, transform .18s ease;
+}
+
+.goal-screen input:focus,
+.goal-screen select:focus,
+.goal-screen textarea:focus,
+.workouts-page input:focus,
+.workouts-page select:focus,
+.workouts-page textarea:focus,
+.premium-dashboard input:focus,
+.premium-dashboard select:focus,
+.premium-dashboard textarea:focus,
+.auth-premium-shell input:focus {
+  border-color: color-mix(in srgb, var(--accent) 70%, var(--border-hover));
+  box-shadow: 0 0 0 3px var(--accent-soft), 0 8px 24px rgba(0,0,0,.08);
+}
+
+/* Modals */
+.modal-bg,
+.exercise-picker-overlay {
+  backdrop-filter: blur(9px);
+  -webkit-backdrop-filter: blur(9px);
+}
+
+.camera-modal,
+.exercise-picker-modal,
+.import-workout-modal,
+.modal {
+  border-color: var(--xp-line-strong);
+  box-shadow: var(--xp-shadow-3);
+}
+
+.camera-modal,
+.exercise-picker-modal,
+.import-workout-modal {
+  background:
+    linear-gradient(145deg, rgba(255,255,255,.035), transparent 35%),
+    var(--panel);
+}
+
+/* Auth perspective */
+.auth-premium-visual {
+  perspective: 1200px;
+}
+
+.auth-preview-card {
+  transform-style: preserve-3d;
+  transition: transform .5s var(--xp-ease), box-shadow .5s ease;
+}
+
+.auth-preview-main {
+  transform: rotateY(-8deg) rotateX(4deg) translateZ(18px);
+  animation: authCardFloat 6.5s ease-in-out infinite;
+}
+
+.auth-preview-water {
+  transform: rotateY(10deg) rotateX(-5deg) translateZ(42px);
+  animation: authCardFloatSmall 5.8s ease-in-out infinite reverse;
+}
+
+.auth-preview-streak {
+  transform: rotateY(-12deg) rotateX(5deg) translateZ(34px);
+  animation: authCardFloatSmall 6.8s ease-in-out infinite;
+}
+
+.auth-premium-visual::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 48%;
+  width: 300px;
+  height: 300px;
+  border: 1px solid color-mix(in srgb, var(--accent) 18%, rgba(255,255,255,.04));
+  border-radius: 50%;
+  transform: translate(-50%,-50%) rotateX(68deg);
+  box-shadow: 0 0 70px color-mix(in srgb, var(--accent) 8%, transparent);
+  animation: authRing 12s linear infinite;
+}
+
+@keyframes authCardFloat {
+  0%,100% { transform: rotateY(-8deg) rotateX(4deg) translateZ(18px) translateY(0); }
+  50% { transform: rotateY(-5deg) rotateX(2deg) translateZ(32px) translateY(-9px); }
+}
+
+@keyframes authCardFloatSmall {
+  0%,100% { translate: 0 0; }
+  50% { translate: 0 -8px; }
+}
+
+@keyframes authRing {
+  to { transform: translate(-50%,-50%) rotateX(68deg) rotateZ(360deg); }
+}
+
+/* Light mode */
+html[data-theme='light'] .app-sidebar,
+html[data-theme='light'] .premium-dashboard .dashboard-hero,
+html[data-theme='light'] .premium-dashboard .card,
+html[data-theme='light'] .goal-screen .goal-section,
+html[data-theme='light'] .workouts-page .workout-card,
+html[data-theme='light'] .admin-page .admin-panel {
+  --xp-line: rgba(15,23,42,.085);
+  --xp-line-strong: rgba(15,23,42,.13);
+}
+
+html[data-theme='light'] .nutrition-core-chip {
+  background: rgba(255,255,255,.82);
+  border-color: rgba(15,23,42,.10);
+}
+
+html[data-theme='light'] .nutrition-core-chip strong { color: #111827; }
+html[data-theme='light'] .nutrition-core-chip span { color: #64748b; }
+
+/* Responsive and accessibility */
+@media (max-width: 1180px) {
+  .nutrition-core-stage {
+    left: 47%;
+    opacity: .72;
+    transform: translate(-46%, -50%) rotateX(62deg) rotateZ(-12deg) scale(.88);
+  }
+}
+
+@media (max-width: 980px) {
+  .nutrition-core-stage {
+    left: auto;
+    right: 22px;
+    top: 25px;
+    width: 190px;
+    height: 190px;
+    opacity: .26;
+    transform: rotateX(62deg) rotateZ(-12deg) scale(.72);
+    transform-origin: top right;
+  }
+
+  .dashboard-hero-badges { margin-top: 14px; }
+}
+
+@media (max-width: 760px) {
+  .nutrition-core-stage { display: none; }
+  .dashboard-hero-badges span:last-child { display: none; }
+  .premium-dashboard .card:hover,
+  .premium-dashboard .streak-card:hover,
+  .goal-screen .goal-section:hover,
+  .workouts-page .workout-card:hover { transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+  }
+  .nutrition-core-sphere,
+  .nutrition-core-orbit,
+  .auth-preview-main,
+  .auth-preview-small,
+  .auth-premium-visual::after {
+    animation: none !important;
+  }
+}
