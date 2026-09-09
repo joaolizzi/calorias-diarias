@@ -1,18 +1,4 @@
-/* Premium authenticated page layout */
-@media (min-width: 981px) {
-  .app:not(.premium-dashboard) {
-    width: auto;
-    max-width: none;
-    margin-left: calc(var(--sidebar-width) + 32px);
-    padding-left: 0;
-  }
-
-  .app:not(.premium-dashboard) > .workouts-page {
-    width: min(100% - 36px, 1120px);
-    margin-left: auto;
-    margin-right: auto;
-  }
-}
+/* Premium authenticated page visuals — layout is controlled by sidebar.css */
 
 /* Goal page */
 .goal-screen {
@@ -50,17 +36,16 @@
   pointer-events: none;
 }
 
-.goal-screen .goal-hero h1 {
-  position: relative;
-  z-index: 1;
-  font-size: clamp(28px, 4vw, 40px);
-  letter-spacing: -1.4px;
-}
-
+.goal-screen .goal-hero h1,
 .goal-screen .goal-hero p,
 .goal-screen .goal-hero .eyebrow {
   position: relative;
   z-index: 1;
+}
+
+.goal-screen .goal-hero h1 {
+  font-size: clamp(28px, 4vw, 40px);
+  letter-spacing: -1.4px;
 }
 
 .goal-screen .goal-section,
@@ -87,7 +72,7 @@
   box-shadow: 0 12px 28px color-mix(in srgb, var(--accent) 16%, transparent);
 }
 
-/* Workouts page */
+/* Workouts */
 .workouts-page {
   padding-top: 28px;
 }
@@ -178,27 +163,14 @@ html[data-theme='light'] .workouts-page .workouts-hero.card {
     var(--panel);
 }
 
-@media (max-width: 980px) {
-  .app:not(.premium-dashboard) {
-    margin-left: 0;
-    width: 100%;
-  }
-
-  .goal-screen .goal-page,
-  .workouts-page,
-  .admin-shell {
-    width: min(100% - 24px, 1120px);
-    margin-left: auto;
-    margin-right: auto;
-  }
-
+@media (max-width:980px) {
   .goal-screen .goal-page,
   .workouts-page {
     padding-top: 18px;
   }
 }
 
-@media (max-width: 560px) {
+@media (max-width:560px) {
   .goal-screen .goal-hero,
   .workouts-page .workouts-hero.card {
     padding: 20px;
