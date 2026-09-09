@@ -64,6 +64,22 @@ function Streaks({ waterStreak, kcalStreak, waterDone, kcalDone }) {
   );
 }
 
+function NutritionCore3D() {
+  return (
+    <div className="nutrition-core-stage" aria-hidden="true">
+      <div className="nutrition-core-shadow" />
+      <div className="nutrition-core-orbit orbit-one"><i /><i /><i /></div>
+      <div className="nutrition-core-orbit orbit-two"><i /><i /></div>
+      <div className="nutrition-core-sphere">
+        <span>N</span>
+      </div>
+      <div className="nutrition-core-chip core-chip-kcal"><strong>KCAL</strong><span>energia</span></div>
+      <div className="nutrition-core-chip core-chip-water"><strong>H₂O</strong><span>hidratação</span></div>
+      <div className="nutrition-core-chip core-chip-ai"><strong>AI</strong><span>insights</span></div>
+    </div>
+  );
+}
+
 function DashboardHero({ kcalConsumed, kcalGoal, waterConsumed, waterGoal, mealsLogged }) {
   const kcalRemaining = Math.max(0, kcalGoal - kcalConsumed);
   const waterPct = waterGoal > 0 ? Math.min(100, Math.round((waterConsumed / waterGoal) * 100)) : 0;
@@ -71,12 +87,18 @@ function DashboardHero({ kcalConsumed, kcalGoal, waterConsumed, waterGoal, meals
 
   return (
     <section className="dashboard-hero">
+      <NutritionCore3D />
+
       <div className="dashboard-hero-copy">
         <span className="dashboard-kicker">SEU DIA EM FOCO</span>
         <h1>Visão geral de hoje</h1>
         <p>
           Acompanhe alimentação, hidratação e consistência em uma visão simples e objetiva.
         </p>
+        <div className="dashboard-hero-badges" aria-hidden="true">
+          <span><i /> Dados em tempo real</span>
+          <span>Nutrix Intelligence</span>
+        </div>
       </div>
 
       <div className="dashboard-hero-stats">
