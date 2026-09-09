@@ -91,6 +91,10 @@ export default function ProfessionalHeader({ subtitle, theme, accent, preset, se
           <strong>{subtitle || 'Seu painel pessoal'}</strong>
         </div>
 
+        <div className="sidebar-tools sidebar-tools-top">
+          <AppearanceMenu theme={theme} accent={accent} preset={preset} setTheme={setTheme} setAccent={setAccent} setPreset={setPreset} />
+        </div>
+
         <nav className="sidebar-nav sidebar-nav-expanded" aria-label="Navegação principal">
           {navigationGroups.map((group) => (
             <div className="sidebar-nav-group" key={group.label}>
@@ -116,10 +120,6 @@ export default function ProfessionalHeader({ subtitle, theme, accent, preset, se
             </div>
           )}
         </nav>
-
-        <div className="sidebar-tools">
-          <AppearanceMenu theme={theme} accent={accent} preset={preset} setTheme={setTheme} setAccent={setAccent} setPreset={setPreset} />
-        </div>
 
         <div className="sidebar-account">
           <div className="sidebar-avatar">{emailInitial}</div>
