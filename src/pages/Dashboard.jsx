@@ -20,10 +20,10 @@ import DailyInsight from '../components/DailyInsight.jsx';
 const MEALS = ['breakfast', 'lunch', 'snack', 'dinner'];
 
 const MEAL_META = {
-  breakfast: { label: 'Café da manhã', short: 'Café', icon: '☀' },
-  lunch: { label: 'Almoço', short: 'Almoço', icon: '◐' },
-  snack: { label: 'Lanche', short: 'Lanche', icon: '◇' },
-  dinner: { label: 'Jantar', short: 'Jantar', icon: '☾' },
+  breakfast: { label: 'Café da manhã', icon: '☀' },
+  lunch: { label: 'Almoço', icon: '◐' },
+  snack: { label: 'Lanche', icon: '◇' },
+  dinner: { label: 'Jantar', icon: '☾' },
 };
 
 function suggestedMeal() {
@@ -34,77 +34,39 @@ function suggestedMeal() {
   return 'dinner';
 }
 
-function PremiumDataObject({ kcalPct, waterPct, mealsLogged }) {
-  return (
-    <div className="premium-data-object" aria-hidden="true">
-      <div className="pdo-glow" />
-      <div className="pdo-platform">
-        <div className="pdo-platform-edge" />
-        <div className="pdo-screen">
-          <div className="pdo-screen-topline">
-            <span>NUTRIX</span>
-            <i />
-          </div>
-          <div className="pdo-ring" style={{ '--pdo-value': `${Math.max(kcalPct, 8)}%` }}>
-            <div>
-              <strong>{kcalPct}%</strong>
-              <span>energia</span>
-            </div>
-          </div>
-          <div className="pdo-mini-metrics">
-            <span><b>{waterPct}%</b> água</span>
-            <span><b>{mealsLogged}</b> refeições</span>
-          </div>
-        </div>
-        <div className="pdo-reflection" />
-      </div>
-      <div className="pdo-float-tag pdo-tag-one">LIVE</div>
-      <div className="pdo-float-tag pdo-tag-two">AI READY</div>
-    </div>
-  );
-}
-
-function DashboardHero({ kcalConsumed, kcalGoal, waterConsumed, waterGoal, mealsLogged }) {
+function DashboardHeader({ day, kcalConsumed, kcalGoal, waterConsumed, waterGoal, mealsLogged }) {
   const kcalRemaining = Math.max(0, kcalGoal - kcalConsumed);
   const waterPct = waterGoal > 0 ? Math.min(100, Math.round((waterConsumed / waterGoal) * 100)) : 0;
   const kcalPct = kcalGoal > 0 ? Math.min(100, Math.round((kcalConsumed / kcalGoal) * 100)) : 0;
 
   return (
-    <section className="dashboard-hero dashboard-hero-v3">
-      <div className="dashboard-hero-copy">
-        <span className="dashboard-kicker">NUTRIX DAILY</span>
-        <h1>Seu dia, sem ruído.</h1>
-        <p>
-          Calorias, hidratação, refeições e consistência em uma visão mais direta e inteligente.
-        </p>
-        <div className="dashboard-hero-badges" aria-hidden="true">
-          <span><i /> Sincronizado</span>
-          <span>Nutrix Intelligence</span>
-        </div>
+    <section className="product-dashboard-header">
+      <div className="product-dashboard-heading">
+        <span className="product-dashboard-date">{fmtDateLabel(day)}</span>
+        <h1>Hoje</h1>
+        <p>Acompanhe o que importa e registre sua próxima refeição.</p>
       </div>
 
-      <PremiumDataObject kcalPct={kcalPct} waterPct={waterPct} mealsLogged={mealsLogged} />
-
-      <div className="dashboard-hero-stats dashboard-hero-stats-v3">
-        <div className="hero-stat hero-stat-primary">
-          <span>Restante</span>
+      <div className="product-summary-grid">
+        <div className="product-summary-item primary">
+          <span>Calorias restantes</span>
           <strong>{kcalRemaining.toLocaleString('pt-BR')}</strong>
-          <small>kcal disponíveis</small>
+          <small>de {kcalGoal.toLocaleString('pt-BR')} kcal</small>
         </div>
-        <div className="hero-stat">
-          <span>Hidratação</span>
-          <strong>{waterPct}%</strong>
-          <small>da meta diária</small>
-        </div>
-        <div className="hero-stat">
-          <span>Calorias</span>
+        <div className="product-summary-item">
+          <span>Consumido</span>
           <strong>{kcalPct}%</strong>
-          <small>da meta diária</small>
+          <small>{kcalConsumed.toLocaleString('pt-BR')} kcal</small>
         </div>
-        <div className="hero-stat">
-          <span>Registros</span>
-          <strong>{mealsLogged}</strong>
-          <small>refeições com itens</small>
+        <div className="product-summary-item">
+          <span>Água</span>
+          <strong>{waterPct}%</strong>
+          <small>{waterConsumed.toLocaleString('pt-BR')} ml</small>
+        </div>
+        <div className="product-summary-item">
+          <span>Refeições</span>
+          <strong>{mealsLogged}/4</strong>
+          <small>registradas hoje</small>
         </div>
       </div>
     </section>
@@ -116,7 +78,7 @@ function CompactStreaks({ waterStreak, kcalStreak, waterDone, kcalDone }) {
   return (
     <section className="compact-streak-card">
       <div className="compact-streak-main">
-        <span className="dashboard-kicker">CONSISTÊNCIA</span>
+        <span className="product-section-label">Consistência</span>
         <strong>{streak}</strong>
         <small>dias de sequência</small>
       </div>
@@ -130,11 +92,11 @@ function CompactStreaks({ waterStreak, kcalStreak, waterDone, kcalDone }) {
 
 function MealRoutineSelector({ activeMeal, setActiveMeal, foodEntries }) {
   return (
-    <div className="meal-routine">
+    <div className="meal-routine product-meal-routine">
       <div className="meal-routine-copy">
-        <span className="dashboard-kicker">ROTINA</span>
-        <strong>O que você vai registrar agora?</strong>
-        <small>Escolha uma etapa da sua rotina. Só a refeição selecionada fica aberta.</small>
+        <span className="product-section-label">Próxima refeição</span>
+        <strong>O que você quer registrar?</strong>
+        <small>Selecione uma refeição para abrir o registro.</small>
       </div>
 
       <div className="meal-routine-options" role="tablist" aria-label="Escolher refeição para registrar">
@@ -154,7 +116,7 @@ function MealRoutineSelector({ activeMeal, setActiveMeal, foodEntries }) {
               <span className="meal-routine-icon">{meta.icon}</span>
               <span className="meal-routine-option-copy">
                 <strong>{meta.label}</strong>
-                <small>{entries.length ? `${entries.length} ${entries.length === 1 ? 'item' : 'itens'} · ${kcal} kcal` : 'Ainda não registrado'}</small>
+                <small>{entries.length ? `${entries.length} ${entries.length === 1 ? 'item' : 'itens'} · ${kcal} kcal` : 'Sem registro'}</small>
               </span>
               <span className="meal-routine-state">{entries.length ? '✓' : '›'}</span>
             </button>
@@ -177,11 +139,8 @@ export default function Dashboard({ theme, accent, setTheme, setAccent }) {
   const [activeMeal, setActiveMeal] = useState(() => suggestedMeal());
 
   const reloadProfile = useCallback(async () => {
-    try {
-      setProfile(await getProfile(user.id));
-    } catch (e) {
-      console.warn('getProfile falhou:', e?.message);
-    }
+    try { setProfile(await getProfile(user.id)); }
+    catch (e) { console.warn('getProfile falhou:', e?.message); }
   }, [user.id]);
 
   const reloadToday = useCallback(async () => {
@@ -192,9 +151,7 @@ export default function Dashboard({ theme, accent, setTheme, setAccent }) {
       ]);
       setWaterEntries(w);
       setFoodEntries(f);
-    } catch (e) {
-      console.warn('reloadToday falhou:', e?.message);
-    }
+    } catch (e) { console.warn('reloadToday falhou:', e?.message); }
   }, [user.id, day]);
 
   const reloadStreaks = useCallback(async () => {
@@ -207,12 +164,8 @@ export default function Dashboard({ theme, accent, setTheme, setAccent }) {
       ]);
       const wm = {};
       const fm = {};
-      water.forEach((e) => {
-        wm[e.day] = (wm[e.day] || 0) + Number(e.ml || 0);
-      });
-      food.forEach((e) => {
-        fm[e.day] = (fm[e.day] || 0) + Number(e.kcal || 0);
-      });
+      water.forEach((e) => { wm[e.day] = (wm[e.day] || 0) + Number(e.ml || 0); });
+      food.forEach((e) => { fm[e.day] = (fm[e.day] || 0) + Number(e.kcal || 0); });
       const count = (map, goal) => {
         let n = 0;
         for (let i = days.length - 1; i >= 0; i--) {
@@ -223,9 +176,7 @@ export default function Dashboard({ theme, accent, setTheme, setAccent }) {
       };
       setWaterStreak(count(wm, profile.daily_water_goal_ml || 2000));
       setKcalStreak(count(fm, profile.daily_kcal_goal || 2000));
-    } catch (e) {
-      console.warn('streaks falharam:', e?.message);
-    }
+    } catch (e) { console.warn('streaks falharam:', e?.message); }
   }, [user.id, day, profile]);
 
   useEffect(() => {
@@ -234,9 +185,7 @@ export default function Dashboard({ theme, accent, setTheme, setAccent }) {
     prefetchTBCA();
   }, [reloadProfile, reloadToday]);
 
-  useEffect(() => {
-    reloadStreaks();
-  }, [reloadStreaks, waterEntries, foodEntries]);
+  useEffect(() => { reloadStreaks(); }, [reloadStreaks, waterEntries, foodEntries]);
 
   const kcalGoal = profile?.daily_kcal_goal || 2000;
   const waterGoal = profile?.daily_water_goal_ml || 2000;
@@ -246,7 +195,7 @@ export default function Dashboard({ theme, accent, setTheme, setAccent }) {
   const activeMealEntries = foodEntries.filter((entry) => entry.meal === activeMeal);
 
   return (
-    <div className="app premium-dashboard dashboard-v3">
+    <div className="app premium-dashboard dashboard-v3 product-dashboard">
       <ProfessionalHeader
         subtitle={`${fmtDateLabel(day)} — Hoje`}
         theme={theme}
@@ -255,7 +204,8 @@ export default function Dashboard({ theme, accent, setTheme, setAccent }) {
         setAccent={setAccent}
       />
 
-      <DashboardHero
+      <DashboardHeader
+        day={day}
         kcalConsumed={kcalConsumed}
         kcalGoal={kcalGoal}
         waterConsumed={waterConsumed}
@@ -263,14 +213,13 @@ export default function Dashboard({ theme, accent, setTheme, setAccent }) {
         mealsLogged={mealsLogged}
       />
 
-      <section className="dashboard-overview-grid">
+      <section className="dashboard-overview-grid product-overview-grid">
         <div className="dashboard-progress-grid dashboard-progress-grid-v3">
           <ProgressCard title="Calorias" unit="kcal" consumed={kcalConsumed} goal={kcalGoal} variant="food" />
           <ProgressCard title="Água" unit="ml" consumed={waterConsumed} goal={waterGoal} variant="water">
             <WaterTracker entries={waterEntries} onChange={reloadToday} />
           </ProgressCard>
         </div>
-
         <CompactStreaks
           waterStreak={waterStreak}
           kcalStreak={kcalStreak}
@@ -279,15 +228,15 @@ export default function Dashboard({ theme, accent, setTheme, setAccent }) {
         />
       </section>
 
-      <section className="dashboard-workspace">
+      <section className="dashboard-workspace product-workspace">
         <div className="dashboard-workspace-head">
           <div>
-            <span className="dashboard-kicker">WORKSPACE</span>
-            <h2>Seu painel diário</h2>
+            <span className="product-section-label">Painel diário</span>
+            <h2>Detalhes</h2>
           </div>
           <div className="dashboard-tabs" role="tablist" aria-label="Painéis do dashboard">
             <button className={activePanel === 'meals' ? 'active' : ''} onClick={() => setActivePanel('meals')}>Rotina</button>
-            <button className={activePanel === 'insights' ? 'active' : ''} onClick={() => setActivePanel('insights')}>Insights</button>
+            <button className={activePanel === 'insights' ? 'active' : ''} onClick={() => setActivePanel('insights')}>Metas</button>
             <button className={activePanel === 'history' ? 'active' : ''} onClick={() => setActivePanel('history')}>Histórico</button>
           </div>
         </div>
@@ -295,27 +244,16 @@ export default function Dashboard({ theme, accent, setTheme, setAccent }) {
         <div className="dashboard-workspace-body">
           {activePanel === 'meals' && (
             <div className="dashboard-panel dashboard-panel-meals dashboard-routine-panel">
-              <MealRoutineSelector
-                activeMeal={activeMeal}
-                setActiveMeal={setActiveMeal}
-                foodEntries={foodEntries}
-              />
-
+              <MealRoutineSelector activeMeal={activeMeal} setActiveMeal={setActiveMeal} foodEntries={foodEntries} />
               <div className="active-meal-panel">
                 <div className="active-meal-panel-head">
                   <div>
-                    <span>REGISTRANDO AGORA</span>
+                    <span>Registrando</span>
                     <strong>{MEAL_META[activeMeal].label}</strong>
                   </div>
-                  <small>{activeMealEntries.length ? `${activeMealEntries.length} ${activeMealEntries.length === 1 ? 'item registrado' : 'itens registrados'}` : 'Nenhum item ainda'}</small>
+                  <small>{activeMealEntries.length ? `${activeMealEntries.length} ${activeMealEntries.length === 1 ? 'item' : 'itens'}` : 'Nenhum item'}</small>
                 </div>
-
-                <FoodSection
-                  key={activeMeal}
-                  meal={activeMeal}
-                  entries={activeMealEntries}
-                  onChange={reloadToday}
-                />
+                <FoodSection key={activeMeal} meal={activeMeal} entries={activeMealEntries} onChange={reloadToday} />
               </div>
             </div>
           )}
@@ -324,12 +262,7 @@ export default function Dashboard({ theme, accent, setTheme, setAccent }) {
             <div className="dashboard-panel dashboard-panel-insights">
               <div className="dashboard-lower-grid dashboard-lower-grid-v3">
                 <GoalsSettings profile={profile} onSaved={reloadProfile} />
-                <DailyInsight
-                  foodEntries={foodEntries}
-                  waterEntries={waterEntries}
-                  kcalGoal={kcalGoal}
-                  waterGoal={waterGoal}
-                />
+                <DailyInsight foodEntries={foodEntries} waterEntries={waterEntries} kcalGoal={kcalGoal} waterGoal={waterGoal} />
               </div>
             </div>
           )}
