@@ -50,26 +50,10 @@ function DashboardHeader({ day, kcalConsumed, kcalGoal, waterConsumed, waterGoal
       </div>
 
       <div className="product-summary-grid">
-        <div className="product-summary-item primary">
-          <span>Calorias restantes</span>
-          <strong>{kcalRemaining.toLocaleString('pt-BR')}</strong>
-          <small>de {kcalGoal.toLocaleString('pt-BR')} kcal</small>
-        </div>
-        <div className="product-summary-item">
-          <span>Consumido</span>
-          <strong>{kcalPct}%</strong>
-          <small>{kcalConsumed.toLocaleString('pt-BR')} kcal</small>
-        </div>
-        <div className="product-summary-item">
-          <span>Água</span>
-          <strong>{waterPct}%</strong>
-          <small>{waterConsumed.toLocaleString('pt-BR')} ml</small>
-        </div>
-        <div className="product-summary-item">
-          <span>Refeições</span>
-          <strong>{mealsLogged}/4</strong>
-          <small>registradas hoje</small>
-        </div>
+        <div className="product-summary-item primary"><span>Calorias restantes</span><strong>{kcalRemaining.toLocaleString('pt-BR')}</strong><small>de {kcalGoal.toLocaleString('pt-BR')} kcal</small></div>
+        <div className="product-summary-item"><span>Consumido</span><strong>{kcalPct}%</strong><small>{kcalConsumed.toLocaleString('pt-BR')} kcal</small></div>
+        <div className="product-summary-item"><span>Água</span><strong>{waterPct}%</strong><small>{waterConsumed.toLocaleString('pt-BR')} ml</small></div>
+        <div className="product-summary-item"><span>Refeições</span><strong>{mealsLogged}/4</strong><small>registradas hoje</small></div>
       </div>
     </section>
   );
@@ -79,11 +63,7 @@ function CompactStreaks({ waterStreak, kcalStreak, waterDone, kcalDone }) {
   const streak = Math.min(waterStreak, kcalStreak);
   return (
     <section className="compact-streak-card">
-      <div className="compact-streak-main">
-        <span className="product-section-label">Consistência</span>
-        <strong>{streak}</strong>
-        <small>dias de sequência</small>
-      </div>
+      <div className="compact-streak-main"><span className="product-section-label">Consistência</span><strong>{streak}</strong><small>dias de sequência</small></div>
       <div className="compact-streak-status">
         <span className={waterDone ? 'done' : ''}><i /> Água <b>{waterStreak}d</b></span>
         <span className={kcalDone ? 'done' : ''}><i /> Calorias <b>{kcalStreak}d</b></span>
@@ -100,26 +80,15 @@ function MealRoutineSelector({ activeMeal, setActiveMeal, foodEntries }) {
         <strong>O que você quer registrar?</strong>
         <small>Selecione uma refeição para abrir o registro.</small>
       </div>
-
       <div className="meal-routine-options" role="tablist" aria-label="Escolher refeição para registrar">
         {MEALS.map((meal) => {
           const meta = MEAL_META[meal];
           const entries = foodEntries.filter((entry) => entry.meal === meal);
           const kcal = entries.reduce((sum, entry) => sum + Number(entry.kcal || 0), 0);
           return (
-            <button
-              key={meal}
-              type="button"
-              role="tab"
-              aria-selected={activeMeal === meal}
-              className={`meal-routine-option ${activeMeal === meal ? 'active' : ''} ${entries.length ? 'logged' : ''}`}
-              onClick={() => setActiveMeal(meal)}
-            >
+            <button key={meal} type="button" role="tab" aria-selected={activeMeal === meal} className={`meal-routine-option ${activeMeal === meal ? 'active' : ''} ${entries.length ? 'logged' : ''}`} onClick={() => setActiveMeal(meal)}>
               <span className="meal-routine-icon">{meta.icon}</span>
-              <span className="meal-routine-option-copy">
-                <strong>{meta.label}</strong>
-                <small>{entries.length ? `${entries.length} ${entries.length === 1 ? 'item' : 'itens'} · ${kcal} kcal` : 'Sem registro'}</small>
-              </span>
+              <span className="meal-routine-option-copy"><strong>{meta.label}</strong><small>{entries.length ? `${entries.length} ${entries.length === 1 ? 'item' : 'itens'} · ${kcal} kcal` : 'Sem registro'}</small></span>
               <span className="meal-routine-state">{entries.length ? '✓' : '›'}</span>
             </button>
           );
@@ -129,7 +98,7 @@ function MealRoutineSelector({ activeMeal, setActiveMeal, foodEntries }) {
   );
 }
 
-export default function Dashboard({ theme, accent, setTheme, setAccent }) {
+export default function Dashboard({ theme, accent, preset, setTheme, setAccent, setPreset }) {
   const { user } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const day = today();
@@ -149,10 +118,7 @@ export default function Dashboard({ theme, accent, setTheme, setAccent }) {
 
   const reloadToday = useCallback(async () => {
     try {
-      const [w, f] = await Promise.all([
-        getWaterForDay(user.id, day),
-        getFoodForDay(user.id, day),
-      ]);
+      const [w, f] = await Promise.all([getWaterForDay(user.id, day), getFoodForDay(user.id, day)]);
       setWaterEntries(w);
       setFoodEntries(f);
     } catch (e) { console.warn('reloadToday falhou:', e?.message); }
@@ -162,10 +128,7 @@ export default function Dashboard({ theme, accent, setTheme, setAccent }) {
     if (!profile) return;
     try {
       const days = lastNDays(60);
-      const [water, food] = await Promise.all([
-        getWaterRange(user.id, days[0], day),
-        getFoodRange(user.id, days[0], day),
-      ]);
+      const [water, food] = await Promise.all([getWaterRange(user.id, days[0], day), getFoodRange(user.id, days[0], day)]);
       const wm = {};
       const fm = {};
       water.forEach((e) => { wm[e.day] = (wm[e.day] || 0) + Number(e.ml || 0); });
@@ -197,17 +160,23 @@ export default function Dashboard({ theme, accent, setTheme, setAccent }) {
   }, [searchParams]);
 
   useEffect(() => {
-    if (activePanel !== 'meals' || searchParams.get('focus') !== 'register') return;
-    const timer = window.setTimeout(() => {
-      document.querySelector('.active-meal-panel input')?.focus();
-    }, 120);
-    return () => window.clearTimeout(timer);
+    const focus = searchParams.get('focus');
+    if (focus === 'register' && activePanel === 'meals') {
+      const timer = window.setTimeout(() => document.querySelector('.active-meal-panel input')?.focus(), 120);
+      return () => window.clearTimeout(timer);
+    }
+    if (focus === 'water') {
+      const timer = window.setTimeout(() => {
+        document.querySelector('.dashboard-progress-grid-v3 .card:nth-child(2)')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 120);
+      return () => window.clearTimeout(timer);
+    }
+    return undefined;
   }, [activePanel, searchParams]);
 
   const openPanel = (panel) => {
     setActivePanel(panel);
-    if (panel === 'meals') setSearchParams({ panel: 'meals' });
-    else setSearchParams({ panel });
+    setSearchParams(panel === 'meals' ? { panel: 'meals' } : { panel });
   };
 
   const kcalGoal = profile?.daily_kcal_goal || 2000;
@@ -216,47 +185,25 @@ export default function Dashboard({ theme, accent, setTheme, setAccent }) {
   const kcalConsumed = foodEntries.reduce((s, e) => s + e.kcal, 0);
   const mealsLogged = MEALS.filter((meal) => foodEntries.some((entry) => entry.meal === meal)).length;
   const activeMealEntries = foodEntries.filter((entry) => entry.meal === activeMeal);
+  const focusAction = searchParams.get('focus') === 'ai' ? 'natural' : null;
 
   return (
     <div className="app premium-dashboard dashboard-v3 product-dashboard">
-      <ProfessionalHeader
-        subtitle={`${fmtDateLabel(day)} — Hoje`}
-        theme={theme}
-        accent={accent}
-        setTheme={setTheme}
-        setAccent={setAccent}
-      />
+      <ProfessionalHeader subtitle={`${fmtDateLabel(day)} — Hoje`} theme={theme} accent={accent} preset={preset} setTheme={setTheme} setAccent={setAccent} setPreset={setPreset} />
 
-      <DashboardHeader
-        day={day}
-        kcalConsumed={kcalConsumed}
-        kcalGoal={kcalGoal}
-        waterConsumed={waterConsumed}
-        waterGoal={waterGoal}
-        mealsLogged={mealsLogged}
-      />
+      <DashboardHeader day={day} kcalConsumed={kcalConsumed} kcalGoal={kcalGoal} waterConsumed={waterConsumed} waterGoal={waterGoal} mealsLogged={mealsLogged} />
 
       <section className="dashboard-overview-grid product-overview-grid">
         <div className="dashboard-progress-grid dashboard-progress-grid-v3">
           <ProgressCard title="Calorias" unit="kcal" consumed={kcalConsumed} goal={kcalGoal} variant="food" />
-          <ProgressCard title="Água" unit="ml" consumed={waterConsumed} goal={waterGoal} variant="water">
-            <WaterTracker entries={waterEntries} onChange={reloadToday} />
-          </ProgressCard>
+          <ProgressCard title="Água" unit="ml" consumed={waterConsumed} goal={waterGoal} variant="water"><WaterTracker entries={waterEntries} onChange={reloadToday} /></ProgressCard>
         </div>
-        <CompactStreaks
-          waterStreak={waterStreak}
-          kcalStreak={kcalStreak}
-          waterDone={waterConsumed >= waterGoal}
-          kcalDone={kcalConsumed >= kcalGoal}
-        />
+        <CompactStreaks waterStreak={waterStreak} kcalStreak={kcalStreak} waterDone={waterConsumed >= waterGoal} kcalDone={kcalConsumed >= kcalGoal} />
       </section>
 
       <section className="dashboard-workspace product-workspace">
         <div className="dashboard-workspace-head">
-          <div>
-            <span className="product-section-label">Painel diário</span>
-            <h2>Detalhes</h2>
-          </div>
+          <div><span className="product-section-label">Painel diário</span><h2>Detalhes</h2></div>
           <div className="dashboard-tabs" role="tablist" aria-label="Painéis do dashboard">
             <button className={activePanel === 'meals' ? 'active' : ''} onClick={() => openPanel('meals')}>Rotina</button>
             <button className={activePanel === 'insights' ? 'active' : ''} onClick={() => openPanel('insights')}>Metas</button>
@@ -270,13 +217,10 @@ export default function Dashboard({ theme, accent, setTheme, setAccent }) {
               <MealRoutineSelector activeMeal={activeMeal} setActiveMeal={setActiveMeal} foodEntries={foodEntries} />
               <div className="active-meal-panel">
                 <div className="active-meal-panel-head">
-                  <div>
-                    <span>Registrando</span>
-                    <strong>{MEAL_META[activeMeal].label}</strong>
-                  </div>
+                  <div><span>Registrando</span><strong>{MEAL_META[activeMeal].label}</strong></div>
                   <small>{activeMealEntries.length ? `${activeMealEntries.length} ${activeMealEntries.length === 1 ? 'item' : 'itens'}` : 'Nenhum item'}</small>
                 </div>
-                <FoodSection key={activeMeal} meal={activeMeal} entries={activeMealEntries} onChange={reloadToday} />
+                <FoodSection key={`${activeMeal}-${focusAction || 'default'}`} meal={activeMeal} entries={activeMealEntries} onChange={reloadToday} initialAction={focusAction} />
               </div>
             </div>
           )}
@@ -290,11 +234,7 @@ export default function Dashboard({ theme, accent, setTheme, setAccent }) {
             </div>
           )}
 
-          {activePanel === 'history' && (
-            <div className="dashboard-panel dashboard-panel-history">
-              <HistoryChart profile={profile} />
-            </div>
-          )}
+          {activePanel === 'history' && <div className="dashboard-panel dashboard-panel-history"><HistoryChart profile={profile} /></div>}
         </div>
       </section>
     </div>
