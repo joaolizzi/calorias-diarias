@@ -17,7 +17,22 @@ import GoalsSettings from '../components/GoalsSettings.jsx';
 import HistoryChart from '../components/HistoryChart.jsx';
 import DailyInsight from '../components/DailyInsight.jsx';
 
-const MEALS = ['breakfast', 'lunch', 'dinner', 'snack'];
+const MEALS = ['breakfast', 'lunch', 'snack', 'dinner'];
+
+const MEAL_META = {
+  breakfast: { label: 'Café da manhã', short: 'Café', icon: '☀' },
+  lunch: { label: 'Almoço', short: 'Almoço', icon: '◐' },
+  snack: { label: 'Lanche', short: 'Lanche', icon: '◇' },
+  dinner: { label: 'Jantar', short: 'Jantar', icon: '☾' },
+};
+
+function suggestedMeal() {
+  const hour = new Date().getHours();
+  if (hour < 10) return 'breakfast';
+  if (hour < 15) return 'lunch';
+  if (hour < 19) return 'snack';
+  return 'dinner';
+}
 
 function PremiumDataObject({ kcalPct, waterPct, mealsLogged }) {
   return (
@@ -113,6 +128,43 @@ function CompactStreaks({ waterStreak, kcalStreak, waterDone, kcalDone }) {
   );
 }
 
+function MealRoutineSelector({ activeMeal, setActiveMeal, foodEntries }) {
+  return (
+    <div className="meal-routine">
+      <div className="meal-routine-copy">
+        <span className="dashboard-kicker">ROTINA</span>
+        <strong>O que você vai registrar agora?</strong>
+        <small>Escolha uma etapa da sua rotina. Só a refeição selecionada fica aberta.</small>
+      </div>
+
+      <div className="meal-routine-options" role="tablist" aria-label="Escolher refeição para registrar">
+        {MEALS.map((meal) => {
+          const meta = MEAL_META[meal];
+          const entries = foodEntries.filter((entry) => entry.meal === meal);
+          const kcal = entries.reduce((sum, entry) => sum + Number(entry.kcal || 0), 0);
+          return (
+            <button
+              key={meal}
+              type="button"
+              role="tab"
+              aria-selected={activeMeal === meal}
+              className={`meal-routine-option ${activeMeal === meal ? 'active' : ''} ${entries.length ? 'logged' : ''}`}
+              onClick={() => setActiveMeal(meal)}
+            >
+              <span className="meal-routine-icon">{meta.icon}</span>
+              <span className="meal-routine-option-copy">
+                <strong>{meta.label}</strong>
+                <small>{entries.length ? `${entries.length} ${entries.length === 1 ? 'item' : 'itens'} · ${kcal} kcal` : 'Ainda não registrado'}</small>
+              </span>
+              <span className="meal-routine-state">{entries.length ? '✓' : '›'}</span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 export default function Dashboard({ theme, accent, setTheme, setAccent }) {
   const { user } = useAuth();
   const day = today();
@@ -122,6 +174,7 @@ export default function Dashboard({ theme, accent, setTheme, setAccent }) {
   const [waterStreak, setWaterStreak] = useState(0);
   const [kcalStreak, setKcalStreak] = useState(0);
   const [activePanel, setActivePanel] = useState('meals');
+  const [activeMeal, setActiveMeal] = useState(() => suggestedMeal());
 
   const reloadProfile = useCallback(async () => {
     try {
@@ -190,6 +243,7 @@ export default function Dashboard({ theme, accent, setTheme, setAccent }) {
   const waterConsumed = waterEntries.reduce((s, e) => s + e.ml, 0);
   const kcalConsumed = foodEntries.reduce((s, e) => s + e.kcal, 0);
   const mealsLogged = MEALS.filter((meal) => foodEntries.some((entry) => entry.meal === meal)).length;
+  const activeMealEntries = foodEntries.filter((entry) => entry.meal === activeMeal);
 
   return (
     <div className="app premium-dashboard dashboard-v3">
@@ -232,7 +286,7 @@ export default function Dashboard({ theme, accent, setTheme, setAccent }) {
             <h2>Seu painel diário</h2>
           </div>
           <div className="dashboard-tabs" role="tablist" aria-label="Painéis do dashboard">
-            <button className={activePanel === 'meals' ? 'active' : ''} onClick={() => setActivePanel('meals')}>Refeições</button>
+            <button className={activePanel === 'meals' ? 'active' : ''} onClick={() => setActivePanel('meals')}>Rotina</button>
             <button className={activePanel === 'insights' ? 'active' : ''} onClick={() => setActivePanel('insights')}>Insights</button>
             <button className={activePanel === 'history' ? 'active' : ''} onClick={() => setActivePanel('history')}>Histórico</button>
           </div>
@@ -240,17 +294,28 @@ export default function Dashboard({ theme, accent, setTheme, setAccent }) {
 
         <div className="dashboard-workspace-body">
           {activePanel === 'meals' && (
-            <div className="dashboard-panel dashboard-panel-meals">
-              <div className="dashboard-panel-meta">{foodEntries.length} itens registrados hoje</div>
-              <div className="dashboard-meals-grid dashboard-meals-grid-v3">
-                {MEALS.map((meal) => (
-                  <FoodSection
-                    key={meal}
-                    meal={meal}
-                    entries={foodEntries.filter((e) => e.meal === meal)}
-                    onChange={reloadToday}
-                  />
-                ))}
+            <div className="dashboard-panel dashboard-panel-meals dashboard-routine-panel">
+              <MealRoutineSelector
+                activeMeal={activeMeal}
+                setActiveMeal={setActiveMeal}
+                foodEntries={foodEntries}
+              />
+
+              <div className="active-meal-panel">
+                <div className="active-meal-panel-head">
+                  <div>
+                    <span>REGISTRANDO AGORA</span>
+                    <strong>{MEAL_META[activeMeal].label}</strong>
+                  </div>
+                  <small>{activeMealEntries.length ? `${activeMealEntries.length} ${activeMealEntries.length === 1 ? 'item registrado' : 'itens registrados'}` : 'Nenhum item ainda'}</small>
+                </div>
+
+                <FoodSection
+                  key={activeMeal}
+                  meal={activeMeal}
+                  entries={activeMealEntries}
+                  onChange={reloadToday}
+                />
               </div>
             </div>
           )}
