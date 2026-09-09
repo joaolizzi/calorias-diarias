@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import {
   getProfile,
@@ -18,6 +19,7 @@ import HistoryChart from '../components/HistoryChart.jsx';
 import DailyInsight from '../components/DailyInsight.jsx';
 
 const MEALS = ['breakfast', 'lunch', 'snack', 'dinner'];
+const VALID_PANELS = new Set(['meals', 'insights', 'history']);
 
 const MEAL_META = {
   breakfast: { label: 'Café da manhã', icon: '☀' },
@@ -129,13 +131,15 @@ function MealRoutineSelector({ activeMeal, setActiveMeal, foodEntries }) {
 
 export default function Dashboard({ theme, accent, setTheme, setAccent }) {
   const { user } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
   const day = today();
   const [profile, setProfile] = useState(null);
   const [waterEntries, setWaterEntries] = useState([]);
   const [foodEntries, setFoodEntries] = useState([]);
   const [waterStreak, setWaterStreak] = useState(0);
   const [kcalStreak, setKcalStreak] = useState(0);
-  const [activePanel, setActivePanel] = useState('meals');
+  const requestedPanel = searchParams.get('panel');
+  const [activePanel, setActivePanel] = useState(() => VALID_PANELS.has(requestedPanel) ? requestedPanel : 'meals');
   const [activeMeal, setActiveMeal] = useState(() => suggestedMeal());
 
   const reloadProfile = useCallback(async () => {
@@ -187,6 +191,25 @@ export default function Dashboard({ theme, accent, setTheme, setAccent }) {
 
   useEffect(() => { reloadStreaks(); }, [reloadStreaks, waterEntries, foodEntries]);
 
+  useEffect(() => {
+    const panel = searchParams.get('panel');
+    setActivePanel(VALID_PANELS.has(panel) ? panel : 'meals');
+  }, [searchParams]);
+
+  useEffect(() => {
+    if (activePanel !== 'meals' || searchParams.get('focus') !== 'register') return;
+    const timer = window.setTimeout(() => {
+      document.querySelector('.active-meal-panel input')?.focus();
+    }, 120);
+    return () => window.clearTimeout(timer);
+  }, [activePanel, searchParams]);
+
+  const openPanel = (panel) => {
+    setActivePanel(panel);
+    if (panel === 'meals') setSearchParams({ panel: 'meals' });
+    else setSearchParams({ panel });
+  };
+
   const kcalGoal = profile?.daily_kcal_goal || 2000;
   const waterGoal = profile?.daily_water_goal_ml || 2000;
   const waterConsumed = waterEntries.reduce((s, e) => s + e.ml, 0);
@@ -235,9 +258,9 @@ export default function Dashboard({ theme, accent, setTheme, setAccent }) {
             <h2>Detalhes</h2>
           </div>
           <div className="dashboard-tabs" role="tablist" aria-label="Painéis do dashboard">
-            <button className={activePanel === 'meals' ? 'active' : ''} onClick={() => setActivePanel('meals')}>Rotina</button>
-            <button className={activePanel === 'insights' ? 'active' : ''} onClick={() => setActivePanel('insights')}>Metas</button>
-            <button className={activePanel === 'history' ? 'active' : ''} onClick={() => setActivePanel('history')}>Histórico</button>
+            <button className={activePanel === 'meals' ? 'active' : ''} onClick={() => openPanel('meals')}>Rotina</button>
+            <button className={activePanel === 'insights' ? 'active' : ''} onClick={() => openPanel('insights')}>Metas</button>
+            <button className={activePanel === 'history' ? 'active' : ''} onClick={() => openPanel('history')}>Histórico</button>
           </div>
         </div>
 
