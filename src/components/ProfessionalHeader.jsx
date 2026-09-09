@@ -1,85 +1,146 @@
-import { NavLink } from 'react-router-dom';
-import { useState } from 'react';
+import { NavLink, useLocation } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import AppearanceMenu from './AppearanceMenu.jsx';
 
 const ADMIN_EMAIL = String(import.meta.env.VITE_ADMIN_EMAIL || '').trim().toLowerCase();
 
+const baseItems = [
+  ['/', '⌂', 'Dashboard', 'Visão do dia'],
+  ['/treinos', '◇', 'Treinos', 'Plano semanal'],
+  ['/goal', '◎', 'Objetivo', 'Metas e cálculo'],
+];
+
 export default function ProfessionalHeader({ subtitle, theme, accent, setTheme, setAccent }) {
   const { user, signOut } = useAuth();
-  const [open, setOpen] = useState(false);
+  const location = useLocation();
+  const [mobileOpen, setMobileOpen] = useState(false);
+
   const isAdmin = Boolean(
     user?.email && ADMIN_EMAIL && user.email.toLowerCase() === ADMIN_EMAIL,
   );
 
   const items = [
-    ['/', '🏠', 'Dashboard'],
-    ['/treinos', '🏋️', 'Treinos'],
-    ['/goal', '🎯', 'Objetivo'],
-    ...(isAdmin ? [['/admin', '⚙️', 'Admin']] : []),
+    ...baseItems,
+    ...(isAdmin ? [['/admin', '⚙', 'Admin', 'Painel interno']] : []),
   ];
 
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    document.body.classList.toggle('sidebar-open', mobileOpen);
+    return () => document.body.classList.remove('sidebar-open');
+  }, [mobileOpen]);
+
+  if (!user) return null;
+
+  const emailInitial = String(user.email || 'N').charAt(0).toUpperCase();
+
   return (
-    <header className="app-header professional-header">
-      <div className="brand-block">
-        <NavLink to="/" className="brand-link">
+    <>
+      <div className="mobile-appbar">
+        <NavLink to="/" className="mobile-brand" aria-label="Nutrix dashboard">
           <span className="brand-mark">N</span>
-          <span>
-            Nutrix<span className="brand-accent">.</span>
-          </span>
+          <span>Nutrix<span className="brand-accent">.</span></span>
         </NavLink>
-        {subtitle && <div className="sub">{subtitle}</div>}
+        <button
+          type="button"
+          className="sidebar-mobile-toggle"
+          onClick={() => setMobileOpen(true)}
+          aria-label="Abrir menu"
+          aria-expanded={mobileOpen}
+        >
+          <span />
+          <span />
+          <span />
+        </button>
       </div>
 
-      {user && (
-        <div className="header-right">
-          <div className="main-menu-wrap">
-            <button
-              className="main-menu-button"
-              onClick={() => setOpen((v) => !v)}
-              aria-expanded={open}
-            >
-              ☰ <span>Menu</span> ⌄
-            </button>
-            {open && (
-              <div className="main-menu-dropdown">
-                {items.map(([to, icon, label]) => (
-                  <NavLink
-                    key={to}
-                    to={to}
-                    end={to === '/'}
-                    onClick={() => setOpen(false)}
-                    className={({ isActive }) =>
-                      `main-menu-item ${isActive ? 'active' : ''}`
-                    }
-                  >
-                    <span>{icon}</span>
-                    {label}
-                  </NavLink>
-                ))}
-              </div>
-            )}
-          </div>
+      <button
+        type="button"
+        className={`sidebar-backdrop ${mobileOpen ? 'show' : ''}`}
+        onClick={() => setMobileOpen(false)}
+        aria-label="Fechar menu"
+      />
 
+      <aside className={`app-sidebar ${mobileOpen ? 'open' : ''}`}>
+        <div className="sidebar-top">
+          <NavLink to="/" className="sidebar-brand">
+            <span className="brand-mark">N</span>
+            <span className="sidebar-brand-copy">
+              <strong>Nutrix<span className="brand-accent">.</span></strong>
+              <small>Nutrition OS</small>
+            </span>
+          </NavLink>
+
+          <button
+            type="button"
+            className="sidebar-close"
+            onClick={() => setMobileOpen(false)}
+            aria-label="Fechar menu"
+          >×</button>
+        </div>
+
+        <div className="sidebar-context">
+          <span>Hoje</span>
+          <strong>{subtitle || 'Seu painel pessoal'}</strong>
+        </div>
+
+        <nav className="sidebar-nav" aria-label="Navegação principal">
+          <span className="sidebar-nav-label">Navegação</span>
+          {items.map(([to, icon, label, description]) => (
+            <NavLink
+              key={to}
+              to={to}
+              end={to === '/'}
+              className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
+            >
+              <span className="sidebar-link-icon">{icon}</span>
+              <span className="sidebar-link-copy">
+                <strong>{label}</strong>
+                <small>{description}</small>
+              </span>
+              <span className="sidebar-link-arrow">›</span>
+            </NavLink>
+          ))}
+        </nav>
+
+        <div className="sidebar-spacer" />
+
+        <div className="sidebar-premium-card">
+          <span className="sidebar-premium-dot" />
+          <div>
+            <strong>Nutrix Intelligence</strong>
+            <small>IA, histórico e metas em um só lugar.</small>
+          </div>
+        </div>
+
+        <div className="sidebar-tools">
           <AppearanceMenu
             theme={theme}
             accent={accent}
             setTheme={setTheme}
             setAccent={setAccent}
           />
-
-          <div className="header-account">
-            <div className="user header-user">{user.email}</div>
-            <button
-              className="btn header-logout"
-              onClick={() => signOut()}
-              title="Sair"
-            >
-              Sair
-            </button>
-          </div>
         </div>
-      )}
-    </header>
+
+        <div className="sidebar-account">
+          <div className="sidebar-avatar">{emailInitial}</div>
+          <div className="sidebar-account-copy">
+            <strong>Minha conta</strong>
+            <small title={user.email}>{user.email}</small>
+          </div>
+          <button
+            type="button"
+            className="sidebar-logout"
+            onClick={() => signOut()}
+            title="Sair"
+            aria-label="Sair"
+          >↗</button>
+        </div>
+      </aside>
+    </>
   );
 }
