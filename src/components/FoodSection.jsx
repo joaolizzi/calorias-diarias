@@ -38,50 +38,67 @@ export default function FoodSection({ meal, entries, onChange }) {
   const total = entries.reduce((s, e) => s + e.kcal, 0);
 
   return (
-    <div className="card">
-      <div className="card-head">
-        <h2>{MEAL_LABELS[meal]}</h2>
+    <div className="card food-section-card">
+      <div className="card-head food-section-head">
+        <div>
+          <span className="food-section-eyebrow">Refeição</span>
+          <h2>{MEAL_LABELS[meal]}</h2>
+        </div>
         <span className="meal-total num">{total.toLocaleString('pt-BR')} kcal</span>
       </div>
 
-      <FoodSearch onPick={(item) => setModalItem(item)} />
+      <div className="food-section-search">
+        <FoodSearch onPick={(item) => setModalItem(item)} />
+      </div>
 
-      <div className="food-ai-actions">
+      <div className="food-entry-actions" aria-label="Formas de registrar alimento">
         <button
-          className="btn camera-ai-btn"
+          type="button"
+          className="food-entry-action"
           onClick={() => setShowCamera(true)}
           title="Fotografe a refeição e deixe a IA estimar os alimentos"
         >
-          <span className="camera-ai-icon">📷</span>
+          <span className="food-entry-action-icon">▣</span>
           <span>
-            <strong>Fotografar com IA</strong>
-            <small>Identificar alimentos e porções</small>
+            <strong>Fotografar</strong>
+            <small>Identificar alimentos pela imagem</small>
           </span>
         </button>
+
         <button
-          className="btn ghost"
+          type="button"
+          className="food-entry-action"
           onClick={() => setShowManual(true)}
-          style={{ width: '100%' }}
         >
-          Não encontrou? Adicionar manualmente
+          <span className="food-entry-action-icon">＋</span>
+          <span>
+            <strong>Adicionar manualmente</strong>
+            <small>Informar alimento e quantidade</small>
+          </span>
         </button>
+
         <button
-          className="btn ghost"
+          type="button"
+          className="food-entry-action"
           onClick={() => setShowNatural(true)}
-          style={{ width: '100%' }}
           title="Descreva o que comeu em uma frase e a IA separa os itens"
         >
-          <span className="pill ai food-ai-pill">IA</span>
-          Descrever refeição por texto
+          <span className="food-entry-action-icon">✦</span>
+          <span>
+            <strong>Descrever por texto</strong>
+            <small>Registrar uma refeição em uma frase</small>
+          </span>
         </button>
       </div>
 
       {entries.length === 0 ? (
-        <div className="empty" style={{ marginTop: 10 }}>
-          Nenhum alimento registrado.
+        <div className="food-empty-state">
+          <span className="food-empty-icon">○</span>
+          <strong>Nenhum alimento registrado</strong>
+          <small>Use a busca ou uma das opções acima para começar.</small>
         </div>
       ) : (
-        <ul className="log" style={{ marginTop: 14 }}>
+        <ul className="log food-log">
           {[...entries].reverse().map((e) => (
             <li key={e.id}>
               <div>
@@ -106,7 +123,7 @@ export default function FoodSection({ meal, entries, onChange }) {
       )}
 
       {entries.length > 0 && (
-        <div style={{ marginTop: 10, display: 'flex', justifyContent: 'flex-end' }}>
+        <div className="food-section-footer">
           <button className="btn danger" onClick={clearMeal}>Limpar refeição</button>
         </div>
       )}
