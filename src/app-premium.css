@@ -1,0 +1,214 @@
+/* Premium authenticated page layout */
+@media (min-width: 981px) {
+  .app:not(.premium-dashboard) {
+    width: auto;
+    max-width: none;
+    margin-left: calc(var(--sidebar-width) + 32px);
+    padding-left: 0;
+  }
+
+  .app:not(.premium-dashboard) > .workouts-page {
+    width: min(100% - 36px, 1120px);
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+/* Goal page */
+.goal-screen {
+  min-height: 100vh;
+}
+
+.goal-screen .goal-page {
+  position: relative;
+}
+
+.goal-screen .goal-hero {
+  position: relative;
+  overflow: hidden;
+  padding: 28px;
+  margin-bottom: 16px;
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--accent) 9%, transparent), transparent 48%),
+    linear-gradient(160deg, rgba(255,255,255,.032), rgba(255,255,255,.008)),
+    var(--panel);
+  box-shadow: var(--shadow-sm);
+}
+
+.goal-screen .goal-hero::after {
+  content: '';
+  position: absolute;
+  width: 180px;
+  height: 180px;
+  right: -70px;
+  top: -80px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  filter: blur(18px);
+  pointer-events: none;
+}
+
+.goal-screen .goal-hero h1 {
+  position: relative;
+  z-index: 1;
+  font-size: clamp(28px, 4vw, 40px);
+  letter-spacing: -1.4px;
+}
+
+.goal-screen .goal-hero p,
+.goal-screen .goal-hero .eyebrow {
+  position: relative;
+  z-index: 1;
+}
+
+.goal-screen .goal-section,
+.goal-screen .goal-result,
+.goal-screen .manual-toggle-row {
+  border-radius: 18px;
+  border-color: color-mix(in srgb, var(--accent) 10%, var(--border));
+  box-shadow: 0 12px 32px rgba(0,0,0,.09);
+}
+
+.goal-screen .goal-card,
+.goal-screen .activity-card,
+.goal-screen .choice {
+  transition: transform .16s ease, border-color .16s ease, background .16s ease;
+}
+
+.goal-screen .goal-card:hover,
+.goal-screen .activity-card:hover {
+  transform: translateY(-2px);
+}
+
+.goal-screen .goal-submit {
+  border-radius: 13px;
+  box-shadow: 0 12px 28px color-mix(in srgb, var(--accent) 16%, transparent);
+}
+
+/* Workouts page */
+.workouts-page {
+  padding-top: 28px;
+}
+
+.workouts-page .workouts-hero.card {
+  position: relative;
+  overflow: hidden;
+  padding: 26px;
+  border-radius: 22px;
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--accent) 9%, transparent), transparent 50%),
+    linear-gradient(155deg, rgba(255,255,255,.035), rgba(255,255,255,.008)),
+    var(--panel);
+  box-shadow: 0 18px 48px rgba(0,0,0,.13);
+}
+
+.workouts-page .workouts-hero.card::after {
+  content: '';
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  right: -90px;
+  top: -100px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--accent) 13%, transparent);
+  filter: blur(20px);
+  pointer-events: none;
+}
+
+.workouts-page .workouts-hero > * {
+  position: relative;
+  z-index: 1;
+}
+
+.workouts-page .workouts-hero h1 {
+  font-size: clamp(28px, 4vw, 38px);
+  letter-spacing: -1.25px;
+}
+
+.workouts-page .workout-summary div {
+  border-radius: 16px;
+  background: linear-gradient(145deg, rgba(255,255,255,.025), rgba(255,255,255,.008)), var(--panel);
+  transition: transform .16s ease, border-color .16s ease;
+}
+
+.workouts-page .workout-summary div:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--accent) 22%, var(--border));
+}
+
+.workouts-page .workout-card {
+  border-radius: 18px;
+  background: linear-gradient(150deg, rgba(255,255,255,.025), rgba(255,255,255,.006)), var(--panel);
+  box-shadow: 0 12px 30px rgba(0,0,0,.08);
+}
+
+.workouts-page .exercise-order {
+  box-shadow: 0 6px 18px var(--accent-soft);
+}
+
+.workouts-page .set-check,
+.workouts-page .input,
+.workouts-page .btn {
+  transition: .16s ease;
+}
+
+.workouts-page .btn-primary {
+  box-shadow: 0 10px 26px color-mix(in srgb, var(--accent) 17%, transparent);
+}
+
+/* Admin */
+.admin-page .admin-stat,
+.admin-page .admin-panel {
+  border-radius: 18px;
+  background: linear-gradient(150deg, rgba(255,255,255,.026), rgba(255,255,255,.006)), var(--panel);
+}
+
+.admin-page .admin-stat:hover,
+.admin-page .admin-panel:hover {
+  border-color: color-mix(in srgb, var(--accent) 20%, var(--border));
+}
+
+html[data-theme='light'] .goal-screen .goal-hero,
+html[data-theme='light'] .workouts-page .workouts-hero.card {
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--accent) 7%, transparent), transparent 50%),
+    linear-gradient(160deg, rgba(255,255,255,.96), rgba(255,255,255,.78)),
+    var(--panel);
+}
+
+@media (max-width: 980px) {
+  .app:not(.premium-dashboard) {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .goal-screen .goal-page,
+  .workouts-page,
+  .admin-shell {
+    width: min(100% - 24px, 1120px);
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .goal-screen .goal-page,
+  .workouts-page {
+    padding-top: 18px;
+  }
+}
+
+@media (max-width: 560px) {
+  .goal-screen .goal-hero,
+  .workouts-page .workouts-hero.card {
+    padding: 20px;
+    border-radius: 18px;
+  }
+
+  .goal-screen .goal-section,
+  .goal-screen .goal-result,
+  .goal-screen .manual-toggle-row,
+  .workouts-page .workout-card {
+    border-radius: 15px;
+  }
+}
