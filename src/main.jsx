@@ -8,6 +8,7 @@ import './sidebar.css';
 import './app-premium.css';
 import './experience-premium.css';
 import './nutrition-core-3d.css';
+import './nutrition-core-interactive.css';
 import App from './App.jsx';
 
 createRoot(document.getElementById('root')).render(
