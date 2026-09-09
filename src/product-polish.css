@@ -1,277 +1,524 @@
-/* Product-first polish: restrained, editorial, software-like */
-.product-dashboard {
-  --product-line: rgba(149,169,163,.10);
-  --product-line-strong: rgba(149,169,163,.16);
-  --product-surface: #0c1519;
-  --product-surface-soft: #101a1f;
-  --product-accent: #71d6a6;
-  --product-shadow: 0 14px 34px rgba(0,0,0,.16);
+/* Nutrix — restrained premium SaaS product layer
+   Inspired by mature finance/product software: neutral surfaces, disciplined spacing,
+   strong typography and color used only for status/action. */
+
+:root {
+  --saas-bg: #0b0f14;
+  --saas-sidebar: #0e1319;
+  --saas-surface: #11171e;
+  --saas-surface-2: #151c24;
+  --saas-surface-3: #19222b;
+  --saas-border: #222c36;
+  --saas-border-soft: rgba(255,255,255,.065);
+  --saas-text: #f4f7f9;
+  --saas-text-2: #c7d0d8;
+  --saas-muted: #7f8b97;
+  --saas-muted-2: #596570;
+  --saas-accent: #52c58f;
+  --saas-accent-hover: #62d39e;
+  --saas-accent-soft: rgba(82,197,143,.10);
+  --saas-danger: #ef6b6b;
+  --saas-radius: 12px;
+  --saas-radius-lg: 16px;
+  --saas-shadow: 0 1px 2px rgba(0,0,0,.22), 0 10px 30px rgba(0,0,0,.12);
 }
 
+html[data-theme='dark'] body,
+body {
+  background: var(--saas-bg) !important;
+  color: var(--saas-text);
+}
+
+/* ---------------------------------------------------------
+   Global product surfaces
+   --------------------------------------------------------- */
+.product-dashboard,
+.goal-screen,
+.workouts-page,
+.admin-page {
+  color: var(--saas-text);
+}
+
+.product-dashboard .card,
+.product-dashboard .compact-streak-card,
+.product-dashboard .product-workspace,
+.goal-screen .goal-section,
+.goal-screen .goal-result,
+.workouts-page .workout-card,
+.workouts-page .workouts-hero,
+.admin-page .admin-panel,
+.admin-page .admin-stat {
+  border: 1px solid var(--saas-border-soft) !important;
+  border-radius: var(--saas-radius-lg) !important;
+  background: var(--saas-surface) !important;
+  box-shadow: var(--saas-shadow) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.product-dashboard .card::before,
+.product-dashboard .card::after,
+.product-dashboard .compact-streak-card::before,
+.product-dashboard .compact-streak-card::after,
+.product-dashboard .btn::before,
+.product-dashboard .btn::after,
+.goal-screen .goal-section::after,
+.workouts-page .workout-card::after,
+.admin-page .admin-panel::after {
+  display: none !important;
+}
+
+.product-dashboard .card:hover,
+.product-dashboard .compact-streak-card:hover,
+.goal-screen .goal-section:hover,
+.workouts-page .workout-card:hover,
+.admin-page .admin-panel:hover {
+  transform: none !important;
+  border-color: rgba(255,255,255,.10) !important;
+  box-shadow: var(--saas-shadow) !important;
+}
+
+/* ---------------------------------------------------------
+   Sidebar
+   --------------------------------------------------------- */
+.app-sidebar {
+  border: 1px solid var(--saas-border-soft) !important;
+  border-radius: 16px !important;
+  background: var(--saas-sidebar) !important;
+  box-shadow: 0 8px 28px rgba(0,0,0,.20) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.app-sidebar::before { display:none !important; }
+.sidebar-premium-card { display:none !important; }
+
+.sidebar-context {
+  padding: 12px 13px !important;
+  border: 1px solid var(--saas-border-soft) !important;
+  border-radius: 10px !important;
+  background: var(--saas-surface) !important;
+}
+.sidebar-context span { color: var(--saas-muted) !important; }
+.sidebar-context strong { color: var(--saas-text-2) !important; font-weight:600 !important; }
+
+.sidebar-nav { gap: 3px !important; }
+.sidebar-link {
+  min-height: 48px !important;
+  padding: 7px 9px !important;
+  border: 1px solid transparent !important;
+  border-radius: 10px !important;
+  color: var(--saas-muted) !important;
+  transition: background .14s ease, color .14s ease, border-color .14s ease !important;
+}
+.sidebar-link:hover {
+  transform:none !important;
+  color:var(--saas-text-2) !important;
+  border-color:var(--saas-border-soft) !important;
+  background:var(--saas-surface) !important;
+}
+.sidebar-link.active {
+  color:var(--saas-text) !important;
+  border-color:rgba(82,197,143,.16) !important;
+  background:var(--saas-accent-soft) !important;
+  box-shadow:none !important;
+}
+.sidebar-link-icon {
+  width:32px !important;
+  height:32px !important;
+  border-radius:8px !important;
+  background:transparent !important;
+  color:inherit !important;
+  font-size:16px !important;
+}
+.sidebar-link.active .sidebar-link-icon { color:var(--saas-accent) !important; }
+.sidebar-link-copy strong { font-size:12px !important; font-weight:650 !important; }
+.sidebar-link-copy small { color:var(--saas-muted-2) !important; }
+
+.nutrix-logo {
+  border:1px solid rgba(82,197,143,.14) !important;
+  border-radius:10px !important;
+  background:#132019 !important;
+  box-shadow:none !important;
+}
+.nutrix-logo::after { display:none !important; }
+.nutrix-logo svg { filter:none !important; }
+
+.sidebar-account { border-color:var(--saas-border-soft) !important; }
+.sidebar-avatar {
+  border:1px solid rgba(82,197,143,.16) !important;
+  background:#14231b !important;
+  color:var(--saas-accent) !important;
+}
+.sidebar-logout {
+  border-color:var(--saas-border-soft) !important;
+  background:transparent !important;
+}
+.sidebar-logout:hover { background:var(--saas-surface) !important; }
+
+/* ---------------------------------------------------------
+   Dashboard top section
+   --------------------------------------------------------- */
 .product-dashboard-header {
   display:grid;
-  grid-template-columns:minmax(280px,.75fr) minmax(520px,1.25fr);
-  gap:28px;
+  grid-template-columns:minmax(260px,.72fr) minmax(560px,1.28fr);
+  gap:32px;
   align-items:end;
-  margin-top:18px;
-  padding:10px 2px 6px;
+  margin-top:22px;
+  padding:4px 0 10px;
 }
 
-.product-dashboard-heading { min-width:0; }
 .product-dashboard-date {
   display:block;
-  margin-bottom:8px;
-  color:var(--muted);
+  margin-bottom:9px;
+  color:var(--saas-muted);
   font-size:11px;
-  font-weight:650;
-  letter-spacing:.2px;
+  font-weight:600;
 }
 .product-dashboard-heading h1 {
   margin:0;
-  font-size:clamp(34px,4vw,48px);
-  line-height:1;
-  letter-spacing:-2px;
+  color:var(--saas-text);
+  font-size:clamp(32px,3.5vw,44px);
+  line-height:1.02;
+  font-weight:760;
+  letter-spacing:-1.8px;
 }
 .product-dashboard-heading p {
-  max-width:460px;
-  margin:12px 0 0;
-  color:var(--muted);
+  max-width:430px;
+  margin:10px 0 0;
+  color:var(--saas-muted);
   font-size:13px;
-  line-height:1.6;
+  line-height:1.55;
 }
 
 .product-summary-grid {
   display:grid;
   grid-template-columns:repeat(4,minmax(0,1fr));
-  border:1px solid var(--product-line);
-  border-radius:18px;
-  background:var(--product-surface);
   overflow:hidden;
-  box-shadow:var(--product-shadow);
+  border:1px solid var(--saas-border-soft);
+  border-radius:var(--saas-radius-lg);
+  background:var(--saas-surface);
+  box-shadow:var(--saas-shadow);
 }
-
 .product-summary-item {
-  min-height:104px;
+  min-height:96px;
   display:flex;
   flex-direction:column;
   justify-content:center;
-  padding:16px 18px;
-  border-right:1px solid var(--product-line);
+  padding:15px 17px;
+  border-right:1px solid var(--saas-border-soft);
 }
 .product-summary-item:last-child { border-right:0; }
-.product-summary-item.primary { background:rgba(113,214,166,.045); }
+.product-summary-item.primary { background:rgba(82,197,143,.045); }
 .product-summary-item span {
-  color:var(--muted);
+  color:var(--saas-muted);
   font-size:9px;
   font-weight:700;
   text-transform:uppercase;
   letter-spacing:.55px;
 }
 .product-summary-item strong {
-  margin:5px 0 4px;
-  color:var(--text);
-  font-size:25px;
+  margin:5px 0 3px;
+  color:var(--saas-text);
+  font-size:24px;
   line-height:1;
-  letter-spacing:-.9px;
+  font-weight:730;
+  letter-spacing:-.8px;
 }
-.product-summary-item small { color:var(--muted-2); font-size:9px; }
+.product-summary-item small { color:var(--saas-muted-2); font-size:9px; }
 
 .product-section-label {
   display:block;
-  color:var(--muted);
-  font-size:9px;
-  font-weight:750;
-  text-transform:uppercase;
-  letter-spacing:.8px;
-}
-
-/* Remove decorative/AI-looking visual language */
-.product-dashboard .dashboard-kicker,
-.product-dashboard .dashboard-hero-badges,
-.product-dashboard .premium-data-object { display:none !important; }
-
-.product-overview-grid { margin-top:16px; }
-.product-dashboard .dashboard-progress-grid-v3 .card,
-.product-dashboard .compact-streak-card,
-.product-dashboard .product-workspace {
-  border-color:var(--product-line);
-  background:var(--product-surface);
-  box-shadow:var(--product-shadow);
-}
-
-.product-dashboard .dashboard-progress-grid-v3 .card,
-.product-dashboard .compact-streak-card {
-  border-radius:17px;
-}
-
-.product-dashboard .compact-streak-main strong {
-  margin-top:9px;
-  font-size:34px;
-}
-
-.product-workspace {
-  border-radius:19px;
-  overflow:hidden;
-}
-.product-dashboard .dashboard-workspace-head {
-  padding:17px 19px;
-  background:#0b1418;
-}
-.product-dashboard .dashboard-workspace-head h2 {
-  margin:4px 0 0;
-  font-size:18px;
-  letter-spacing:-.5px;
-}
-.product-dashboard .dashboard-tabs {
-  gap:2px;
-  padding:3px;
-  border:1px solid var(--product-line);
-  border-radius:10px;
-  background:#091216;
-}
-.product-dashboard .dashboard-tabs button {
-  min-height:31px;
-  padding:0 13px;
-  border-radius:8px;
-  font-size:10px;
-}
-.product-dashboard .dashboard-tabs button.active {
-  color:var(--text);
-  background:#14231d;
-  box-shadow:none;
-}
-
-.product-meal-routine {
-  display:grid;
-  grid-template-columns:220px minmax(0,1fr);
-  gap:18px;
-  align-items:start;
-  padding:4px 2px 14px;
-}
-.product-meal-routine .meal-routine-copy strong {
-  display:block;
-  margin-top:5px;
-  color:var(--text);
-  font-size:15px;
-  letter-spacing:-.35px;
-}
-.product-meal-routine .meal-routine-copy small {
-  display:block;
-  margin-top:5px;
-  color:var(--muted);
-  font-size:10px;
-  line-height:1.5;
-}
-.product-dashboard .meal-routine-options {
-  display:grid;
-  grid-template-columns:repeat(4,minmax(0,1fr));
-  gap:8px;
-}
-.product-dashboard .meal-routine-option {
-  min-height:66px;
-  padding:10px 11px;
-  border:1px solid var(--product-line);
-  border-radius:12px;
-  background:#0c1519;
-  box-shadow:none;
-  transition:border-color .16s ease,background .16s ease;
-}
-.product-dashboard .meal-routine-option:hover {
-  transform:none;
-  border-color:var(--product-line-strong);
-  background:#101a1f;
-}
-.product-dashboard .meal-routine-option.active {
-  border-color:rgba(113,214,166,.28) !important;
-  background:#11231b !important;
-  box-shadow:inset 0 0 0 1px rgba(113,214,166,.05) !important;
-}
-.product-dashboard .meal-routine-icon {
-  background:#101a1f;
-  color:var(--text-soft);
-  box-shadow:none;
-}
-.product-dashboard .meal-routine-option.active .meal-routine-icon {
-  background:rgba(113,214,166,.10);
-  color:var(--product-accent);
-}
-
-.product-dashboard .active-meal-panel {
-  border-top:1px solid var(--product-line);
-  padding-top:14px;
-}
-.product-dashboard .active-meal-panel-head span {
-  color:var(--muted);
+  color:var(--saas-muted);
   font-size:9px;
   font-weight:700;
   text-transform:uppercase;
   letter-spacing:.7px;
 }
 
-/* Less shine, less generated-looking effects */
-.product-dashboard .card::after,
-.product-dashboard .streak-card::after,
-.product-dashboard .btn::after { display:none !important; }
-.product-dashboard .card:hover,
-.product-dashboard .compact-streak-card:hover { transform:none !important; }
-.product-dashboard .btn {
-  box-shadow:none;
-  transition:background .16s ease,border-color .16s ease,color .16s ease;
+/* ---------------------------------------------------------
+   Overview cards
+   --------------------------------------------------------- */
+.product-overview-grid { margin-top:14px !important; gap:12px !important; }
+.product-dashboard .dashboard-progress-grid-v3 { gap:12px !important; }
+.product-dashboard .dashboard-progress-grid-v3 .card {
+  min-height:150px !important;
+  padding:16px !important;
 }
-
-/* Sidebar: flatter and more mature */
-.app-sidebar {
-  background:#0a1317 !important;
-  box-shadow:0 20px 50px rgba(0,0,0,.22) !important;
+.product-dashboard .compact-streak-card {
+  padding:16px !important;
 }
-.sidebar-premium-card { display:none; }
-.sidebar-context {
-  background:#0d171b !important;
-  border-color:rgba(149,169,163,.08) !important;
+.product-dashboard .compact-streak-main strong {
+  margin-top:7px !important;
+  color:var(--saas-text) !important;
+  font-size:32px !important;
+  font-weight:730 !important;
 }
-.sidebar-link.active {
-  background:#11221a !important;
-  border-color:rgba(113,214,166,.15) !important;
-  box-shadow:inset 2px 0 0 var(--accent) !important;
-}
-
-.nutrix-logo {
-  border-radius:11px !important;
-  background:#0f1b19 !important;
-  border-color:rgba(113,214,166,.13) !important;
+.product-dashboard .compact-streak-main small,
+.product-dashboard .compact-streak-status span { color:var(--saas-muted) !important; }
+.product-dashboard .compact-streak-status span.done i {
+  background:var(--saas-accent) !important;
   box-shadow:none !important;
 }
-.nutrix-logo svg { filter:none !important; }
 
+/* ---------------------------------------------------------
+   Workspace / tabs
+   --------------------------------------------------------- */
+.product-workspace {
+  margin-top:14px !important;
+  overflow:hidden;
+  border-radius:var(--saas-radius-lg) !important;
+}
+.product-dashboard .dashboard-workspace-head {
+  padding:16px 18px !important;
+  border-bottom:1px solid var(--saas-border-soft) !important;
+  background:var(--saas-surface) !important;
+}
+.product-dashboard .dashboard-workspace-head h2 {
+  margin:4px 0 0 !important;
+  color:var(--saas-text) !important;
+  font-size:17px !important;
+  font-weight:680 !important;
+  letter-spacing:-.4px !important;
+}
+.product-dashboard .dashboard-workspace-body { padding:14px !important; }
+
+.product-dashboard .dashboard-tabs {
+  display:inline-flex;
+  gap:2px;
+  padding:3px;
+  border:1px solid var(--saas-border-soft) !important;
+  border-radius:9px !important;
+  background:#0d1218 !important;
+}
+.product-dashboard .dashboard-tabs button {
+  min-height:30px !important;
+  padding:0 12px !important;
+  border:0 !important;
+  border-radius:7px !important;
+  background:transparent !important;
+  color:var(--saas-muted) !important;
+  font-size:10px !important;
+  font-weight:650 !important;
+  box-shadow:none !important;
+}
+.product-dashboard .dashboard-tabs button:hover { color:var(--saas-text-2) !important; }
+.product-dashboard .dashboard-tabs button.active {
+  color:var(--saas-text) !important;
+  background:var(--saas-surface-3) !important;
+  box-shadow:0 1px 2px rgba(0,0,0,.20) !important;
+}
+
+/* ---------------------------------------------------------
+   Routine selector
+   --------------------------------------------------------- */
+.product-meal-routine {
+  display:grid;
+  grid-template-columns:210px minmax(0,1fr);
+  gap:18px;
+  align-items:start;
+  padding:2px 0 14px;
+}
+.product-meal-routine .meal-routine-copy strong {
+  display:block;
+  margin-top:5px;
+  color:var(--saas-text);
+  font-size:15px;
+  font-weight:660;
+  letter-spacing:-.3px;
+}
+.product-meal-routine .meal-routine-copy small {
+  display:block;
+  margin-top:5px;
+  color:var(--saas-muted);
+  font-size:10px;
+  line-height:1.45;
+}
+.product-dashboard .meal-routine-options {
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:7px;
+}
+.product-dashboard .meal-routine-option {
+  min-height:64px !important;
+  padding:9px 10px !important;
+  border:1px solid var(--saas-border-soft) !important;
+  border-radius:10px !important;
+  background:var(--saas-surface) !important;
+  box-shadow:none !important;
+  transition:background .14s ease,border-color .14s ease !important;
+}
+.product-dashboard .meal-routine-option:hover {
+  transform:none !important;
+  border-color:rgba(255,255,255,.11) !important;
+  background:var(--saas-surface-2) !important;
+}
+.product-dashboard .meal-routine-option.active {
+  border-color:rgba(82,197,143,.24) !important;
+  background:#132019 !important;
+  box-shadow:inset 0 0 0 1px rgba(82,197,143,.035) !important;
+}
+.product-dashboard .meal-routine-icon {
+  background:transparent !important;
+  color:var(--saas-muted) !important;
+  box-shadow:none !important;
+}
+.product-dashboard .meal-routine-option.active .meal-routine-icon { color:var(--saas-accent) !important; }
+.product-dashboard .meal-routine-option-copy strong { color:var(--saas-text-2) !important; font-weight:650 !important; }
+.product-dashboard .meal-routine-option-copy small { color:var(--saas-muted-2) !important; }
+.product-dashboard .meal-routine-state { color:var(--saas-muted-2) !important; }
+.product-dashboard .meal-routine-option.logged .meal-routine-state { color:var(--saas-accent) !important; }
+
+.product-dashboard .active-meal-panel {
+  margin-top:0 !important;
+  padding-top:14px !important;
+  border-top:1px solid var(--saas-border-soft) !important;
+}
+.product-dashboard .active-meal-panel-head span {
+  color:var(--saas-muted) !important;
+  font-size:9px !important;
+  font-weight:700 !important;
+  letter-spacing:.65px !important;
+}
+.product-dashboard .active-meal-panel-head strong { color:var(--saas-text) !important; }
+.product-dashboard .active-meal-panel-head small { color:var(--saas-muted) !important; }
+
+/* ---------------------------------------------------------
+   Forms, buttons, logs
+   --------------------------------------------------------- */
+.product-dashboard .btn,
+.goal-screen .btn,
+.workouts-page .btn,
+.admin-page .btn,
+.auth-premium-shell .btn {
+  border-radius:9px !important;
+  box-shadow:none !important;
+  text-shadow:none !important;
+  transition:background .14s ease,border-color .14s ease,color .14s ease !important;
+}
+.product-dashboard .btn::after,
+.goal-screen .btn::after,
+.workouts-page .btn::after,
+.admin-page .btn::after,
+.auth-premium-shell .btn::after { display:none !important; }
+
+.btn.primary,
+.btn-primary,
+.auth-primary-action {
+  border:1px solid #58c997 !important;
+  background:var(--saas-accent) !important;
+  color:#07130e !important;
+  font-weight:700 !important;
+}
+.btn.primary:hover,
+.btn-primary:hover,
+.auth-primary-action:hover {
+  background:var(--saas-accent-hover) !important;
+  filter:none !important;
+}
+
+.product-dashboard input,
+.product-dashboard select,
+.product-dashboard textarea,
+.goal-screen input,
+.goal-screen select,
+.workouts-page input,
+.workouts-page select,
+.auth-field input {
+  border-color:var(--saas-border) !important;
+  border-radius:9px !important;
+  background:#0d1319 !important;
+  color:var(--saas-text) !important;
+  box-shadow:none !important;
+}
+.product-dashboard input:focus,
+.product-dashboard select:focus,
+.product-dashboard textarea:focus,
+.goal-screen input:focus,
+.workouts-page input:focus,
+.auth-field input:focus {
+  border-color:rgba(82,197,143,.48) !important;
+  box-shadow:0 0 0 3px rgba(82,197,143,.08) !important;
+}
+
+.product-dashboard .log li {
+  border-radius:9px !important;
+  background:#0e151b !important;
+  border-color:var(--saas-border-soft) !important;
+}
+
+/* ---------------------------------------------------------
+   Auth page — same product language
+   --------------------------------------------------------- */
+.auth-premium-shell { background:var(--saas-bg) !important; }
+.auth-premium-panel { background:var(--saas-bg) !important; }
+.auth-premium-visual {
+  border-color:var(--saas-border-soft) !important;
+  background:var(--saas-sidebar) !important;
+}
+.auth-premium-visual::before,
+.auth-visual-orb { display:none !important; }
+.auth-preview-card {
+  border-color:var(--saas-border-soft) !important;
+  border-radius:14px !important;
+  background:var(--saas-surface) !important;
+  box-shadow:var(--saas-shadow) !important;
+  backdrop-filter:none !important;
+}
+.auth-brand-tagline,
+.auth-premium-copy p,
+.auth-footnote { color:var(--saas-muted) !important; }
+.auth-eyebrow { color:var(--saas-muted) !important; }
+.auth-brand-name,
+.auth-premium-copy h1 { color:var(--saas-text) !important; }
+
+/* ---------------------------------------------------------
+   Responsive
+   --------------------------------------------------------- */
 @media (max-width:1180px) {
-  .product-dashboard-header { grid-template-columns:1fr; }
+  .product-dashboard-header { grid-template-columns:1fr; gap:18px; }
 }
 
 @media (max-width:760px) {
   .product-summary-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
   .product-summary-item:nth-child(2) { border-right:0; }
-  .product-summary-item:nth-child(-n+2) { border-bottom:1px solid var(--product-line); }
-  .product-meal-routine { grid-template-columns:1fr; }
+  .product-summary-item:nth-child(-n+2) { border-bottom:1px solid var(--saas-border-soft); }
+  .product-meal-routine { grid-template-columns:1fr; gap:12px; }
   .product-dashboard .meal-routine-options { grid-template-columns:repeat(2,minmax(0,1fr)); }
 }
 
 @media (max-width:520px) {
-  .product-dashboard-heading h1 { font-size:34px; }
-  .product-summary-item { min-height:88px; padding:13px; }
+  .product-dashboard-heading h1 { font-size:32px; }
+  .product-summary-item { min-height:84px; padding:12px; }
   .product-summary-item strong { font-size:21px; }
+  .product-dashboard .dashboard-workspace-head { padding:14px !important; }
+  .product-dashboard .dashboard-workspace-body { padding:10px !important; }
 }
 
-html[data-theme='light'] .product-dashboard {
-  --product-line:rgba(46,76,66,.10);
-  --product-line-strong:rgba(46,76,66,.16);
-  --product-surface:#fbfdfc;
-  --product-surface-soft:#f5f9f7;
-  --product-shadow:0 12px 30px rgba(37,73,61,.07);
+/* ---------------------------------------------------------
+   Light theme
+   --------------------------------------------------------- */
+html[data-theme='light'] {
+  --saas-bg:#f4f6f8;
+  --saas-sidebar:#ffffff;
+  --saas-surface:#ffffff;
+  --saas-surface-2:#f7f9fa;
+  --saas-surface-3:#eef2f4;
+  --saas-border:#dfe5e9;
+  --saas-border-soft:rgba(28,45,55,.09);
+  --saas-text:#172027;
+  --saas-text-2:#34424d;
+  --saas-muted:#77838d;
+  --saas-muted-2:#9aa4ac;
+  --saas-shadow:0 1px 2px rgba(20,35,45,.04),0 8px 24px rgba(20,35,45,.05);
 }
-html[data-theme='light'] .product-dashboard .dashboard-workspace-head,
+html[data-theme='light'] body { background:var(--saas-bg) !important; }
 html[data-theme='light'] .product-dashboard .dashboard-tabs,
-html[data-theme='light'] .product-dashboard .meal-routine-option { background:#f8fbf9; }
-html[data-theme='light'] .product-dashboard .dashboard-tabs button.active,
-html[data-theme='light'] .product-dashboard .meal-routine-option.active { background:#eaf6ef !important; }
-html[data-theme='light'] .app-sidebar { background:#fbfdfc !important; }
-html[data-theme='light'] .sidebar-context { background:#f5f9f7 !important; }
+html[data-theme='light'] .product-dashboard input,
+html[data-theme='light'] .product-dashboard select,
+html[data-theme='light'] .product-dashboard textarea,
+html[data-theme='light'] .auth-field input { background:#f7f9fa !important; }
+html[data-theme='light'] .product-dashboard .meal-routine-option.active,
+html[data-theme='light'] .sidebar-link.active { background:#edf8f2 !important; }
+html[data-theme='light'] .nutrix-logo { background:#edf8f2 !important; }
+html[data-theme='light'] .sidebar-avatar { background:#edf8f2 !important; }
