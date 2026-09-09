@@ -1,31 +1,35 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
-const THEMES = [
-  { id: 'dark', label: 'Escuro', icon: '☾', description: 'Interface escura' },
-  { id: 'light', label: 'Claro', icon: '☀', description: 'Interface clara' },
-  { id: 'system', label: 'Sistema', icon: '◐', description: 'Segue o dispositivo' },
+const MODES = [
+  { id: 'dark', label: 'Escuro', icon: '☾' },
+  { id: 'light', label: 'Claro', icon: '☀' },
+  { id: 'system', label: 'Sistema', icon: '◐' },
 ];
 
 const PRESETS = [
-  { id: 'graphite', label: 'Graphite', description: 'Sóbrio e profissional', colors: ['#0b0f14', '#151c24', '#52c58f'] },
-  { id: 'midnight', label: 'Midnight', description: 'Azul executivo', colors: ['#09111f', '#111d31', '#4f8cff'] },
-  { id: 'forest', label: 'Forest', description: 'Verde profundo', colors: ['#09120f', '#12231b', '#57c58b'] },
-  { id: 'stone', label: 'Stone', description: 'Neutro sofisticado', colors: ['#11110f', '#1c1b18', '#c7a96b'] },
-  { id: 'plum', label: 'Plum', description: 'Roxo discreto', colors: ['#120e17', '#211827', '#b48ad6'] },
-  { id: 'paper', label: 'Paper', description: 'Claro editorial', colors: ['#f4f1ea', '#ffffff', '#237a57'], forceLight: true },
+  { id: 'graphite', label: 'Graphite', description: 'Grafite + verde', bg: '#0b0f14', panel: '#11171e', accent: '#52c58f' },
+  { id: 'midnight', label: 'Midnight', description: 'Azul executivo', bg: '#09111d', panel: '#101b2a', accent: '#6ea8fe' },
+  { id: 'forest', label: 'Forest', description: 'Verde profundo', bg: '#09130f', panel: '#0f1c17', accent: '#68c995' },
+  { id: 'stone', label: 'Stone', description: 'Grafite quente', bg: '#12110f', panel: '#1a1815', accent: '#d0ab68' },
+  { id: 'plum', label: 'Plum', description: 'Roxo discreto', bg: '#120e17', panel: '#1c1623', accent: '#b08ad6' },
+  { id: 'paper', label: 'Paper', description: 'Editorial claro', bg: '#f2f0ea', panel: '#fbfaf6', accent: '#478f69' },
 ];
 
 const ACCENTS = [
   { id: 'green', label: 'Verde', value: '#52c58f' },
-  { id: 'blue', label: 'Azul', value: '#5b8def' },
+  { id: 'blue', label: 'Azul', value: '#60a5fa' },
   { id: 'purple', label: 'Roxo', value: '#a78bfa' },
-  { id: 'orange', label: 'Âmbar', value: '#d99a52' },
+  { id: 'orange', label: 'Laranja', value: '#fb923c' },
 ];
 
-export default function AppearanceMenu({ theme, accent, setTheme, setAccent }) {
+export default function AppearanceMenu({ theme, accent, preset, setTheme, setAccent, setPreset }) {
   const [open, setOpen] = useState(false);
-  const [preset, setPresetState] = useState(() => localStorage.getItem('nutrix-preset') || 'graphite');
+  const [localPreset, setLocalPreset] = useState(() => preset || localStorage.getItem('nutrix-preset') || 'graphite');
   const ref = useRef(null);
+
+  useEffect(() => {
+    if (preset) setLocalPreset(preset);
+  }, [preset]);
 
   useEffect(() => {
     const close = (event) => {
@@ -35,12 +39,13 @@ export default function AppearanceMenu({ theme, accent, setTheme, setAccent }) {
     return () => document.removeEventListener('pointerdown', close);
   }, []);
 
-  const choosePreset = (item) => {
-    setPresetState(item.id);
-    document.documentElement.dataset.preset = item.id;
-    localStorage.setItem('nutrix-preset', item.id);
-    if (item.forceLight && theme !== 'light') setTheme('light');
-    if (!item.forceLight && item.id !== 'graphite' && theme === 'light') setTheme('dark');
+  const currentPreset = useMemo(() => preset || localPreset, [preset, localPreset]);
+
+  const applyPreset = (id) => {
+    setLocalPreset(id);
+    localStorage.setItem('nutrix-preset', id);
+    document.documentElement.dataset.preset = id;
+    if (typeof setPreset === 'function') setPreset(id);
   };
 
   return (
@@ -52,7 +57,7 @@ export default function AppearanceMenu({ theme, accent, setTheme, setAccent }) {
       </button>
 
       {open && (
-        <div className="appearance-popover appearance-popover-themes">
+        <div className="appearance-popover appearance-popover-v2">
           <div className="appearance-popover-head">
             <div>
               <strong>Aparência</strong>
@@ -62,15 +67,15 @@ export default function AppearanceMenu({ theme, accent, setTheme, setAccent }) {
           </div>
 
           <div className="appearance-section">
-            <div className="appearance-label">Temas do Nutrix</div>
-            <div className="preset-options">
+            <div className="appearance-label">Tema</div>
+            <div className="appearance-presets">
               {PRESETS.map((item) => (
-                <button key={item.id} className={`preset-option ${preset === item.id ? 'active' : ''}`} onClick={() => choosePreset(item)}>
-                  <span className="preset-preview" aria-hidden="true">
-                    {item.colors.map((color) => <i key={color} style={{ background: color }} />)}
+                <button key={item.id} className={`appearance-preset ${currentPreset === item.id ? 'active' : ''}`} onClick={() => applyPreset(item.id)}>
+                  <span className="appearance-preset-preview" style={{ '--preview-bg': item.bg, '--preview-panel': item.panel, '--preview-accent': item.accent }}>
+                    <i /><b /><em />
                   </span>
-                  <span className="preset-copy"><strong>{item.label}</strong><small>{item.description}</small></span>
-                  {preset === item.id && <span className="theme-check">✓</span>}
+                  <span className="appearance-preset-copy"><strong>{item.label}</strong><small>{item.description}</small></span>
+                  {currentPreset === item.id && <span className="theme-check">✓</span>}
                 </button>
               ))}
             </div>
@@ -78,9 +83,9 @@ export default function AppearanceMenu({ theme, accent, setTheme, setAccent }) {
 
           <div className="appearance-section appearance-compact-section">
             <div className="appearance-label">Modo</div>
-            <div className="mode-options">
-              {THEMES.map((item) => (
-                <button key={item.id} className={`mode-option ${theme === item.id ? 'active' : ''}`} onClick={() => setTheme(item.id)} title={item.description}>
+            <div className="appearance-mode-row">
+              {MODES.map((item) => (
+                <button key={item.id} className={`appearance-mode-option ${theme === item.id ? 'active' : ''}`} onClick={() => setTheme?.(item.id)}>
                   <span>{item.icon}</span>{item.label}
                 </button>
               ))}
@@ -91,7 +96,7 @@ export default function AppearanceMenu({ theme, accent, setTheme, setAccent }) {
             <div className="appearance-label">Cor de ação</div>
             <div className="accent-options">
               {ACCENTS.map((item) => (
-                <button key={item.id} className={`accent-option ${accent === item.id ? 'active' : ''}`} onClick={() => setAccent(item.id)} title={item.label} aria-label={`Cor ${item.label}`}>
+                <button key={item.id} className={`accent-option ${accent === item.id ? 'active' : ''}`} onClick={() => setAccent?.(item.id)} title={item.label} aria-label={`Cor ${item.label}`}>
                   <span style={{ '--accent-preview': item.value }} />
                   {accent === item.id && <b>✓</b>}
                 </button>
