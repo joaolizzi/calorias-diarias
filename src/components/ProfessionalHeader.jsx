@@ -31,7 +31,7 @@ const navigationGroups = [
   },
 ];
 
-export default function ProfessionalHeader({ subtitle, theme, accent, setTheme, setAccent }) {
+export default function ProfessionalHeader({ subtitle, theme, accent, preset, setTheme, setAccent, setPreset }) {
   const { user, signOut } = useAuth();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -67,25 +67,12 @@ export default function ProfessionalHeader({ subtitle, theme, accent, setTheme, 
           <NutrixLogo className="brand-logo-mark" size={34} decorative />
           <span>Nutrix<span className="brand-accent">.</span></span>
         </NavLink>
-        <button
-          type="button"
-          className="sidebar-mobile-toggle"
-          onClick={() => setMobileOpen(true)}
-          aria-label="Abrir menu"
-          aria-expanded={mobileOpen}
-        >
-          <span />
-          <span />
-          <span />
+        <button type="button" className="sidebar-mobile-toggle" onClick={() => setMobileOpen(true)} aria-label="Abrir menu" aria-expanded={mobileOpen}>
+          <span /><span /><span />
         </button>
       </div>
 
-      <button
-        type="button"
-        className={`sidebar-backdrop ${mobileOpen ? 'show' : ''}`}
-        onClick={() => setMobileOpen(false)}
-        aria-label="Fechar menu"
-      />
+      <button type="button" className={`sidebar-backdrop ${mobileOpen ? 'show' : ''}`} onClick={() => setMobileOpen(false)} aria-label="Fechar menu" />
 
       <aside className={`app-sidebar ${mobileOpen ? 'open' : ''}`}>
         <div className="sidebar-top">
@@ -96,13 +83,7 @@ export default function ProfessionalHeader({ subtitle, theme, accent, setTheme, 
               <small>Painel pessoal</small>
             </span>
           </NavLink>
-
-          <button
-            type="button"
-            className="sidebar-close"
-            onClick={() => setMobileOpen(false)}
-            aria-label="Fechar menu"
-          >×</button>
+          <button type="button" className="sidebar-close" onClick={() => setMobileOpen(false)} aria-label="Fechar menu">×</button>
         </div>
 
         <div className="sidebar-context">
@@ -115,16 +96,9 @@ export default function ProfessionalHeader({ subtitle, theme, accent, setTheme, 
             <div className="sidebar-nav-group" key={group.label}>
               <span className="sidebar-nav-label">{group.label}</span>
               {group.items.map(([to, icon, label, description]) => (
-                <NavLink
-                  key={to}
-                  to={to}
-                  className={`sidebar-link ${isShortcutActive(to) ? 'active' : ''}`}
-                >
+                <NavLink key={to} to={to} className={`sidebar-link ${isShortcutActive(to) ? 'active' : ''}`}>
                   <span className="sidebar-link-icon">{icon}</span>
-                  <span className="sidebar-link-copy">
-                    <strong>{label}</strong>
-                    <small>{description}</small>
-                  </span>
+                  <span className="sidebar-link-copy"><strong>{label}</strong><small>{description}</small></span>
                   <span className="sidebar-link-arrow">›</span>
                 </NavLink>
               ))}
@@ -134,45 +108,23 @@ export default function ProfessionalHeader({ subtitle, theme, accent, setTheme, 
           {isAdmin && (
             <div className="sidebar-nav-group">
               <span className="sidebar-nav-label">Sistema</span>
-              <NavLink
-                to="/admin"
-                className={`sidebar-link ${location.pathname === '/admin' ? 'active' : ''}`}
-              >
+              <NavLink to="/admin" className={`sidebar-link ${location.pathname === '/admin' ? 'active' : ''}`}>
                 <span className="sidebar-link-icon">⚙</span>
-                <span className="sidebar-link-copy">
-                  <strong>Admin</strong>
-                  <small>Painel interno</small>
-                </span>
+                <span className="sidebar-link-copy"><strong>Admin</strong><small>Painel interno</small></span>
                 <span className="sidebar-link-arrow">›</span>
               </NavLink>
             </div>
           )}
         </nav>
 
-        <div className="sidebar-spacer" />
-
         <div className="sidebar-tools">
-          <AppearanceMenu
-            theme={theme}
-            accent={accent}
-            setTheme={setTheme}
-            setAccent={setAccent}
-          />
+          <AppearanceMenu theme={theme} accent={accent} preset={preset} setTheme={setTheme} setAccent={setAccent} setPreset={setPreset} />
         </div>
 
         <div className="sidebar-account">
           <div className="sidebar-avatar">{emailInitial}</div>
-          <div className="sidebar-account-copy">
-            <strong>Minha conta</strong>
-            <small title={user.email}>{user.email}</small>
-          </div>
-          <button
-            type="button"
-            className="sidebar-logout"
-            onClick={() => signOut()}
-            title="Sair"
-            aria-label="Sair"
-          >↗</button>
+          <div className="sidebar-account-copy"><strong>Minha conta</strong><small title={user.email}>{user.email}</small></div>
+          <button type="button" className="sidebar-logout" onClick={() => signOut()} title="Sair" aria-label="Sair">↗</button>
         </div>
       </aside>
     </>
