@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext.jsx';
+import NutrixLogo from './NutrixLogo.jsx';
 
 export default function AuthGate() {
   const { signIn, signUp, signInAnonymously } = useAuth();
@@ -40,7 +41,7 @@ export default function AuthGate() {
     <main className="auth-premium-shell">
       <section className="auth-premium-panel">
         <div className="auth-brand-row">
-          <span className="auth-brand-mark">N</span>
+          <NutrixLogo className="auth-logo-mark" size={46} decorative />
           <div>
             <div className="auth-brand-name">Nutrix<span>.</span></div>
             <div className="auth-brand-tagline">Nutrição simples. Progresso visível.</div>
@@ -50,37 +51,18 @@ export default function AuthGate() {
         <div className="auth-premium-copy">
           <span className="auth-eyebrow">BEM-VINDO</span>
           <h1>{mode === 'login' ? 'Entre na sua conta' : 'Crie sua conta'}</h1>
-          <p>
-            Acompanhe calorias, água, refeições e treinos em um só lugar.
-          </p>
+          <p>Acompanhe calorias, água, refeições e treinos em um só lugar.</p>
         </div>
 
         <form className="auth-premium-form" onSubmit={submit}>
           <div className="field auth-field">
             <label htmlFor="email">Email</label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              autoComplete="email"
-              placeholder="seu@email.com"
-            />
+            <input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email" placeholder="seu@email.com" />
           </div>
 
           <div className="field auth-field">
             <label htmlFor="password">Senha</label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={6}
-              autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
-              placeholder="••••••••"
-            />
+            <input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} autoComplete={mode === 'login' ? 'current-password' : 'new-password'} placeholder="••••••••" />
           </div>
 
           {err && <div className="err auth-error">{err}</div>}
@@ -92,37 +74,22 @@ export default function AuthGate() {
 
         <div className="toggle auth-mode-toggle">
           {mode === 'login' ? (
-            <>
-              Ainda não tem conta?{' '}
-              <button type="button" onClick={() => setMode('signup')}>Criar conta</button>
-            </>
+            <>Ainda não tem conta? <button type="button" onClick={() => setMode('signup')}>Criar conta</button></>
           ) : (
-            <>
-              Já tem conta?{' '}
-              <button type="button" onClick={() => setMode('login')}>Entrar</button>
-            </>
+            <>Já tem conta? <button type="button" onClick={() => setMode('login')}>Entrar</button></>
           )}
         </div>
 
         <div className="auth-divider"><span />ou<span /></div>
 
-        <button
-          className="btn submit auth-guest-action"
-          type="button"
-          onClick={enterAsGuest}
-          disabled={busy || guestBusy}
-        >
+        <button className="btn submit auth-guest-action" type="button" onClick={enterAsGuest} disabled={busy || guestBusy}>
           {guestBusy ? 'Entrando…' : 'Testar sem criar conta'}
         </button>
 
-        <p className="auth-footnote">
-          Entre como visitante para explorar o app sem informar email ou senha.
-        </p>
+        <p className="auth-footnote">Entre como visitante para explorar o app sem informar email ou senha.</p>
 
         {mode === 'signup' && (
-          <p className="auth-footnote auth-signup-note">
-            Se a confirmação por email estiver habilitada, verifique sua caixa de entrada após o cadastro.
-          </p>
+          <p className="auth-footnote auth-signup-note">Se a confirmação por email estiver habilitada, verifique sua caixa de entrada após o cadastro.</p>
         )}
       </section>
 
