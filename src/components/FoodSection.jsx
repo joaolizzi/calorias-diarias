@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { deleteFood, clearFoodMeal } from '../lib/supabase.js';
 import { fmtTime, MEAL_LABELS } from '../lib/dates.js';
@@ -8,12 +8,18 @@ import AddFoodModal from './AddFoodModal.jsx';
 import NaturalFoodModal from './NaturalFoodModal.jsx';
 import CameraFoodModal from './CameraFoodModal.jsx';
 
-export default function FoodSection({ meal, entries, onChange }) {
+export default function FoodSection({ meal, entries, onChange, initialAction = null }) {
   const { user } = useAuth();
   const [modalItem, setModalItem] = useState(null);
   const [showManual, setShowManual] = useState(false);
   const [showNatural, setShowNatural] = useState(false);
   const [showCamera, setShowCamera] = useState(false);
+
+  useEffect(() => {
+    if (initialAction === 'natural') setShowNatural(true);
+    if (initialAction === 'manual') setShowManual(true);
+    if (initialAction === 'camera') setShowCamera(true);
+  }, [initialAction, meal]);
 
   const remove = async (id) => {
     try {
@@ -52,42 +58,19 @@ export default function FoodSection({ meal, entries, onChange }) {
       </div>
 
       <div className="food-entry-actions" aria-label="Formas de registrar alimento">
-        <button
-          type="button"
-          className="food-entry-action"
-          onClick={() => setShowCamera(true)}
-          title="Fotografe a refeição e deixe a IA estimar os alimentos"
-        >
+        <button type="button" className="food-entry-action" onClick={() => setShowCamera(true)} title="Fotografe a refeição e deixe a IA estimar os alimentos">
           <span className="food-entry-action-icon">▣</span>
-          <span>
-            <strong>Fotografar</strong>
-            <small>Identificar alimentos pela imagem</small>
-          </span>
+          <span><strong>Fotografar</strong><small>Identificar alimentos pela imagem</small></span>
         </button>
 
-        <button
-          type="button"
-          className="food-entry-action"
-          onClick={() => setShowManual(true)}
-        >
+        <button type="button" className="food-entry-action" onClick={() => setShowManual(true)}>
           <span className="food-entry-action-icon">＋</span>
-          <span>
-            <strong>Adicionar manualmente</strong>
-            <small>Informar alimento e quantidade</small>
-          </span>
+          <span><strong>Adicionar manualmente</strong><small>Informar alimento e quantidade</small></span>
         </button>
 
-        <button
-          type="button"
-          className="food-entry-action"
-          onClick={() => setShowNatural(true)}
-          title="Descreva o que comeu em uma frase e a IA separa os itens"
-        >
+        <button type="button" className="food-entry-action" onClick={() => setShowNatural(true)} title="Descreva o que comeu em uma frase e a IA separa os itens">
           <span className="food-entry-action-icon">✦</span>
-          <span>
-            <strong>Descrever por texto</strong>
-            <small>Registrar uma refeição em uma frase</small>
-          </span>
+          <span><strong>Descrever por texto</strong><small>Registrar uma refeição em uma frase</small></span>
         </button>
       </div>
 
@@ -105,16 +88,9 @@ export default function FoodSection({ meal, entries, onChange }) {
                 <div className="amt">
                   {e.name}{' '}
                   <span className="meal-tag">{e.kcal} kcal</span>
-                  {e.grams ? (
-                    <span className="muted" style={{ fontSize: 12 }}>
-                      {' '}({e.grams} g)
-                    </span>
-                  ) : null}
+                  {e.grams ? <span className="muted" style={{ fontSize: 12 }}>{' '}({e.grams} g)</span> : null}
                 </div>
-                <div className="when">
-                  {fmtTime(e.consumed_at)}
-                  {e.day ? ` · ${e.day}` : ''}
-                </div>
+                <div className="when">{fmtTime(e.consumed_at)}{e.day ? ` · ${e.day}` : ''}</div>
               </div>
               <button className="x" onClick={() => remove(e.id)} title="Remover">×</button>
             </li>
@@ -128,18 +104,10 @@ export default function FoodSection({ meal, entries, onChange }) {
         </div>
       )}
 
-      {modalItem && (
-        <AddFoodModal item={modalItem} meal={meal} onClose={() => setModalItem(null)} onSaved={onChange} />
-      )}
-      {showManual && (
-        <AddFoodModal item={null} meal={meal} onClose={() => setShowManual(false)} onSaved={onChange} />
-      )}
-      {showNatural && (
-        <NaturalFoodModal meal={meal} onClose={() => setShowNatural(false)} onSaved={onChange} />
-      )}
-      {showCamera && (
-        <CameraFoodModal meal={meal} onClose={() => setShowCamera(false)} onSaved={onChange} />
-      )}
+      {modalItem && <AddFoodModal item={modalItem} meal={meal} onClose={() => setModalItem(null)} onSaved={onChange} />}
+      {showManual && <AddFoodModal item={null} meal={meal} onClose={() => setShowManual(false)} onSaved={onChange} />}
+      {showNatural && <NaturalFoodModal meal={meal} onClose={() => setShowNatural(false)} onSaved={onChange} />}
+      {showCamera && <CameraFoodModal meal={meal} onClose={() => setShowCamera(false)} onSaved={onChange} />}
     </div>
   );
 }
