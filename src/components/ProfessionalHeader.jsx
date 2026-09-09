@@ -2,6 +2,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import AppearanceMenu from './AppearanceMenu.jsx';
+import NutrixLogo from './NutrixLogo.jsx';
 
 const ADMIN_EMAIL = String(import.meta.env.VITE_ADMIN_EMAIL || '').trim().toLowerCase();
 
@@ -42,7 +43,7 @@ export default function ProfessionalHeader({ subtitle, theme, accent, setTheme, 
     <>
       <div className="mobile-appbar">
         <NavLink to="/" className="mobile-brand" aria-label="Nutrix dashboard">
-          <span className="brand-mark">N</span>
+          <NutrixLogo className="brand-logo-mark" size={34} decorative />
           <span>Nutrix<span className="brand-accent">.</span></span>
         </NavLink>
         <button
@@ -68,7 +69,7 @@ export default function ProfessionalHeader({ subtitle, theme, accent, setTheme, 
       <aside className={`app-sidebar ${mobileOpen ? 'open' : ''}`}>
         <div className="sidebar-top">
           <NavLink to="/" className="sidebar-brand">
-            <span className="brand-mark">N</span>
+            <NutrixLogo className="brand-logo-mark" size={42} decorative />
             <span className="sidebar-brand-copy">
               <strong>Nutrix<span className="brand-accent">.</span></strong>
               <small>Nutrition OS</small>
