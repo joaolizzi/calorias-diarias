@@ -1,0 +1,93 @@
+/* Nutrix premium themes — concrete product palettes, not decorative skins */
+
+/* Graphite is the neutral default and inherits the SaaS system. */
+html[data-preset='graphite'] {
+  --saas-bg:#0b0f14; --saas-sidebar:#0e1319; --saas-surface:#11171e; --saas-surface-2:#151c24; --saas-surface-3:#19222b;
+  --saas-border:#222c36; --saas-border-soft:rgba(255,255,255,.065); --saas-text:#f4f7f9; --saas-text-2:#c7d0d8; --saas-muted:#7f8b97; --saas-muted-2:#596570;
+}
+
+html[data-preset='midnight'] {
+  --saas-bg:#08111f; --saas-sidebar:#0b1525; --saas-surface:#101b2d; --saas-surface-2:#142238; --saas-surface-3:#192a44;
+  --saas-border:#243650; --saas-border-soft:rgba(132,164,210,.10); --saas-text:#f2f6fc; --saas-text-2:#c4d0e0; --saas-muted:#8292aa; --saas-muted-2:#5e6f87;
+  --saas-accent:#5b8def; --saas-accent-hover:#73a0f4; --saas-accent-soft:rgba(91,141,239,.11);
+}
+
+html[data-preset='forest'] {
+  --saas-bg:#08110e; --saas-sidebar:#0b1511; --saas-surface:#101b16; --saas-surface-2:#14221b; --saas-surface-3:#192a21;
+  --saas-border:#24372d; --saas-border-soft:rgba(139,190,160,.09); --saas-text:#f2f7f4; --saas-text-2:#c3d2c9; --saas-muted:#7f9589; --saas-muted-2:#5c7165;
+  --saas-accent:#57c58b; --saas-accent-hover:#6bd29a; --saas-accent-soft:rgba(87,197,139,.11);
+}
+
+html[data-preset='stone'] {
+  --saas-bg:#11100e; --saas-sidebar:#151411; --saas-surface:#1b1916; --saas-surface-2:#211f1b; --saas-surface-3:#292620;
+  --saas-border:#38342c; --saas-border-soft:rgba(226,211,179,.09); --saas-text:#f5f2eb; --saas-text-2:#d3cdc0; --saas-muted:#938b7c; --saas-muted-2:#6d665b;
+  --saas-accent:#c7a96b; --saas-accent-hover:#d2b77e; --saas-accent-soft:rgba(199,169,107,.11);
+}
+
+html[data-preset='plum'] {
+  --saas-bg:#100c14; --saas-sidebar:#150f1a; --saas-surface:#1b1421; --saas-surface-2:#221929; --saas-surface-3:#2b2033;
+  --saas-border:#3b2d45; --saas-border-soft:rgba(198,164,218,.09); --saas-text:#f6f1f8; --saas-text-2:#d6c7dc; --saas-muted:#9987a1; --saas-muted-2:#715f79;
+  --saas-accent:#b48ad6; --saas-accent-hover:#c09bdf; --saas-accent-soft:rgba(180,138,214,.11);
+}
+
+html[data-preset='paper'] {
+  --saas-bg:#f2efe8; --saas-sidebar:#fbfaf7; --saas-surface:#ffffff; --saas-surface-2:#f7f5f0; --saas-surface-3:#efebe3;
+  --saas-border:#ded9cf; --saas-border-soft:rgba(45,55,49,.09); --saas-text:#202722; --saas-text-2:#465149; --saas-muted:#788078; --saas-muted-2:#9aa09a;
+  --saas-accent:#237a57; --saas-accent-hover:#2c8a64; --saas-accent-soft:rgba(35,122,87,.09); --saas-shadow:0 1px 2px rgba(34,43,37,.04),0 10px 28px rgba(34,43,37,.055);
+  color-scheme:light;
+}
+
+html[data-preset='paper'] body { background:var(--saas-bg) !important; color:var(--saas-text) !important; }
+html[data-preset='paper'] .product-dashboard input,
+html[data-preset='paper'] .product-dashboard select,
+html[data-preset='paper'] .product-dashboard textarea,
+html[data-preset='paper'] .auth-field input { background:#fbfaf7 !important; color:var(--saas-text) !important; }
+html[data-preset='paper'] .product-dashboard .dashboard-tabs { background:#f7f5f0 !important; }
+html[data-preset='paper'] .product-dashboard .meal-routine-option.active,
+html[data-preset='paper'] .sidebar-link.active { background:#e9f3ed !important; }
+html[data-preset='paper'] .product-dashboard .log li { background:#fbfaf7 !important; }
+html[data-preset='paper'] .nutrix-logo,
+html[data-preset='paper'] .sidebar-avatar { background:#e9f3ed !important; }
+
+/* Keep accent selector meaningful: user-selected action color wins on neutral Graphite only. */
+html[data-preset='graphite'][data-accent='blue'] { --saas-accent:#5b8def; --saas-accent-hover:#73a0f4; --saas-accent-soft:rgba(91,141,239,.11); }
+html[data-preset='graphite'][data-accent='purple'] { --saas-accent:#a78bfa; --saas-accent-hover:#b69cfb; --saas-accent-soft:rgba(167,139,250,.11); }
+html[data-preset='graphite'][data-accent='orange'] { --saas-accent:#d99a52; --saas-accent-hover:#e2aa69; --saas-accent-soft:rgba(217,154,82,.11); }
+
+/* Appearance picker */
+.appearance-popover-themes { width:350px !important; }
+.preset-options { display:grid; grid-template-columns:1fr 1fr; gap:7px; }
+.preset-option {
+  display:grid; grid-template-columns:42px 1fr 14px; align-items:center; gap:9px; min-width:0; padding:9px;
+  text-align:left; color:var(--saas-text-2,var(--text-soft)); background:transparent; border:1px solid var(--saas-border-soft,var(--border)); border-radius:11px; cursor:pointer;
+}
+.preset-option:hover { background:var(--saas-surface-2,rgba(255,255,255,.035)); border-color:var(--saas-border,var(--border-hover)); }
+.preset-option.active { background:var(--saas-accent-soft,var(--accent-soft)); border-color:color-mix(in srgb,var(--saas-accent,var(--accent)) 28%,transparent); }
+.preset-preview { display:flex; overflow:hidden; width:42px; height:30px; border:1px solid var(--saas-border-soft,var(--border)); border-radius:8px; }
+.preset-preview i { flex:1; height:100%; }
+.preset-copy { min-width:0; }
+.preset-copy strong { display:block; color:var(--saas-text,var(--text)); font-size:10px; font-weight:700; }
+.preset-copy small { display:block; overflow:hidden; margin-top:2px; color:var(--saas-muted,var(--muted)); font-size:7.5px; white-space:nowrap; text-overflow:ellipsis; }
+.appearance-compact-section { padding-top:12px !important; }
+.mode-options { display:grid; grid-template-columns:repeat(3,1fr); gap:5px; }
+.mode-option { min-height:34px; border:1px solid var(--saas-border-soft,var(--border)); border-radius:9px; background:transparent; color:var(--saas-muted,var(--muted)); font-size:9px; font-weight:650; cursor:pointer; }
+.mode-option span { margin-right:5px; }
+.mode-option.active { color:var(--saas-text,var(--text)); background:var(--saas-surface-3,rgba(255,255,255,.05)); border-color:var(--saas-border,var(--border-hover)); }
+
+/* Make the selected palette concrete across product chrome. */
+html[data-preset] .app-sidebar { background:var(--saas-sidebar) !important; border-color:var(--saas-border-soft) !important; }
+html[data-preset] .product-dashboard .card,
+html[data-preset] .product-dashboard .product-workspace,
+html[data-preset] .product-dashboard .compact-streak-card { background:var(--saas-surface) !important; border-color:var(--saas-border-soft) !important; }
+html[data-preset] .product-summary-grid { background:var(--saas-surface) !important; border-color:var(--saas-border-soft) !important; }
+html[data-preset] .sidebar-link.active { background:var(--saas-accent-soft) !important; border-color:color-mix(in srgb,var(--saas-accent) 22%,transparent) !important; }
+html[data-preset] .sidebar-link.active .sidebar-link-icon,
+html[data-preset] .product-dashboard .meal-routine-option.active .meal-routine-icon,
+html[data-preset] .product-dashboard .meal-routine-option.logged .meal-routine-state { color:var(--saas-accent) !important; }
+html[data-preset] .product-dashboard .meal-routine-option.active { border-color:color-mix(in srgb,var(--saas-accent) 26%,transparent) !important; background:var(--saas-accent-soft) !important; }
+html[data-preset] .appearance-popover { background:var(--saas-sidebar) !important; border-color:var(--saas-border) !important; color:var(--saas-text) !important; }
+
+@media (max-width:520px) {
+  .appearance-popover-themes { width:min(350px,calc(100vw - 24px)) !important; }
+  .preset-options { grid-template-columns:1fr; }
+}
