@@ -67,15 +67,26 @@ function Streaks({ waterStreak, kcalStreak, waterDone, kcalDone }) {
 function NutritionCore3D() {
   return (
     <div className="nutrition-core-stage" aria-hidden="true">
+      <div className="nutrition-core-aura aura-one" />
+      <div className="nutrition-core-aura aura-two" />
+      <div className="nutrition-core-grid" />
       <div className="nutrition-core-shadow" />
+
       <div className="nutrition-core-orbit orbit-one"><i /><i /><i /></div>
       <div className="nutrition-core-orbit orbit-two"><i /><i /></div>
+      <div className="nutrition-core-orbit orbit-three"><i /><i /></div>
+
       <div className="nutrition-core-sphere">
-        <span>N</span>
+        <span className="nutrition-core-shell shell-back" />
+        <span className="nutrition-core-shell shell-mid" />
+        <span className="nutrition-core-shell shell-front" />
+        <span className="nutrition-core-letter">N</span>
       </div>
+
       <div className="nutrition-core-chip core-chip-kcal"><strong>KCAL</strong><span>energia</span></div>
       <div className="nutrition-core-chip core-chip-water"><strong>H₂O</strong><span>hidratação</span></div>
       <div className="nutrition-core-chip core-chip-ai"><strong>AI</strong><span>insights</span></div>
+      <div className="nutrition-core-chip core-chip-protein"><strong>PRO</strong><span>proteína</span></div>
     </div>
   );
 }
