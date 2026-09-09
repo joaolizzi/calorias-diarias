@@ -16,6 +16,13 @@ const navigationGroups = [
     ],
   },
   {
+    label: 'Ações rápidas',
+    items: [
+      ['/?focus=water', '≈', 'Água', 'Registrar hidratação'],
+      ['/?panel=meals&focus=ai', '✦', 'IA', 'Descrever refeição'],
+    ],
+  },
+  {
     label: 'Progresso',
     items: [
       ['/?panel=insights', '◎', 'Metas', 'Objetivos e análise'],
