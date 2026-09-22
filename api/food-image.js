@@ -1,17 +1,12 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
 import { createClient } from '@supabase/supabase-js';
-import WebSocket from 'ws';
+import { generateGemini } from '../server/gemini-rest.js';
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-1.5-flash';
 const MAX_BASE64_CHARS = 11_000_000;
-const TIMEOUT_MS = 30_000;
-
-const rateBucket = new Map();
 const RATE_WINDOW_MS = 60_000;
 const RATE_MAX = 10;
+const rateBucket = new Map();
 
 function send(res, status, body) { return res.status(status).json(body); }
 
@@ -31,17 +26,11 @@ async function authenticate(req) {
 
 function rateLimit(userId) {
   const now = Date.now();
-  const entries = (rateBucket.get(userId) || []).filter((t) => now - t < RATE_WINDOW_MS);
+  const entries = (rateBucket.get(userId) || []).filter((time) => now - time < RATE_WINDOW_MS);
   if (entries.length >= RATE_MAX) return false;
   entries.push(now);
   rateBucket.set(userId, entries);
   return true;
-}
-
-function sanitizeInt(value, min, max) {
-  const n = Math.round(Number(value));
-  if (!Number.isFinite(n)) return null;
-  return Math.min(max, Math.max(min, n));
 }
 
 function extractJson(text) {
@@ -52,51 +41,44 @@ function extractJson(text) {
   if (block) { try { return JSON.parse(block[1]); } catch {} }
   const first = value.indexOf('{');
   const last = value.lastIndexOf('}');
-  if (first !== -1 && last > first) {
+  if (first >= 0 && last > first) {
     try { return JSON.parse(value.slice(first, last + 1)); } catch {}
   }
   return null;
 }
 
-function shapeItems(parsed) {
-  if (!parsed || !Array.isArray(parsed.items)) return [];
+function number(value, min, max, fallback = null) {
+  const n = Number(value);
+  return Number.isFinite(n) ? Math.min(max, Math.max(min, n)) : fallback;
+}
+
+function shapeItems(parsed, defaultMeal) {
+  if (!Array.isArray(parsed?.items)) return [];
+  const meals = new Set(['breakfast', 'lunch', 'dinner', 'snack']);
   return parsed.items.map((item) => {
-    const name = String(item.name || '').trim();
-    const grams = sanitizeInt(item.grams, 1, 2000);
-    const kcal = sanitizeInt(item.kcal, 0, 5000);
-    const protein = sanitizeInt(item.protein, 0, 300);
-    const carbs = sanitizeInt(item.carbs, 0, 500);
-    const fat = sanitizeInt(item.fat, 0, 300);
-    const confidence = sanitizeInt(item.confidence, 0, 100);
-    const meals = new Set(['breakfast', 'lunch', 'dinner', 'snack']);
-    const meal = meals.has(item.meal) ? item.meal : null;
-    if (!name || grams == null || kcal == null || protein == null || carbs == null || fat == null) return null;
-    return { name, grams, kcal, protein, carbs, fat, confidence: confidence ?? 0, meal };
+    const name = String(item?.name || '').trim().slice(0, 120);
+    const grams = Math.round(number(item?.grams, 1, 2500, 0));
+    const kcalPer100g = number(item?.kcalPer100g, 0, 900, null);
+    const proteinPer100g = number(item?.proteinPer100g, 0, 100, 0);
+    const carbsPer100g = number(item?.carbsPer100g, 0, 100, 0);
+    const fatPer100g = number(item?.fatPer100g, 0, 100, 0);
+    if (!name || !grams || kcalPer100g == null) return null;
+    const meal = meals.has(item?.meal) ? item.meal : defaultMeal;
+    return {
+      name,
+      grams,
+      kcal: Math.round((grams * kcalPer100g) / 100),
+      protein: Math.round((grams * proteinPer100g) / 10) / 10,
+      carbs: Math.round((grams * carbsPer100g) / 10) / 10,
+      fat: Math.round((grams * fatPer100g) / 10) / 10,
+      confidence: Math.round(number(item?.confidence, 0, 100, 50)),
+      meal,
+    };
   }).filter(Boolean).slice(0, 10);
 }
 
 function promptFor(meal) {
-  return `Você é um especialista em nutrição brasileira analisando uma foto de uma refeição. Identifique apenas alimentos realmente visíveis e estime a porção com base no tamanho aparente, densidade e contexto do prato.
-
-Responda SOMENTE JSON válido, sem markdown, no esquema:
-{"items":[{"name":string,"grams":number,"kcal":number,"protein":number,"carbs":number,"fat":number,"confidence":number,"meal":"breakfast"|"lunch"|"dinner"|"snack"}]}
-
-REGRAS DE IDENTIFICAÇÃO:
-- Não invente ingredientes, marcas ou variedades que não sejam visualmente sustentadas.
-- Para frutas e alimentos que possuem variedades visualmente parecidas, NÃO adivinhe a variedade. Se não houver evidência visual forte, use o nome genérico. Exemplo: se parecer banana mas não for possível distinguir banana-prata, banana-nanica, banana-maçã etc., retorne apenas "banana".
-- Só use uma variedade específica (como "banana-maçã" ou "banana-nanica") quando características visuais claras justificarem isso. A aparência isolada de tamanho/cor não é suficiente para ter certeza.
-- Nunca transforme "banana" automaticamente em "banana-nanica".
-- Liste no máximo 10 alimentos claramente visíveis.
-- Não inclua ingredientes escondidos ou presumidos.
-- grams é a porção total estimada daquele alimento na foto, entre 1 e 2000.
-- kcal, protein, carbs e fat são estimativas para a porção indicada.
-- confidence é de 0 a 100 e representa confiança na identificação e na estimativa.
-- Use nomes curtos em pt-BR.
-- Se for um prato misto, tente separar apenas componentes visualmente distinguíveis.
-- Use "${meal}" como meal quando a refeição não puder ser inferida da imagem.
-- A estimativa é aproximada e nunca deve ser apresentada como medição exata.
-
-Refeição informada pelo usuário: ${meal}`;
+  return `Analise a foto como assistente nutricional brasileiro. Identifique SOMENTE alimentos visíveis. Retorne SOMENTE JSON válido no formato {"items":[{"name":string,"grams":number,"kcalPer100g":number,"proteinPer100g":number,"carbsPer100g":number,"fatPer100g":number,"confidence":number,"meal":"breakfast"|"lunch"|"dinner"|"snack"}]}. Regras: nomes em pt-BR; máximo 10 itens; não invente marca, variedade ou ingredientes escondidos; não presuma óleo/manteiga invisível; estime grams pela porção aparente; use valores por 100 g plausíveis e compatíveis com alimentos brasileiros; confidence entre 0 e 100; use ${meal} quando a refeição não puder ser inferida.`;
 }
 
 export default async function handler(req, res) {
@@ -111,32 +93,29 @@ export default async function handler(req, res) {
   if (!['breakfast', 'lunch', 'dinner', 'snack'].includes(meal)) return send(res, 400, { ok: false, error: 'Refeição inválida' });
   if (typeof image !== 'string' || !image.startsWith('data:image/')) return send(res, 400, { ok: false, error: 'Imagem inválida' });
   if (image.length > MAX_BASE64_CHARS) return send(res, 413, { ok: false, error: 'Imagem muito grande' });
-  if (!GEMINI_API_KEY) return send(res, 500, { ok: false, error: 'GEMINI_API_KEY não configurada' });
 
   const match = image.match(/^data:(image\/(?:jpeg|jpg|png|webp));base64,([A-Za-z0-9+/=]+)$/i);
   if (!match) return send(res, 400, { ok: false, error: 'Formato de imagem não suportado' });
 
+  const mimeType = match[1].toLowerCase() === 'image/jpg' ? 'image/jpeg' : match[1].toLowerCase();
+
   try {
-    const gen = new GoogleGenerativeAI(GEMINI_API_KEY);
-    const model = gen.getGenerativeModel({
-      model: GEMINI_MODEL,
-      generationConfig: { responseMimeType: 'application/json' },
+    const result = await generateGemini({
+      parts: [
+        { text: promptFor(meal) },
+        { inlineData: { mimeType, data: match[2] } },
+      ],
+      timeoutMs: 30_000,
+      temperature: 0.1,
     });
-
-    const resultPromise = model.generateContent([
-      { text: promptFor(meal) },
-      { inlineData: { mimeType: match[1].toLowerCase() === 'image/jpg' ? 'image/jpeg' : match[1].toLowerCase(), data: match[2] } },
-    ]);
-    const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('Tempo limite da análise')), TIMEOUT_MS));
-    const result = await Promise.race([resultPromise, timeout]);
-    const parsed = extractJson(result.response.text());
-    const items = shapeItems(parsed);
-
-    return send(res, 200, { ok: true, data: items });
-  } catch (e) {
-    const msg = e?.message || 'Falha ao analisar imagem';
-    const status = /429|quota|rate|exhausted/i.test(msg) ? 429 : 502;
-    console.warn(`[food-image] erro user=${auth.user.id} status=${status} msg=${msg}`);
-    return send(res, status, { ok: false, error: msg });
+    const parsed = extractJson(result.text);
+    const items = shapeItems(parsed, meal);
+    if (!items.length) return send(res, 502, { ok: false, error: 'Não consegui identificar alimentos visíveis na imagem' });
+    return send(res, 200, { ok: true, data: items, model: result.model });
+  } catch (error) {
+    const message = error?.message || 'Falha ao analisar imagem';
+    const status = error?.status === 429 ? 429 : error?.status === 500 ? 500 : 502;
+    console.error(`[food-image] user=${auth.user.id} status=${status} ${message}`);
+    return send(res, status, { ok: false, error: message });
   }
 }
