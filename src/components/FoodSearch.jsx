@@ -3,14 +3,10 @@ import { searchFoods, searchTBCA } from '../lib/foods.js';
 import { searchFoodsGemini } from '../lib/gemini.js';
 import { toast } from './Toast.jsx';
 
-// Encadeia 3 fontes para a busca do usuário:
-//   1) Open Food Facts (industrializados, em qualquer idioma)
-//   2) TBCA local (public/tbca.json — pt-BR, ~6k alimentos, offline)
-//   3) Gemini (estimativa via IA — pratos caseiros, frases vagas)
-//
-// Cada item carrega `source` ('off' | 'tbca' | 'gemini') para UI saber
-// destacar a origem sem reinventar a forma do retorno.
-
+// Ordem pensada para um app brasileiro de dieta:
+//   1) TBCA local: alimentos in natura e preparações comuns no Brasil
+//   2) Open Food Facts: industrializados e produtos de marca
+//   3) Gemini: último recurso para termos vagos ou pratos não encontrados
 const SOURCE_LABEL = {
   off: 'Open Food Facts',
   tbca: 'TBCA',
@@ -32,6 +28,7 @@ export default function FoodSearch({ onPick }) {
       setLoading(false);
       return;
     }
+
     debRef.current = setTimeout(async () => {
       const ctrl = new AbortController();
       ctrlRef.current?.abort();
@@ -43,7 +40,6 @@ export default function FoodSearch({ onPick }) {
       const seen = new Set();
       const pushUnique = (items) => {
         for (const it of items) {
-          // dedup pelo par (name normalizado, kcalPer100g)
           const key = `${norm(it.name)}|${it.kcalPer100g}`;
           if (seen.has(key)) continue;
           seen.add(key);
@@ -51,40 +47,34 @@ export default function FoodSearch({ onPick }) {
         }
       };
 
-      // 1) OFF primeiro (industrializados são o caso comum)
-      try {
-        const off = await searchFoods(q, { limit: 6, signal: ctrl.signal });
-        pushUnique(off);
-        // OFF já retornou algo razoável: encerra cedo para não chamar Gemini à toa
-        if (merged.length >= 3) {
-          setResults(merged.slice(0, 8));
-          setLoading(false);
-          return;
-        }
-      } catch (e) {
-        if (e.name !== 'AbortError') {
-          // OFF pode falhar offline — não trava, segue para TBCA/Gemini
-          // eslint-disable-next-line no-console
-          console.warn('OFF falhou:', e?.message);
-        }
-      }
-
-      // 2) TBCA local (rápido, sem rede, sem custo)
+      // 1) TBCA primeiro: melhor referência para alimentos comuns no Brasil.
       if (!ctrl.signal.aborted) {
         try {
           const tbca = await searchTBCA(q, { limit: 6 });
           pushUnique(tbca);
-          if (merged.length >= 3) {
-            setResults(merged.slice(0, 8));
-            setLoading(false);
-            return;
-          }
-        } catch (e) {
-          // TBCA pode não existir (build sem o JSON) — segue
+        } catch {
+          // Se a base local falhar, seguimos normalmente.
         }
       }
 
-      // 3) Gemini como último recurso (custa cota gratuita)
+      // 2) Open Food Facts complementa com produtos industrializados/marcas.
+      if (!ctrl.signal.aborted) {
+        try {
+          const off = await searchFoods(q, { limit: 5, signal: ctrl.signal });
+          pushUnique(off);
+        } catch (e) {
+          if (e.name !== 'AbortError') console.warn('OFF falhou:', e?.message);
+        }
+      }
+
+      // Se as bases reais já responderam bem, não gastamos IA.
+      if (!ctrl.signal.aborted && merged.length >= 3) {
+        setResults(merged.slice(0, 8));
+        setLoading(false);
+        return;
+      }
+
+      // 3) IA apenas como fallback.
       if (!ctrl.signal.aborted) {
         try {
           const gem = await searchFoodsGemini(q, { signal: ctrl.signal });
@@ -93,11 +83,9 @@ export default function FoodSearch({ onPick }) {
           if (e.name === 'AbortError') {
             // ignorado
           } else if (e.status === 401) {
-            // não logado — não tenta de novo
+            // usuário não autenticado
           } else if (e.status === 429) {
             toast('Limite de IA atingido; tente mais tarde', { type: 'error' });
-          } else {
-            // silencioso: OFF/TBCA já populou a lista, ou fallback manual existe
           }
         }
       }
@@ -106,7 +94,8 @@ export default function FoodSearch({ onPick }) {
         setResults(merged.slice(0, 8));
         setLoading(false);
       }
-    }, 400);
+    }, 320);
+
     return () => clearTimeout(debRef.current);
   }, [q]);
 
@@ -129,7 +118,7 @@ export default function FoodSearch({ onPick }) {
 
       {!loading && q.trim().length >= 2 && results.length === 0 && !error && (
         <div className="muted" style={{ marginTop: 6 }}>
-          Nada encontrado. Use o botão "Não achei" abaixo para adicionar manual.
+          Nada encontrado. Use o botão "Não achei" abaixo para adicionar manualmente.
         </div>
       )}
 
@@ -167,5 +156,5 @@ export default function FoodSearch({ onPick }) {
 }
 
 function norm(s) {
-  return (s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+  return String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 }
