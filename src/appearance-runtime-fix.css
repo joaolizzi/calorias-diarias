@@ -1,6 +1,5 @@
-/* Appearance runtime fixes — loaded after premium-themes.css. */
+/* Appearance HUD — final runtime positioning and interaction layer. */
 
-/* The sidebar itself must not clip the appearance popover. Navigation scrolls instead. */
 .app-sidebar {
   overflow: visible !important;
 }
@@ -16,10 +15,10 @@
 
 .sidebar-tools-top {
   position: relative;
-  z-index: 300;
+  z-index: 1200;
   flex: 0 0 auto;
   width: 100%;
-  margin: 0 0 14px !important;
+  margin: 0 0 12px !important;
 }
 
 .sidebar-tools-top .appearance-menu,
@@ -44,19 +43,27 @@
   margin-left: auto;
 }
 
-/* Match the current JSX class names. */
-.appearance-popover-v2 {
-  z-index: 1000 !important;
+/* Desktop: open beside the sidebar, never below the viewport. */
+.sidebar-tools-top .appearance-popover-v2 {
+  position: fixed !important;
+  z-index: 5000 !important;
+  left: calc(var(--sidebar-left, 16px) + var(--sidebar-width, 252px) + 12px) !important;
+  right: auto !important;
+  top: auto !important;
+  bottom: 16px !important;
   width: 370px !important;
-  max-height: min(680px, calc(100vh - 32px));
-  overflow-y: auto;
+  max-width: calc(100vw - var(--sidebar-width, 252px) - 56px) !important;
+  max-height: min(680px, calc(100vh - 32px)) !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain;
   padding: 14px !important;
   border: 1px solid var(--saas-border, var(--border-hover)) !important;
-  background: var(--saas-sidebar, var(--panel-strong)) !important;
+  border-radius: 16px !important;
+  background: color-mix(in srgb, var(--saas-sidebar, var(--panel-strong)) 96%, transparent) !important;
   color: var(--saas-text, var(--text)) !important;
-  box-shadow: 0 22px 60px rgba(0,0,0,.34) !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
+  box-shadow: 0 24px 70px rgba(0,0,0,.38) !important;
+  backdrop-filter: blur(18px) !important;
+  -webkit-backdrop-filter: blur(18px) !important;
 }
 
 .appearance-presets {
@@ -86,7 +93,7 @@
 }
 
 .appearance-preset.active {
-  border-color: color-mix(in srgb, var(--saas-accent, var(--accent)) 30%, transparent);
+  border-color: color-mix(in srgb, var(--saas-accent, var(--accent)) 34%, transparent);
   background: var(--saas-accent-soft, var(--accent-soft));
 }
 
@@ -96,7 +103,7 @@
   width: 48px;
   height: 34px;
   overflow: hidden;
-  border: 1px solid rgba(255,255,255,.10);
+  border: 1px solid var(--saas-border-soft, rgba(255,255,255,.10));
   border-radius: 8px;
   background: var(--preview-bg);
 }
@@ -128,21 +135,14 @@
   background: var(--preview-accent);
 }
 
-.appearance-preset-copy {
-  min-width: 0;
-}
-
+.appearance-preset-copy { min-width: 0; }
 .appearance-preset-copy strong,
-.appearance-preset-copy small {
-  display: block;
-}
-
+.appearance-preset-copy small { display: block; }
 .appearance-preset-copy strong {
   color: var(--saas-text, var(--text));
   font-size: 10px;
   font-weight: 700;
 }
-
 .appearance-preset-copy small {
   margin-top: 2px;
   overflow: hidden;
@@ -169,10 +169,6 @@
   cursor: pointer;
 }
 
-.appearance-mode-option span {
-  margin-right: 5px;
-}
-
 .appearance-mode-option:hover {
   background: var(--saas-surface-2, rgba(255,255,255,.035));
   color: var(--saas-text-2, var(--text-soft));
@@ -184,60 +180,6 @@
   color: var(--saas-text, var(--text));
 }
 
-/* Light mode now changes the product surfaces even when a preset is selected. */
-html[data-theme='light'][data-preset]:not([data-preset='paper']) {
-  --saas-bg: #f4f6f8;
-  --saas-sidebar: #ffffff;
-  --saas-surface: #ffffff;
-  --saas-surface-2: #f7f9fa;
-  --saas-surface-3: #edf1f3;
-  --saas-border: #dce3e7;
-  --saas-border-soft: rgba(30,48,58,.09);
-  --saas-text: #182127;
-  --saas-text-2: #35434d;
-  --saas-muted: #74818a;
-  --saas-muted-2: #9aa4ab;
-  --saas-shadow: 0 1px 2px rgba(20,35,45,.04), 0 8px 24px rgba(20,35,45,.05);
-  color-scheme: light;
-}
-
-html[data-theme='light'][data-preset]:not([data-preset='paper']) body {
-  background: var(--saas-bg) !important;
-  color: var(--saas-text) !important;
-}
-
-html[data-theme='light'][data-preset]:not([data-preset='paper']) .product-dashboard input,
-html[data-theme='light'][data-preset]:not([data-preset='paper']) .product-dashboard select,
-html[data-theme='light'][data-preset]:not([data-preset='paper']) .product-dashboard textarea,
-html[data-theme='light'][data-preset]:not([data-preset='paper']) .auth-field input {
-  background: #f8fafb !important;
-  color: var(--saas-text) !important;
-}
-
-@media (prefers-color-scheme: light) {
-  html[data-theme='system'][data-preset]:not([data-preset='paper']) {
-    --saas-bg: #f4f6f8;
-    --saas-sidebar: #ffffff;
-    --saas-surface: #ffffff;
-    --saas-surface-2: #f7f9fa;
-    --saas-surface-3: #edf1f3;
-    --saas-border: #dce3e7;
-    --saas-border-soft: rgba(30,48,58,.09);
-    --saas-text: #182127;
-    --saas-text-2: #35434d;
-    --saas-muted: #74818a;
-    --saas-muted-2: #9aa4ab;
-    --saas-shadow: 0 1px 2px rgba(20,35,45,.04), 0 8px 24px rgba(20,35,45,.05);
-    color-scheme: light;
-  }
-
-  html[data-theme='system'][data-preset]:not([data-preset='paper']) body {
-    background: var(--saas-bg) !important;
-    color: var(--saas-text) !important;
-  }
-}
-
-/* Visible keyboard focus. */
 .appearance-trigger:focus-visible,
 .appearance-preset:focus-visible,
 .appearance-mode-option:focus-visible,
@@ -248,26 +190,28 @@ html[data-theme='light'][data-preset]:not([data-preset='paper']) .auth-field inp
 
 @media (max-width: 980px) {
   .app-sidebar {
-    overflow: hidden !important;
-  }
-
-  .sidebar-nav-expanded {
-    overflow-y: auto;
+    overflow: visible !important;
   }
 
   .sidebar-tools-top .appearance-popover-v2 {
-    position: fixed !important;
-    left: 12px !important;
-    right: 12px !important;
-    top: 76px !important;
-    bottom: auto !important;
-    width: auto !important;
-    max-height: calc(100vh - 92px);
+    position: absolute !important;
+    left: 0 !important;
+    right: auto !important;
+    top: auto !important;
+    bottom: 52px !important;
+    width: min(370px, calc(100vw - 48px)) !important;
+    max-width: min(370px, calc(100vw - 48px)) !important;
+    max-height: calc(100vh - 120px) !important;
   }
 }
 
 @media (max-width: 560px) {
   .appearance-presets {
     grid-template-columns: 1fr;
+  }
+
+  .sidebar-tools-top .appearance-popover-v2 {
+    width: calc(100vw - 48px) !important;
+    max-width: calc(100vw - 48px) !important;
   }
 }
