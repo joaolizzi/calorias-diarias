@@ -1,8 +1,10 @@
 // src/lib/gemini.js
 // Wrapper front para /api/gemini (proxy Vercel) e /api/food-image.
-// Mantém as chaves do Gemini fora do bundle e exige login.
+// A interpretação natural usa Gemini para entender a frase e TBCA para
+// substituir estimativas quando há correspondência confiável.
 
 import { supabase } from './supabase.js';
+import { resolveTBCAFood } from './foods.js';
 
 const ENDPOINT = '/api/gemini';
 const IMAGE_ENDPOINT = '/api/food-image';
@@ -31,8 +33,10 @@ async function post(body, { signal } = {}) {
     body: JSON.stringify(body),
     signal,
   });
+
   let json = null;
   try { json = await res.json(); } catch {}
+
   if (!res.ok) {
     const err = new Error(json?.error || `HTTP ${res.status}`);
     err.status = res.status;
@@ -85,12 +89,41 @@ export async function searchFoodsGemini(query, { signal } = {}) {
 export async function parseNaturalFood(query, defaultMeal = 'snack', { signal } = {}) {
   const items = await post({ intent: 'parse', q: query, meal: defaultMeal }, { signal });
   if (!Array.isArray(items)) return [];
-  return items.map((it) => ({
-    name: it.name,
-    grams: it.grams,
-    kcal: it.kcal,
-    meal: it.meal || defaultMeal,
-    source: 'gemini',
+
+  return Promise.all(items.map(async (it) => {
+    const grams = Math.max(1, Math.round(Number(it.grams) || 0));
+    let tbca = null;
+
+    try {
+      tbca = await resolveTBCAFood(it.name, { minScore: 0.68 });
+    } catch {
+      tbca = null;
+    }
+
+    if (tbca && grams > 0) {
+      return {
+        name: tbca.name || it.name,
+        grams,
+        kcal: Math.max(0, Math.round((Number(tbca.kcalPer100g) * grams) / 100)),
+        kcalPer100g: Number(tbca.kcalPer100g),
+        proteinPer100g: Number(tbca.proteinPer100g || 0),
+        carbsPer100g: Number(tbca.carbsPer100g || 0),
+        fatPer100g: Number(tbca.fatPer100g || 0),
+        meal: it.meal || defaultMeal,
+        confidence: Number(tbca.matchScore || 0) >= 0.82 ? 'high' : 'medium',
+        source: 'tbca',
+        originalName: it.name,
+      };
+    }
+
+    return {
+      name: it.name,
+      grams,
+      kcal: Math.max(0, Math.round(Number(it.kcal) || 0)),
+      meal: it.meal || defaultMeal,
+      confidence: it.confidence || 'medium',
+      source: 'gemini',
+    };
   }));
 }
 
