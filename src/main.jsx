@@ -11,6 +11,7 @@ import './visual-fixes.css';
 import './premium-themes.css';
 import './appearance-runtime-fix.css';
 import './product-polish.css';
+import './layout-contract.css';
 import App from './App.jsx';
 
 createRoot(document.getElementById('root')).render(
