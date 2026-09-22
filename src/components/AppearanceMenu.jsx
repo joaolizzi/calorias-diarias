@@ -7,19 +7,19 @@ const MODES = [
 ];
 
 const PRESETS = [
-  { id: 'graphite', label: 'Graphite', description: 'Grafite + verde', bg: '#0b0f14', panel: '#11171e', accent: '#52c58f' },
-  { id: 'midnight', label: 'Midnight', description: 'Azul executivo', bg: '#09111d', panel: '#101b2a', accent: '#6ea8fe' },
-  { id: 'forest', label: 'Forest', description: 'Verde profundo', bg: '#09130f', panel: '#0f1c17', accent: '#68c995' },
-  { id: 'stone', label: 'Stone', description: 'Grafite quente', bg: '#12110f', panel: '#1a1815', accent: '#d0ab68' },
-  { id: 'plum', label: 'Plum', description: 'Roxo discreto', bg: '#120e17', panel: '#1c1623', accent: '#b08ad6' },
-  { id: 'paper', label: 'Paper', description: 'Editorial claro', bg: '#f2f0ea', panel: '#fbfaf6', accent: '#478f69' },
+  { id: 'graphite', label: 'Obsidian', description: 'Grafite + índigo', bg: '#080b12', panel: '#101722', accent: '#7c8cff' },
+  { id: 'midnight', label: 'Midnight', description: 'Azul profundo + ciano', bg: '#07101c', panel: '#0f1b2b', accent: '#4cc9f0' },
+  { id: 'forest', label: 'Forest', description: 'Verde mineral', bg: '#07110d', panel: '#0f1c17', accent: '#6ee7b7' },
+  { id: 'stone', label: 'Stone', description: 'Grafite quente + dourado', bg: '#100f0d', panel: '#1a1815', accent: '#d8b56a' },
+  { id: 'plum', label: 'Plum', description: 'Ameixa + lavanda', bg: '#0f0b14', panel: '#1b1422', accent: '#c4a7e7' },
+  { id: 'paper', label: 'Paper', description: 'Claro + índigo', bg: '#f5f6fa', panel: '#ffffff', accent: '#6577f3' },
 ];
 
 const ACCENTS = [
-  { id: 'green', label: 'Verde', value: '#52c58f' },
-  { id: 'blue', label: 'Azul', value: '#60a5fa' },
-  { id: 'purple', label: 'Roxo', value: '#a78bfa' },
-  { id: 'orange', label: 'Laranja', value: '#fb923c' },
+  { id: 'green', label: 'Índigo', value: '#7c8cff' },
+  { id: 'blue', label: 'Ciano', value: '#38bdf8' },
+  { id: 'purple', label: 'Violeta', value: '#b59cff' },
+  { id: 'orange', label: 'Coral', value: '#ff8a65' },
 ];
 
 export default function AppearanceMenu({ theme, accent, preset, setTheme, setAccent, setPreset }) {
