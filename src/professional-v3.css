@@ -1,0 +1,242 @@
+/* Nutrix Professional V3 — overrides finais do dashboard */
+
+body .product-dashboard {
+  max-width: 1440px !important;
+  padding: 36px 38px 64px !important;
+}
+
+body .product-dashboard .product-dashboard-header {
+  margin: 0 0 22px !important;
+  padding: 30px !important;
+  border: 1px solid rgba(148,163,184,.18) !important;
+  border-radius: 26px !important;
+  background: linear-gradient(145deg, rgba(255,255,255,.055), rgba(255,255,255,.018)) !important;
+  box-shadow: 0 18px 55px rgba(0,0,0,.14) !important;
+}
+
+body .product-dashboard .product-dashboard-heading {
+  margin-bottom: 24px !important;
+}
+
+body .product-dashboard .product-dashboard-heading h1 {
+  margin: 12px 0 6px !important;
+  font-size: clamp(36px, 4vw, 52px) !important;
+  line-height: 1 !important;
+  letter-spacing: -2.2px !important;
+}
+
+body .product-dashboard .product-summary-grid {
+  display: grid !important;
+  grid-template-columns: 1.35fr repeat(3, minmax(0, 1fr)) !important;
+  gap: 12px !important;
+}
+
+body .product-dashboard .product-summary-item {
+  min-height: 122px !important;
+  padding: 20px !important;
+  border: 1px solid rgba(148,163,184,.16) !important;
+  border-radius: 18px !important;
+  background: rgba(255,255,255,.035) !important;
+  box-shadow: none !important;
+}
+
+body .product-dashboard .product-summary-item.primary {
+  border-color: color-mix(in srgb, var(--accent) 34%, transparent) !important;
+  background: linear-gradient(145deg, color-mix(in srgb, var(--accent) 15%, transparent), rgba(255,255,255,.03)) !important;
+}
+
+body .product-dashboard .product-summary-item strong {
+  margin-top: 8px !important;
+  font-size: 30px !important;
+  line-height: 1 !important;
+}
+
+body .product-dashboard .dashboard-overview-grid {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) 260px !important;
+  gap: 16px !important;
+  margin: 0 0 22px !important;
+}
+
+body .product-dashboard .dashboard-progress-grid-v3 {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 16px !important;
+}
+
+body .product-dashboard .dashboard-progress-grid-v3 .card,
+body .product-dashboard .compact-streak-card {
+  min-height: 176px !important;
+  border: 1px solid rgba(148,163,184,.16) !important;
+  border-radius: 22px !important;
+  background: rgba(255,255,255,.028) !important;
+  box-shadow: 0 14px 40px rgba(0,0,0,.11) !important;
+}
+
+body .product-dashboard .dashboard-progress-grid-v3 .card {
+  padding: 22px !important;
+}
+
+body .product-dashboard .compact-streak-card {
+  padding: 22px !important;
+}
+
+body .product-dashboard .dashboard-workspace {
+  margin-top: 0 !important;
+  border: 1px solid rgba(148,163,184,.18) !important;
+  border-radius: 26px !important;
+  background: rgba(255,255,255,.022) !important;
+  box-shadow: 0 22px 65px rgba(0,0,0,.14) !important;
+  overflow: hidden !important;
+}
+
+body .product-dashboard .dashboard-workspace-head {
+  min-height: 96px !important;
+  padding: 22px 26px !important;
+  border-bottom: 1px solid rgba(148,163,184,.14) !important;
+}
+
+body .product-dashboard .dashboard-workspace-head h2 {
+  margin-top: 7px !important;
+  font-size: 24px !important;
+}
+
+body .product-dashboard .dashboard-tabs {
+  display: inline-flex !important;
+  gap: 4px !important;
+  padding: 5px !important;
+  border: 1px solid rgba(148,163,184,.14) !important;
+  border-radius: 14px !important;
+  background: rgba(0,0,0,.1) !important;
+}
+
+body .product-dashboard .dashboard-tabs button {
+  min-height: 38px !important;
+  padding: 0 15px !important;
+  border-radius: 10px !important;
+  font-size: 11px !important;
+}
+
+body .product-dashboard .dashboard-tabs button.active {
+  background: color-mix(in srgb, var(--accent) 15%, transparent) !important;
+  color: var(--text) !important;
+}
+
+body .product-dashboard .dashboard-workspace-body {
+  padding: 24px !important;
+}
+
+body .product-dashboard .dashboard-routine-panel {
+  display: grid !important;
+  grid-template-columns: 320px minmax(0, 1fr) !important;
+  gap: 20px !important;
+  align-items: start !important;
+}
+
+body .product-dashboard .product-meal-routine,
+body .product-dashboard .active-meal-panel {
+  border: 1px solid rgba(148,163,184,.16) !important;
+  border-radius: 22px !important;
+  background: rgba(255,255,255,.025) !important;
+  box-shadow: none !important;
+}
+
+body .product-dashboard .product-meal-routine {
+  padding: 18px !important;
+}
+
+body .product-dashboard .meal-routine-options {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 8px !important;
+  margin-top: 14px !important;
+}
+
+body .product-dashboard .meal-routine-option {
+  min-height: 64px !important;
+  padding: 10px 12px !important;
+  border-radius: 13px !important;
+  border: 1px solid rgba(148,163,184,.13) !important;
+  background: rgba(255,255,255,.018) !important;
+}
+
+body .product-dashboard .meal-routine-option.active {
+  border-color: color-mix(in srgb, var(--accent) 38%, transparent) !important;
+  background: color-mix(in srgb, var(--accent) 11%, transparent) !important;
+}
+
+body .product-dashboard .active-meal-panel {
+  padding: 20px !important;
+}
+
+body .product-dashboard .search-results {
+  margin-top: 10px !important;
+  border: 1px solid rgba(148,163,184,.14) !important;
+  border-radius: 16px !important;
+  overflow: hidden !important;
+  background: rgba(255,255,255,.025) !important;
+}
+
+body .product-dashboard .search-results .item {
+  padding: 13px 14px !important;
+  border-bottom: 1px solid rgba(148,163,184,.1) !important;
+}
+
+body .product-dashboard .search-results .item:last-child {
+  border-bottom: 0 !important;
+}
+
+body .app-sidebar {
+  border-right: 1px solid rgba(148,163,184,.14) !important;
+  box-shadow: 18px 0 55px rgba(0,0,0,.08) !important;
+}
+
+body .app-sidebar .sidebar-link {
+  border-radius: 12px !important;
+}
+
+body .app-sidebar .sidebar-link.active {
+  background: color-mix(in srgb, var(--accent) 12%, transparent) !important;
+  border-color: color-mix(in srgb, var(--accent) 26%, transparent) !important;
+}
+
+@media (max-width: 1180px) {
+  body .product-dashboard .product-summary-grid {
+    grid-template-columns: repeat(2, minmax(0,1fr)) !important;
+  }
+  body .product-dashboard .dashboard-routine-panel {
+    grid-template-columns: 1fr !important;
+  }
+  body .product-dashboard .meal-routine-options {
+    grid-template-columns: repeat(2, minmax(0,1fr)) !important;
+  }
+}
+
+@media (max-width: 760px) {
+  body .product-dashboard {
+    padding: 82px 14px 36px !important;
+  }
+  body .product-dashboard .product-dashboard-header {
+    padding: 20px !important;
+    border-radius: 20px !important;
+  }
+  body .product-dashboard .product-summary-grid,
+  body .product-dashboard .dashboard-overview-grid,
+  body .product-dashboard .dashboard-progress-grid-v3,
+  body .product-dashboard .meal-routine-options {
+    grid-template-columns: 1fr !important;
+  }
+  body .product-dashboard .dashboard-workspace-head {
+    align-items: flex-start !important;
+    flex-direction: column !important;
+  }
+  body .product-dashboard .dashboard-tabs {
+    width: 100% !important;
+  }
+  body .product-dashboard .dashboard-tabs button {
+    flex: 1 !important;
+  }
+  body .product-dashboard .dashboard-workspace-body {
+    padding: 14px !important;
+  }
+}
