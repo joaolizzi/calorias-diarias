@@ -1,0 +1,177 @@
+/* Nutrix color system — final palette layer.
+   One accent for actions, semantic colors for nutrition states. */
+
+:root,
+html[data-preset='graphite'] {
+  --saas-bg: #080b12;
+  --saas-sidebar: #0b1019;
+  --saas-surface: #101722;
+  --saas-surface-2: #151e2b;
+  --saas-surface-3: #1b2635;
+  --saas-border: #273345;
+  --saas-border-soft: rgba(159, 176, 201, .11);
+  --saas-text: #f7f9fc;
+  --saas-text-2: #d5dce7;
+  --saas-muted: #8a96a8;
+  --saas-muted-2: #596679;
+  --saas-accent: #7c8cff;
+  --saas-accent-hover: #92a0ff;
+  --saas-accent-soft: rgba(124, 140, 255, .13);
+  --saas-shadow: 0 18px 48px rgba(0, 0, 0, .18);
+
+  --bg: var(--saas-bg);
+  --bg-soft: #0d121c;
+  --panel: var(--saas-surface);
+  --panel-strong: var(--saas-surface);
+  --panel-hover: var(--saas-surface-2);
+  --panel-2: #0d141f;
+  --border: var(--saas-border-soft);
+  --border-hover: rgba(159, 176, 201, .20);
+  --text: var(--saas-text);
+  --text-soft: var(--saas-text-2);
+  --muted: var(--saas-muted);
+  --muted-2: var(--saas-muted-2);
+
+  --accent: var(--saas-accent);
+  --accent-strong: var(--saas-accent-hover);
+  --accent-soft: var(--saas-accent-soft);
+
+  --water: #38bdf8;
+  --water-2: #0ea5e9;
+  --water-soft: rgba(56, 189, 248, .12);
+  --food: #ff8a65;
+  --food-2: #f9734e;
+  --food-soft: rgba(255, 138, 101, .12);
+  --good: #34d399;
+  --good-2: #10b981;
+  --good-soft: rgba(52, 211, 153, .12);
+  --warn: #f6c453;
+  --warn-soft: rgba(246, 196, 83, .13);
+  --bad: #fb7185;
+  --bad-soft: rgba(251, 113, 133, .13);
+  --ai: #b59cff;
+  --ai-soft: rgba(181, 156, 255, .13);
+}
+
+/* Presets stay distinct but use a calmer, more polished palette. */
+html[data-preset='midnight'] {
+  --saas-bg:#07101c; --saas-sidebar:#091421; --saas-surface:#0f1b2b; --saas-surface-2:#14243a; --saas-surface-3:#1a2d47;
+  --saas-border:#2b405d; --saas-border-soft:rgba(128,170,226,.12); --saas-text:#f5f9ff; --saas-text-2:#cdd9e8; --saas-muted:#8497ae; --saas-muted-2:#5c6f86;
+  --saas-accent:#4cc9f0; --saas-accent-hover:#70d6f5; --saas-accent-soft:rgba(76,201,240,.12);
+}
+
+html[data-preset='forest'] {
+  --saas-bg:#07110d; --saas-sidebar:#0a1511; --saas-surface:#0f1c17; --saas-surface-2:#14251d; --saas-surface-3:#1a3025;
+  --saas-border:#294234; --saas-border-soft:rgba(140,205,169,.11); --saas-text:#f3faf6; --saas-text-2:#c9ddd2; --saas-muted:#839b8d; --saas-muted-2:#5d7467;
+  --saas-accent:#6ee7b7; --saas-accent-hover:#8cecc5; --saas-accent-soft:rgba(110,231,183,.12);
+}
+
+html[data-preset='stone'] {
+  --saas-bg:#100f0d; --saas-sidebar:#141310; --saas-surface:#1a1815; --saas-surface-2:#221f1a; --saas-surface-3:#2a261f;
+  --saas-border:#3e382e; --saas-border-soft:rgba(226,207,166,.11); --saas-text:#faf7ef; --saas-text-2:#ddd5c6; --saas-muted:#9c9282; --saas-muted-2:#71695d;
+  --saas-accent:#d8b56a; --saas-accent-hover:#e1c27f; --saas-accent-soft:rgba(216,181,106,.12);
+}
+
+html[data-preset='plum'] {
+  --saas-bg:#0f0b14; --saas-sidebar:#140f1a; --saas-surface:#1b1422; --saas-surface-2:#241a2d; --saas-surface-3:#2e2139;
+  --saas-border:#43324f; --saas-border-soft:rgba(210,177,229,.11); --saas-text:#fbf7fd; --saas-text-2:#dfd0e5; --saas-muted:#a08da8; --saas-muted-2:#75627d;
+  --saas-accent:#c4a7e7; --saas-accent-hover:#d0b7ec; --saas-accent-soft:rgba(196,167,231,.12);
+}
+
+html[data-preset='paper'] {
+  --saas-bg:#f5f6fa; --saas-sidebar:#ffffff; --saas-surface:#ffffff; --saas-surface-2:#f7f8fc; --saas-surface-3:#eef1f7;
+  --saas-border:#d9deea; --saas-border-soft:rgba(49,63,91,.10); --saas-text:#182033; --saas-text-2:#3f4b63; --saas-muted:#758097; --saas-muted-2:#9da5b5;
+  --saas-accent:#6577f3; --saas-accent-hover:#5266ec; --saas-accent-soft:rgba(101,119,243,.10); --saas-shadow:0 12px 34px rgba(30,42,67,.07);
+}
+
+/* The user's action-color selector remains meaningful on the neutral Obsidian preset.
+   Keep the historic ids so existing localStorage preferences continue working. */
+html[data-preset='graphite'][data-accent='green'] {
+  --saas-accent:#7c8cff; --saas-accent-hover:#92a0ff; --saas-accent-soft:rgba(124,140,255,.13);
+}
+html[data-preset='graphite'][data-accent='blue'] {
+  --saas-accent:#38bdf8; --saas-accent-hover:#60cffb; --saas-accent-soft:rgba(56,189,248,.13);
+}
+html[data-preset='graphite'][data-accent='purple'] {
+  --saas-accent:#b59cff; --saas-accent-hover:#c3afff; --saas-accent-soft:rgba(181,156,255,.13);
+}
+html[data-preset='graphite'][data-accent='orange'] {
+  --saas-accent:#ff8a65; --saas-accent-hover:#ff9f80; --saas-accent-soft:rgba(255,138,101,.13);
+}
+
+html[data-preset] {
+  --bg: var(--saas-bg);
+  --panel: var(--saas-surface);
+  --panel-strong: var(--saas-surface);
+  --panel-hover: var(--saas-surface-2);
+  --border: var(--saas-border-soft);
+  --border-hover: var(--saas-border);
+  --text: var(--saas-text);
+  --text-soft: var(--saas-text-2);
+  --muted: var(--saas-muted);
+  --muted-2: var(--saas-muted-2);
+  --accent: var(--saas-accent);
+  --accent-strong: var(--saas-accent-hover);
+  --accent-soft: var(--saas-accent-soft);
+}
+
+/* Give the app depth without turning it into a neon interface. */
+body {
+  background:
+    radial-gradient(circle at 78% -10%, color-mix(in srgb, var(--saas-accent) 8%, transparent), transparent 32%),
+    radial-gradient(circle at 20% 110%, color-mix(in srgb, var(--water) 5%, transparent), transparent 30%),
+    var(--saas-bg) !important;
+}
+
+.product-dashboard .product-dashboard-header {
+  background:
+    radial-gradient(circle at 92% 0%, color-mix(in srgb, var(--saas-accent) 14%, transparent), transparent 30%),
+    linear-gradient(145deg, color-mix(in srgb, var(--saas-surface-2) 78%, var(--saas-surface)), var(--saas-surface)) !important;
+}
+
+.app-sidebar {
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--saas-accent) 3%, var(--saas-sidebar)), var(--saas-sidebar)) !important;
+}
+
+.sidebar-primary-action,
+.btn.primary,
+.btn-primary,
+.auth-primary-action {
+  border-color: color-mix(in srgb, var(--saas-accent) 55%, transparent) !important;
+  background: linear-gradient(135deg, var(--saas-accent), color-mix(in srgb, var(--saas-accent) 72%, #ffffff)) !important;
+  color: #090d17 !important;
+}
+
+.sidebar-link.active,
+.product-dashboard .meal-routine-option.active {
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--saas-accent) 7%, transparent) !important;
+}
+
+.pill.ai,
+.natural-modal-kicker {
+  color: var(--ai) !important;
+  border-color: color-mix(in srgb, var(--ai) 28%, transparent) !important;
+  background: var(--ai-soft) !important;
+}
+
+html[data-theme='light'][data-preset]:not([data-preset='paper']) {
+  --saas-bg:#f6f7fb;
+  --saas-sidebar:#ffffff;
+  --saas-surface:#ffffff;
+  --saas-surface-2:#f8f9fc;
+  --saas-surface-3:#eef1f7;
+  --saas-border:#dce1eb;
+  --saas-border-soft:rgba(42,55,82,.09);
+  --saas-text:#172033;
+  --saas-text-2:#3f4b62;
+  --saas-muted:#748096;
+  --saas-muted-2:#9ba4b5;
+  --saas-shadow:0 12px 34px rgba(30,42,67,.07);
+}
+
+html[data-theme='light'] body {
+  background:
+    radial-gradient(circle at 80% -10%, color-mix(in srgb, var(--saas-accent) 7%, transparent), transparent 30%),
+    var(--saas-bg) !important;
+}
