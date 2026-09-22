@@ -1,0 +1,88 @@
+/* Nutrix layout contract — geometry only. Keep this file visual-style agnostic. */
+
+/* Desktop: preserve the fixed sidebar gutter and cap the content width. */
+@media (min-width: 981px) {
+  body .app.premium-dashboard.product-dashboard {
+    width: auto !important;
+    max-width: 1320px !important;
+    margin-left: calc(var(--sidebar-left) + var(--sidebar-width) + var(--sidebar-content-gap)) !important;
+    margin-right: 24px !important;
+    padding: 30px 0 64px !important;
+  }
+}
+
+/* Tablet/mobile: ProfessionalHeader already occupies normal flow through mobile-appbar. */
+@media (max-width: 980px) {
+  body .app.premium-dashboard.product-dashboard {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 12px 44px !important;
+  }
+
+  body .product-dashboard .product-dashboard-header {
+    margin-top: 14px !important;
+  }
+}
+
+@media (max-width: 560px) {
+  body .app.premium-dashboard.product-dashboard {
+    padding-inline: 10px !important;
+  }
+}
+
+/* Progress bars are bars; the percentage belongs below them, not inside an 8px track. */
+body .product-dashboard .progress {
+  height: 8px !important;
+  margin: 16px 0 25px !important;
+  overflow: visible !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+body .product-dashboard .progress-label {
+  position: absolute !important;
+  inset: 13px 0 auto 0 !important;
+  display: block !important;
+  color: var(--saas-muted) !important;
+  font-size: 9px !important;
+  font-weight: 650 !important;
+  line-height: 1.2 !important;
+  text-align: left !important;
+  text-shadow: none !important;
+}
+
+body .product-dashboard .progress-card-food .progress-fill {
+  background: linear-gradient(90deg, var(--food), var(--food-2)) !important;
+  box-shadow: none !important;
+}
+
+body .product-dashboard .progress-card-water .progress-fill {
+  background: linear-gradient(90deg, var(--water), var(--water-2)) !important;
+  box-shadow: none !important;
+}
+
+body .product-dashboard .progress-fill.over {
+  background: linear-gradient(90deg, var(--good), var(--good-2)) !important;
+}
+
+/* Prevent long food names and actions from forcing horizontal overflow. */
+body .product-dashboard,
+body .product-dashboard .dashboard-workspace,
+body .product-dashboard .active-meal-panel,
+body .product-dashboard .food-section-card,
+body .product-dashboard .search-results .item,
+body .product-dashboard .food-entry-action {
+  min-width: 0;
+}
+
+body .product-dashboard .search-results .info,
+body .product-dashboard .food-entry-action > span:last-child,
+body .product-dashboard .food-log li > div:first-child {
+  min-width: 0;
+}
+
+body .product-dashboard .search-results .name,
+body .product-dashboard .food-log .amt {
+  overflow-wrap: anywhere;
+}
