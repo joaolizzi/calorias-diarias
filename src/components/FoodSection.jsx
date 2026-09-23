@@ -69,14 +69,14 @@ export default function FoodSection({ meal, entries, onChange, initialAction = n
                   <div className="food-entry-meta"><span>P {macro.protein.toFixed(1)}g</span><span>C {macro.carbs.toFixed(1)}g</span><span>G {macro.fat.toFixed(1)}g</span>{e.source ? <span className="food-source-mini">{SOURCE_LABEL[e.source] || e.source}</span> : null}</div>
                   <div className="when">{fmtTime(e.consumed_at)}{e.day ? ` · ${e.day}` : ''}</div>
                 </div>
-                <button className="x" onClick={() => remove(e.id)} title="Remover">×</button>
+                <button type="button" className="x" onClick={() => remove(e.id)} title={`Remover ${e.name}`} aria-label={`Remover ${e.name}`}>×</button>
               </li>
             );
           })}
         </ul>
       )}
 
-      {entries.length > 0 && <div className="food-section-footer"><button className="btn danger" onClick={clearMeal}>Limpar refeição</button></div>}
+      {entries.length > 0 && <div className="food-section-footer"><button type="button" className="btn danger" onClick={clearMeal}>Limpar refeição</button></div>}
 
       {modalItem && <AddFoodModal item={modalItem} meal={meal} onClose={() => setModalItem(null)} onSaved={onChange} />}
       {showManual && <AddFoodModal item={null} meal={meal} onClose={() => setShowManual(false)} onSaved={onChange} />}
