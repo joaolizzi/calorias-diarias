@@ -15,6 +15,7 @@ import './color-system.css';
 import './brand-accent.css';
 import './appearance-runtime-fix.css';
 import './macro-system.css';
+import './history-charts.css';
 import App from './App.jsx';
 
 createRoot(document.getElementById('root')).render(
