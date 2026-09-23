@@ -206,9 +206,16 @@ export default async function handler(req, res) {
 
     return send(res, 200, { ok: true, data, model: result.model });
   } catch (error) {
-    const message = error?.message || 'Falha na IA';
-    const status = error?.status === 429 ? 429 : error?.status === 500 ? 500 : 502;
-    console.error(`[gemini] intent=${intent} user=${auth.user.id} status=${status} ${message}`);
-    return send(res, status, { ok: false, error: message });
+    const technicalMessage = error?.message || 'Falha na IA';
+    const publicMessage = error?.publicMessage || technicalMessage;
+    const status = error?.code === 'AI_TEMPORARILY_UNAVAILABLE'
+      ? 503
+      : error?.status === 429
+        ? 429
+        : error?.status === 500
+          ? 500
+          : 502;
+    console.error(`[gemini] intent=${intent} user=${auth.user.id} status=${status} ${technicalMessage}`);
+    return send(res, status, { ok: false, error: publicMessage });
   }
 }
