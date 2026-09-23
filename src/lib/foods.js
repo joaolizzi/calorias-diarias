@@ -10,78 +10,39 @@ let _tbcaLoading = null;
 async function loadTBCA() {
   if (_tbcaCache) return _tbcaCache;
   if (_tbcaLoading) return _tbcaLoading;
-
   _tbcaLoading = fetch(TBCA_URL)
-    .then((r) => {
-      if (!r.ok) throw new Error(`TBCA: HTTP ${r.status}`);
-      return r.json();
-    })
-    .then((arr) => {
-      if (!Array.isArray(arr)) throw new Error('TBCA: JSON inválido');
-      _tbcaCache = arr;
-      return arr;
-    })
-    .catch((e) => {
-      _tbcaLoading = null;
-      throw e;
-    });
-
+    .then((r) => { if (!r.ok) throw new Error(`TBCA: HTTP ${r.status}`); return r.json(); })
+    .then((arr) => { if (!Array.isArray(arr)) throw new Error('TBCA: JSON inválido'); _tbcaCache = arr; return arr; })
+    .catch((e) => { _tbcaLoading = null; throw e; });
   return _tbcaLoading;
 }
 
 const COMBINING_MARKS = /[\u0300-\u036f]/g;
-const STOP_WORDS = new Set([
-  'de','da','do','das','dos','com','sem','em','ao','aos','na','no','nas','nos',
-  'um','uma','para','por','tipo','caseiro','caseira',
-]);
+const STOP_WORDS = new Set(['de','da','do','das','dos','com','sem','em','ao','aos','na','no','nas','nos','um','uma','para','por','tipo','caseiro','caseira']);
 
 function norm(s) {
-  return String(s || '')
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(COMBINING_MARKS, '')
-    .replace(/[^a-z0-9\s]/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
+  return String(s || '').toLowerCase().normalize('NFD').replace(COMBINING_MARKS, '').replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
 }
 
-function tokens(s) {
-  return norm(s)
-    .split(' ')
-    .filter((token) => token.length > 1 && !STOP_WORDS.has(token));
-}
+function tokens(s) { return norm(s).split(' ').filter((token) => token.length > 1 && !STOP_WORDS.has(token)); }
 
 function preparationBonus(query, candidate) {
-  const q = norm(query);
-  const c = norm(candidate);
+  const q = norm(query); const c = norm(candidate);
   const prepTerms = ['cozido','cozida','cru','crua','grelhado','grelhada','assado','assada','frito','frita','integral','desnatado','desnatada'];
   let score = 0;
-  for (const term of prepTerms) {
-    const qHas = q.includes(term);
-    const cHas = c.includes(term);
-    if (qHas && cHas) score += 0.08;
-    else if (qHas && !cHas) score -= 0.06;
-  }
+  for (const term of prepTerms) { const qHas = q.includes(term); const cHas = c.includes(term); if (qHas && cHas) score += 0.08; else if (qHas && !cHas) score -= 0.06; }
   return score;
 }
 
 function similarity(query, candidate) {
-  const q = norm(query);
-  const c = norm(candidate);
+  const q = norm(query); const c = norm(candidate);
   if (!q || !c) return 0;
   if (q === c) return 1;
-
   let score = 0;
   if (c.startsWith(q) || q.startsWith(c)) score += 0.52;
   else if (c.includes(q) || q.includes(c)) score += 0.4;
-
-  const qTokens = tokens(q);
-  const cTokens = new Set(tokens(c));
-  if (qTokens.length) {
-    const hits = qTokens.filter((token) => cTokens.has(token)).length;
-    score += (hits / qTokens.length) * 0.48;
-  }
-
+  const qTokens = tokens(q); const cTokens = new Set(tokens(c));
+  if (qTokens.length) score += (qTokens.filter((token) => cTokens.has(token)).length / qTokens.length) * 0.48;
   score += preparationBonus(q, c);
   return Math.max(0, Math.min(1, score));
 }
@@ -103,24 +64,11 @@ function mapTBCAItem(it, score = null) {
 export async function searchTBCA(query, { limit = 8 } = {}) {
   const q = norm(String(query || '').trim());
   if (q.length < 2) return [];
-
   let arr;
-  try {
-    arr = await loadTBCA();
-  } catch {
-    return [];
-  }
-
-  return arr
-    .map((item) => ({ item, score: similarity(q, item.name) }))
-    .filter(({ item, score }) => Number(item.kcalPer100g) > 0 && score >= 0.34)
-    .sort((a, b) => b.score - a.score)
-    .slice(0, limit)
-    .map(({ item, score }) => mapTBCAItem(item, score));
+  try { arr = await loadTBCA(); } catch { return []; }
+  return arr.map((item) => ({ item, score: similarity(q, item.name) })).filter(({ item, score }) => Number(item.kcalPer100g) > 0 && score >= 0.34).sort((a, b) => b.score - a.score).slice(0, limit).map(({ item, score }) => mapTBCAItem(item, score));
 }
 
-// Resolve um item da IA contra a TBCA. Só substitui valores quando o match
-// é forte o bastante para não transformar uma correção em outro chute.
 export async function resolveTBCAFood(query, { minScore = 0.68 } = {}) {
   const matches = await searchTBCA(query, { limit: 5 });
   const best = matches[0];
@@ -128,9 +76,7 @@ export async function resolveTBCAFood(query, { minScore = 0.68 } = {}) {
   return best;
 }
 
-export function prefetchTBCA() {
-  loadTBCA().catch(() => {});
-}
+export function prefetchTBCA() { loadTBCA().catch(() => {}); }
 
 export async function searchFoods(query, { limit = 10, signal } = {}) {
   const q = (query || '').trim();
@@ -151,18 +97,20 @@ export async function searchFoods(query, { limit = 10, signal } = {}) {
   return (data.products || [])
     .map((p) => {
       const name = p.product_name_pt || p.product_name || p.generic_name || p.product_name_en;
-      const kcal = Number(
-        p.nutriments?.['energy-kcal_100g'] ??
-        p.nutriments?.energy_kcal ??
-        p.nutriments?.energy ??
-        0
-      );
+      const nutriments = p.nutriments || {};
+      const kcal = Number(nutriments['energy-kcal_100g'] ?? nutriments.energy_kcal ?? nutriments.energy ?? 0);
+      const protein = Number(nutriments.proteins_100g ?? nutriments.proteins ?? 0);
+      const carbs = Number(nutriments.carbohydrates_100g ?? nutriments.carbohydrates ?? 0);
+      const fat = Number(nutriments.fat_100g ?? nutriments.fat ?? 0);
       return {
         id: p.code,
         name: (name || '').trim() || '(sem nome)',
         brand: p.brands || '',
         kcalPer100g: Number.isFinite(kcal) ? Math.round(kcal) : 0,
-        source: 'off',
+        proteinPer100g: Number.isFinite(protein) ? Math.round(protein * 10) / 10 : 0,
+        carbsPer100g: Number.isFinite(carbs) ? Math.round(carbs * 10) / 10 : 0,
+        fatPer100g: Number.isFinite(fat) ? Math.round(fat * 10) / 10 : 0,
+        source: 'openfoodfacts',
       };
     })
     .filter((p) => p.name && p.kcalPer100g > 0)
