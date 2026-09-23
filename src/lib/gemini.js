@@ -76,7 +76,10 @@ export async function parseNaturalFood(query, defaultMeal = 'snack', { signal } 
       const carbsPer100g = Number(tbca.carbsPer100g || 0);
       const fatPer100g = Number(tbca.fatPer100g || 0);
       return {
-        name: tbca.name || it.name,
+        // O nome amigável interpretado pela IA continua sendo exibido/salvo.
+        // O nome técnico da TBCA fica apenas como referência para auditoria.
+        name: String(it.name || tbca.name || '').trim(),
+        referenceName: tbca.name || null,
         grams,
         kcal: Math.max(0, Math.round((Number(tbca.kcalPer100g) * grams) / 100)),
         kcalPer100g: Number(tbca.kcalPer100g),
@@ -87,7 +90,7 @@ export async function parseNaturalFood(query, defaultMeal = 'snack', { signal } 
         carbs: round1(carbsPer100g * grams / 100),
         fat: round1(fatPer100g * grams / 100),
         meal: it.meal || defaultMeal,
-        confidence: Number(tbca.matchScore || 0) >= 0.82 ? 'high' : 'medium',
+        confidence: Number(tbca.matchScore || 0) >= 0.86 ? 'high' : 'medium',
         source: 'tbca',
         originalName: it.name,
       };
