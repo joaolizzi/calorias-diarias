@@ -49,7 +49,24 @@ function DashboardHeader({ day, kcalConsumed, kcalGoal, waterConsumed, waterGoal
 
 function CompactStreaks({ waterStreak, kcalStreak, waterDone, kcalDone }) {
   const streak = Math.min(waterStreak, kcalStreak);
-  return <section className="compact-streak-card"><div className="compact-streak-main"><span className="product-section-label">Consistência</span><strong>{streak}</strong><small>dias de sequência</small></div><div className="compact-streak-status"><span className={waterDone ? 'done' : ''}><i /> Água <b>{waterStreak}d</b></span><span className={kcalDone ? 'done' : ''}><i /> Calorias <b>{kcalStreak}d</b></span></div></section>;
+  const active = streak > 0 || waterDone || kcalDone;
+  return (
+    <section className="streak-inline-card">
+      <div className="streak-fire-wrap" aria-hidden="true">
+        <span className="streak-fire-glow" />
+        <span className={`streak-fire ${active ? '' : 'inactive'}`} />
+      </div>
+      <div className="streak-inline-copy">
+        <span>Sequência</span>
+        <strong>{streak}</strong>
+        <small>{streak === 1 ? 'dia consistente' : 'dias consistentes'}</small>
+      </div>
+      <div className="streak-inline-status">
+        <span className={`streak-chip ${waterDone ? 'done' : ''}`}><i /> Água <b>{waterStreak}d</b></span>
+        <span className={`streak-chip ${kcalDone ? 'done' : ''}`}><i /> Calorias <b>{kcalStreak}d</b></span>
+      </div>
+    </section>
+  );
 }
 
 function MacroCard({ label, value, goal, type }) {
@@ -131,7 +148,7 @@ export default function Dashboard({ theme, accent, preset, setTheme, setAccent, 
   useEffect(() => {
     const focus = searchParams.get('focus');
     if (focus === 'register' && activePanel === 'meals') { const timer = window.setTimeout(() => document.querySelector('.active-meal-panel input')?.focus(), 120); return () => window.clearTimeout(timer); }
-    if (focus === 'water') { const timer = window.setTimeout(() => document.querySelector('.dashboard-progress-grid-v3 .card:nth-child(2)')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 120); return () => window.clearTimeout(timer); }
+    if (focus === 'water') { const timer = window.setTimeout(() => document.querySelector('.dashboard-vitals-water .progress-card-water')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 120); return () => window.clearTimeout(timer); }
     return undefined;
   }, [activePanel, searchParams]);
 
@@ -150,7 +167,19 @@ export default function Dashboard({ theme, accent, preset, setTheme, setAccent, 
     <div className="app premium-dashboard dashboard-v3 product-dashboard">
       <ProfessionalHeader subtitle={`${fmtDateLabel(day)} — Hoje`} theme={theme} accent={accent} preset={preset} setTheme={setTheme} setAccent={setAccent} setPreset={setPreset} />
       <DashboardHeader day={day} kcalConsumed={kcalConsumed} kcalGoal={kcalGoal} waterConsumed={waterConsumed} waterGoal={waterGoal} mealsLogged={mealsLogged} />
-      <section className="dashboard-overview-grid product-overview-grid"><div className="dashboard-progress-grid dashboard-progress-grid-v3"><ProgressCard title="Calorias" unit="kcal" consumed={kcalConsumed} goal={kcalGoal} variant="food" /><ProgressCard title="Água" unit="ml" consumed={waterConsumed} goal={waterGoal} variant="water"><WaterTracker entries={waterEntries} onChange={reloadToday} /></ProgressCard></div><CompactStreaks waterStreak={waterStreak} kcalStreak={kcalStreak} waterDone={waterConsumed >= waterGoal} kcalDone={kcalConsumed >= kcalGoal} /></section>
+
+      <section className="dashboard-vitals-grid">
+        <div className="dashboard-vitals-left">
+          <ProgressCard title="Calorias" unit="kcal" consumed={kcalConsumed} goal={kcalGoal} variant="food" />
+          <CompactStreaks waterStreak={waterStreak} kcalStreak={kcalStreak} waterDone={waterConsumed >= waterGoal} kcalDone={kcalConsumed >= kcalGoal} />
+        </div>
+        <div className="dashboard-vitals-water">
+          <ProgressCard title="Água" unit="ml" consumed={waterConsumed} goal={waterGoal} variant="water">
+            <WaterTracker entries={waterEntries} onChange={reloadToday} />
+          </ProgressCard>
+        </div>
+      </section>
+
       <MacroOverview totals={macroTotals} goals={macroGoals} />
 
       <section className="dashboard-workspace product-workspace">
