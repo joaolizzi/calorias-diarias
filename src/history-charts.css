@@ -1,0 +1,104 @@
+/* History charts — final layout layer */
+.history-chart-section {
+  margin-top: 14px;
+  padding: 14px;
+  border: 1px solid var(--saas-border-soft, var(--border));
+  border-radius: 14px;
+  background: var(--saas-surface-2, var(--panel-2));
+}
+
+.history-chart-section-macros {
+  background:
+    linear-gradient(145deg, color-mix(in srgb, var(--saas-accent) 4%, transparent), transparent 55%),
+    var(--saas-surface-2, var(--panel-2));
+}
+
+.history-chart-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 10px;
+}
+
+.history-chart-head > div {
+  min-width: 0;
+}
+
+.history-chart-head span,
+.history-chart-head small {
+  color: var(--saas-muted, var(--muted));
+  font-size: 8px;
+}
+
+.history-chart-head span {
+  display: block;
+  margin-bottom: 3px;
+  font-weight: 800;
+  letter-spacing: .6px;
+  text-transform: uppercase;
+}
+
+.history-chart-head strong {
+  display: block;
+  color: var(--saas-text, var(--text));
+  font-size: 13px;
+  letter-spacing: -.2px;
+}
+
+.history-chart-head small {
+  max-width: 330px;
+  text-align: right;
+  line-height: 1.4;
+}
+
+.history-card-v2 .chart-wrap {
+  position: relative;
+  min-height: 270px;
+  height: 270px;
+}
+
+.history-card-v2 .history-macro-chart-wrap {
+  min-height: 300px;
+  height: 300px;
+}
+
+.history-chart-empty {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 10px;
+  text-align: center;
+}
+
+@media (max-width: 760px) {
+  .history-chart-head {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .history-chart-head small {
+    max-width: none;
+    text-align: left;
+  }
+
+  .history-card-v2 .chart-wrap,
+  .history-card-v2 .history-macro-chart-wrap {
+    min-height: 260px;
+    height: 260px;
+  }
+}
+
+@media (max-width: 460px) {
+  .history-chart-section {
+    padding: 11px;
+  }
+
+  .history-card-v2 .chart-wrap,
+  .history-card-v2 .history-macro-chart-wrap {
+    min-height: 235px;
+    height: 235px;
+  }
+}
