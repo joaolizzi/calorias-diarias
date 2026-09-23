@@ -42,14 +42,13 @@ export default function WaterTracker({ entries, onChange }) {
     }
   };
 
-  // reverse chronological for display
   const items = [...entries].reverse();
 
   return (
     <>
       <div className="quick">
         {QUICK.map((ml) => (
-          <button key={ml} className="btn" onClick={() => add(ml)}>
+          <button type="button" key={ml} className="btn" onClick={() => add(ml)} aria-label={`Adicionar ${ml} ml de água`}>
             +{ml >= 1000 ? `${ml / 1000}L` : `${ml} ml`}
           </button>
         ))}
@@ -67,8 +66,9 @@ export default function WaterTracker({ entries, onChange }) {
             if (e.key === 'Enter') add(custom);
           }}
           inputMode="numeric"
+          aria-label="Quantidade de água em mililitros"
         />
-        <button className="btn primary" onClick={() => add(custom)}>
+        <button type="button" className="btn primary" onClick={() => add(custom)}>
           Adicionar
         </button>
       </div>
@@ -91,7 +91,7 @@ export default function WaterTracker({ entries, onChange }) {
       )}
 
       <div style={{ marginTop: 12, display: 'flex', justifyContent: 'flex-end' }}>
-        <button className="btn danger" onClick={clearDay} disabled={!entries.length}>
+        <button type="button" className="btn danger" onClick={clearDay} disabled={!entries.length}>
           Limpar água do dia
         </button>
       </div>
