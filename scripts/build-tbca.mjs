@@ -1,44 +1,48 @@
 // scripts/build-tbca.mjs
-// Baixa o JSON Lines da TBCA (Tabela Brasileira de Composição de Alimentos)
-// do scraper comunitário DiegoLins10/web-scrapping-alimentos e gera um JSON
-// slim em public/tbca.json com apenas { id, name, kcalPer100g, category }.
-//
-// Uso:  npm run build:tbca
-//
-// Não requer dependências externas — usa apenas Node built-ins (https, fs, path).
+// Baixa a base comunitária derivada da TBCA e gera um JSON slim usado no app.
+// Mantém kcal + proteína + carboidratos + gordura por 100 g.
 
 import { writeFileSync } from 'node:fs';
 import { request } from 'node:https';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const RAW_URL =
-  'https://raw.githubusercontent.com/DiegoLins10/web-scrapping-alimentos/main/alimentos.txt';
-
+const RAW_URL = 'https://raw.githubusercontent.com/DiegoLins10/web-scrapping-alimentos/main/alimentos.txt';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const OUT = resolve(__dirname, '..', 'public', 'tbca.json');
 
 function download(url, redirectsLeft = 5) {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolvePromise, reject) => {
     request(url, (r) => {
-      // seguir redirects (github raw redireciona http -> https)
       if ([301, 302, 303, 307, 308].includes(r.statusCode)) {
         if (redirectsLeft <= 0) return reject(new Error('too many redirects'));
         const next = r.headers.location;
         if (!next) return reject(new Error('redirect without Location'));
         r.resume();
-        return download(next, redirectsLeft - 1).then(resolve, reject);
+        return download(next, redirectsLeft - 1).then(resolvePromise, reject);
       }
-      if (r.statusCode !== 200) {
-        return reject(new Error('HTTP ' + r.statusCode + ' for ' + url));
-      }
+      if (r.statusCode !== 200) return reject(new Error('HTTP ' + r.statusCode + ' for ' + url));
       const chunks = [];
       r.setEncoding('utf8');
       r.on('data', (c) => chunks.push(c));
-      r.on('end', () => resolve(chunks.join('')));
+      r.on('end', () => resolvePromise(chunks.join('')));
       r.on('error', reject);
     }).on('error', reject).end();
   });
+}
+
+function normalize(value) {
+  return String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+}
+
+function parseValue(nutrient) {
+  const raw = String(nutrient?.['Valor por 100g'] || '').replace(',', '.').replace(/[<>]/g, '').trim();
+  const value = parseFloat(raw);
+  return Number.isFinite(value) && value >= 0 ? value : 0;
+}
+
+function findNutrient(list, matcher) {
+  return (list || []).find((n) => matcher(normalize(n?.Componente), normalize(n?.Unidades)));
 }
 
 const text = await download(RAW_URL);
@@ -52,30 +56,32 @@ let skippedInvalid = 0;
 for (const line of text.split('\n')) {
   if (!line.trim()) continue;
   let o;
-  try { o = JSON.parse(line); }
-  catch { skippedInvalid++; continue; }
+  try { o = JSON.parse(line); } catch { skippedInvalid++; continue; }
   parsed++;
 
-  const kcalNutrient = (o.nutrientes || []).find(
-    (n) => n.Componente === 'Energia' && n.Unidades === 'kcal'
-  );
-  if (!kcalNutrient) { skippedNoKcal++; continue; }
+  const nutrients = o.nutrientes || [];
+  const kcalNutrient = findNutrient(nutrients, (name, unit) => name === 'energia' && unit === 'kcal');
+  const kcal = parseValue(kcalNutrient);
+  if (!kcal) { skippedNoKcal++; continue; }
 
-  const raw = String(kcalNutrient['Valor por 100g'] || '').replace(',', '.');
-  const kcal = parseFloat(raw);
-  if (!Number.isFinite(kcal) || kcal <= 0) { skippedNoKcal++; continue; }
+  const protein = findNutrient(nutrients, (name, unit) => unit === 'g' && name.includes('proteina'));
+  const carbs = findNutrient(nutrients, (name, unit) => unit === 'g' && (name.includes('carboidrato total') || name.includes('carboidratos totais')))
+    || findNutrient(nutrients, (name, unit) => unit === 'g' && name.includes('carboidrato disponivel'))
+    || findNutrient(nutrients, (name, unit) => unit === 'g' && name.includes('carboidrato'));
+  const fat = findNutrient(nutrients, (name, unit) => unit === 'g' && (name.includes('lipidio') || name.includes('gordura total')));
 
   slim.push({
     id: o.codigo,
     name: o.descricao,
     kcalPer100g: Math.round(kcal),
+    proteinPer100g: Math.round(parseValue(protein) * 10) / 10,
+    carbsPer100g: Math.round(parseValue(carbs) * 10) / 10,
+    fatPer100g: Math.round(parseValue(fat) * 10) / 10,
     category: o.classe || '',
   });
 }
 
-// ordenar alfabeticamente, preservando acentos
 slim.sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
-
 writeFileSync(OUT, JSON.stringify(slim), 'utf8');
 
 const sizeKb = (Buffer.byteLength(JSON.stringify(slim)) / 1024).toFixed(1);
