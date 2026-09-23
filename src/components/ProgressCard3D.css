@@ -1,5 +1,12 @@
 /* Isolated 3D calorie visualization for ProgressCard */
 
+/* Grid children keep their own natural height. Without this, the calorie card
+   stretches to the tallest sibling (water), creating a large empty area. */
+.product-dashboard .dashboard-progress-grid-v3 {
+  align-items: start !important;
+  grid-auto-rows: max-content !important;
+}
+
 /* The calorie card must size itself by its own content instead of stretching
    to the height of the water card that shares the same CSS grid row. */
 .product-dashboard .dashboard-progress-grid-v3 .calorie-3d-card {
