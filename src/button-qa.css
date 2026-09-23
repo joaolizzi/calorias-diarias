@@ -1,0 +1,157 @@
+/* Nutrix interaction QA — buttons only. Loaded last. */
+
+:is(.product-dashboard, .modal-bg, .goal-screen, .workouts-page, .admin-page, .app-sidebar) button {
+  font: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+
+:is(.product-dashboard, .modal-bg, .goal-screen, .workouts-page, .admin-page, .app-sidebar) button:not(:disabled) {
+  cursor: pointer;
+}
+
+:is(.product-dashboard, .modal-bg, .goal-screen, .workouts-page, .admin-page, .app-sidebar) button:disabled {
+  opacity: .46;
+  cursor: not-allowed !important;
+  transform: none !important;
+  box-shadow: none;
+}
+
+:is(.product-dashboard, .modal-bg, .goal-screen, .workouts-page, .admin-page, .app-sidebar) button:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--saas-accent, #7c8cff) 72%, white);
+  outline-offset: 2px;
+}
+
+/* Shared CTA buttons */
+.btn {
+  max-width: 100%;
+  line-height: 1.1;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.btn:not(:disabled):active {
+  transform: translateY(0) scale(.985) !important;
+}
+
+/* Dashboard register actions */
+.product-dashboard .food-entry-action {
+  width: 100%;
+  overflow: hidden;
+}
+
+.product-dashboard .food-entry-action > span:last-child {
+  min-width: 0;
+}
+
+.product-dashboard .food-entry-action strong,
+.product-dashboard .food-entry-action small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.product-dashboard .food-entry-action:active {
+  transform: scale(.99) !important;
+}
+
+/* Search result add button */
+.product-dashboard .search-results .item > .btn {
+  flex: 0 0 auto;
+  width: 36px;
+  min-width: 36px;
+  height: 36px;
+  min-height: 36px !important;
+  padding: 0 !important;
+  border-radius: 10px !important;
+  font-size: 18px !important;
+  line-height: 1 !important;
+}
+
+/* Remove-entry X buttons */
+.product-dashboard .log .x,
+.product-dashboard button.x {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  min-width: 30px;
+  height: 30px;
+  min-height: 30px;
+  padding: 0;
+  border-radius: 8px;
+}
+
+/* Tabs / segmented controls */
+.product-dashboard .dashboard-tabs button,
+.product-dashboard .range-toggle button {
+  white-space: nowrap;
+}
+
+.product-dashboard .dashboard-tabs button:active,
+.product-dashboard .range-toggle button:active {
+  transform: none !important;
+}
+
+/* Meal buttons */
+.product-dashboard .meal-routine-option {
+  overflow: hidden;
+}
+
+.product-dashboard .meal-routine-option:focus-visible {
+  outline-offset: 1px;
+}
+
+/* Water quick actions */
+.product-dashboard .water-column-card .quick .btn,
+.product-dashboard .progress-card-water .quick .btn {
+  min-width: 0;
+  white-space: nowrap;
+}
+
+/* Modal action rows */
+.modal .actions,
+.modal .camera-actions,
+.modal .natural-modal-actions {
+  row-gap: 8px;
+}
+
+.modal .actions .btn,
+.modal .camera-actions .btn,
+.modal .natural-modal-actions .btn {
+  flex: 0 0 auto;
+}
+
+/* Appearance / sidebar buttons */
+.app-sidebar .sidebar-link,
+.app-sidebar .appearance-trigger,
+.app-sidebar .sidebar-primary-action,
+.app-sidebar .sidebar-quick-action {
+  user-select: none;
+}
+
+@media (hover: hover) {
+  .btn:not(:disabled):hover,
+  .product-dashboard .food-entry-action:not(:disabled):hover,
+  .product-dashboard .meal-routine-option:not(:disabled):hover {
+    will-change: transform;
+  }
+}
+
+@media (max-width: 560px) {
+  .product-dashboard .food-entry-action {
+    min-height: 62px !important;
+  }
+
+  .product-dashboard .food-entry-actions {
+    gap: 7px !important;
+  }
+
+  .modal .actions,
+  .modal .natural-modal-actions {
+    width: auto;
+  }
+
+  .modal .actions .btn,
+  .modal .natural-modal-actions .btn {
+    min-height: 40px;
+  }
+}
