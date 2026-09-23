@@ -15,44 +15,17 @@ let _cachedTokenExp = 0;
 async function getAccessToken() {
   const now = Date.now();
   if (_cachedToken && now < _cachedTokenExp) return _cachedToken;
-
   const { data } = await supabase.auth.getSession();
   const session = data?.session;
   if (!session?.access_token) throw new Error('Não autenticado');
-
   _cachedToken = session.access_token;
   _cachedTokenExp = (session.expires_at || 0) * 1000 - 30_000;
   return _cachedToken;
 }
 
-async function post(body, { signal } = {}) {
+async function request(endpoint, body, { signal } = {}) {
   const token = await getAccessToken();
-  const res = await fetch(ENDPOINT, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-    body: JSON.stringify(body),
-    signal,
-  });
-
-  let json = null;
-  try { json = await res.json(); } catch {}
-
-  if (!res.ok) {
-    const err = new Error(json?.error || `HTTP ${res.status}`);
-    err.status = res.status;
-    throw err;
-  }
-  if (!json?.ok) {
-    const err = new Error(json?.error || 'Resposta inválida');
-    err.status = res.status;
-    throw err;
-  }
-  return json.data;
-}
-
-async function postImage(body, { signal } = {}) {
-  const token = await getAccessToken();
-  const res = await fetch(IMAGE_ENDPOINT, {
+  const res = await fetch(endpoint, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
     body: JSON.stringify(body),
@@ -60,18 +33,17 @@ async function postImage(body, { signal } = {}) {
   });
   let json = null;
   try { json = await res.json(); } catch {}
-  if (!res.ok) {
+  if (!res.ok || !json?.ok) {
     const err = new Error(json?.error || `HTTP ${res.status}`);
-    err.status = res.status;
-    throw err;
-  }
-  if (!json?.ok) {
-    const err = new Error(json?.error || 'Resposta inválida');
     err.status = res.status;
     throw err;
   }
   return json.data;
 }
+
+const post = (body, options) => request(ENDPOINT, body, options);
+const postImage = (body, options) => request(IMAGE_ENDPOINT, body, options);
+const round1 = (value) => Math.round((Number(value) || 0) * 10) / 10;
 
 export async function searchFoodsGemini(query, { signal } = {}) {
   const items = await post({ intent: 'search', q: query }, { signal });
@@ -81,7 +53,11 @@ export async function searchFoodsGemini(query, { signal } = {}) {
     name: it.name,
     brand: 'Estimativa IA',
     kcalPer100g: it.kcalPer100g,
+    proteinPer100g: Number(it.proteinPer100g || 0),
+    carbsPer100g: Number(it.carbsPer100g || 0),
+    fatPer100g: Number(it.fatPer100g || 0),
     portionSuggestionG: it.portionSuggestionG ?? null,
+    confidence: it.confidence || 'medium',
     source: 'gemini',
   }));
 }
@@ -93,22 +69,23 @@ export async function parseNaturalFood(query, defaultMeal = 'snack', { signal } 
   return Promise.all(items.map(async (it) => {
     const grams = Math.max(1, Math.round(Number(it.grams) || 0));
     let tbca = null;
-
-    try {
-      tbca = await resolveTBCAFood(it.name, { minScore: 0.68 });
-    } catch {
-      tbca = null;
-    }
+    try { tbca = await resolveTBCAFood(it.name, { minScore: 0.68 }); } catch { tbca = null; }
 
     if (tbca && grams > 0) {
+      const proteinPer100g = Number(tbca.proteinPer100g || 0);
+      const carbsPer100g = Number(tbca.carbsPer100g || 0);
+      const fatPer100g = Number(tbca.fatPer100g || 0);
       return {
         name: tbca.name || it.name,
         grams,
         kcal: Math.max(0, Math.round((Number(tbca.kcalPer100g) * grams) / 100)),
         kcalPer100g: Number(tbca.kcalPer100g),
-        proteinPer100g: Number(tbca.proteinPer100g || 0),
-        carbsPer100g: Number(tbca.carbsPer100g || 0),
-        fatPer100g: Number(tbca.fatPer100g || 0),
+        proteinPer100g,
+        carbsPer100g,
+        fatPer100g,
+        protein: round1(proteinPer100g * grams / 100),
+        carbs: round1(carbsPer100g * grams / 100),
+        fat: round1(fatPer100g * grams / 100),
         meal: it.meal || defaultMeal,
         confidence: Number(tbca.matchScore || 0) >= 0.82 ? 'high' : 'medium',
         source: 'tbca',
@@ -120,6 +97,13 @@ export async function parseNaturalFood(query, defaultMeal = 'snack', { signal } 
       name: it.name,
       grams,
       kcal: Math.max(0, Math.round(Number(it.kcal) || 0)),
+      kcalPer100g: Number(it.kcalPer100g || 0),
+      proteinPer100g: Number(it.proteinPer100g || 0),
+      carbsPer100g: Number(it.carbsPer100g || 0),
+      fatPer100g: Number(it.fatPer100g || 0),
+      protein: round1(it.protein),
+      carbs: round1(it.carbs),
+      fat: round1(it.fat),
       meal: it.meal || defaultMeal,
       confidence: it.confidence || 'medium',
       source: 'gemini',
@@ -130,17 +114,24 @@ export async function parseNaturalFood(query, defaultMeal = 'snack', { signal } 
 export async function analyzeFoodImage(imageDataUrl, defaultMeal = 'snack', { signal } = {}) {
   const items = await postImage({ image: imageDataUrl, meal: defaultMeal }, { signal });
   if (!Array.isArray(items)) return [];
-  return items.map((it) => ({
-    name: it.name,
-    grams: it.grams,
-    kcal: it.kcal,
-    protein: it.protein,
-    carbs: it.carbs,
-    fat: it.fat,
-    confidence: it.confidence,
-    meal: it.meal || defaultMeal,
-    source: 'gemini-vision',
-  }));
+  return items.map((it) => {
+    const grams = Math.max(1, Number(it.grams) || 1);
+    return {
+      name: it.name,
+      grams: it.grams,
+      kcal: it.kcal,
+      protein: it.protein,
+      carbs: it.carbs,
+      fat: it.fat,
+      kcalPer100g: Math.round((Number(it.kcal) || 0) * 100 / grams),
+      proteinPer100g: round1((Number(it.protein) || 0) * 100 / grams),
+      carbsPer100g: round1((Number(it.carbs) || 0) * 100 / grams),
+      fatPer100g: round1((Number(it.fat) || 0) * 100 / grams),
+      confidence: it.confidence,
+      meal: it.meal || defaultMeal,
+      source: 'gemini-vision',
+    };
+  });
 }
 
 export async function getDailyInsight(payload, { signal } = {}) {
