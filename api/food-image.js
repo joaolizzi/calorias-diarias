@@ -113,9 +113,16 @@ export default async function handler(req, res) {
     if (!items.length) return send(res, 502, { ok: false, error: 'Não consegui identificar alimentos visíveis na imagem' });
     return send(res, 200, { ok: true, data: items, model: result.model });
   } catch (error) {
-    const message = error?.message || 'Falha ao analisar imagem';
-    const status = error?.status === 429 ? 429 : error?.status === 500 ? 500 : 502;
-    console.error(`[food-image] user=${auth.user.id} status=${status} ${message}`);
-    return send(res, status, { ok: false, error: message });
+    const technicalMessage = error?.message || 'Falha ao analisar imagem';
+    const publicMessage = error?.publicMessage || technicalMessage;
+    const status = error?.code === 'AI_TEMPORARILY_UNAVAILABLE'
+      ? 503
+      : error?.status === 429
+        ? 429
+        : error?.status === 500
+          ? 500
+          : 502;
+    console.error(`[food-image] user=${auth.user.id} status=${status} ${technicalMessage}`);
+    return send(res, status, { ok: false, error: publicMessage });
   }
 }
