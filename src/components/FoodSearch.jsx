@@ -61,7 +61,7 @@ export default function FoodSearch({ onPick }) {
 
   return (
     <div>
-      <div className="custom" style={{ marginTop: 0 }}><input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar alimento (ex: arroz, banana, frango)..." /></div>
+      <div className="custom" style={{ marginTop: 0 }}><input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar alimento (ex: arroz, banana, frango)..." aria-label="Buscar alimento" /></div>
       {error && <div className="muted" style={{ marginTop: 6, color: 'var(--bad)' }}>{error}</div>}
       {loading && <div className="muted" style={{ marginTop: 6 }}>Buscando…</div>}
       {!loading && q.trim().length >= 2 && results.length === 0 && !error && <div className="muted" style={{ marginTop: 6 }}>Nada encontrado. Use “Adicionar manualmente” abaixo.</div>}
@@ -75,7 +75,7 @@ export default function FoodSearch({ onPick }) {
                 <div className="meta">{r.kcalPer100g} kcal / 100g{r.portionSuggestionG ? ` · porção ~${r.portionSuggestionG}g` : ''} · <span className={`pill ${r.source === 'gemini' ? 'ai' : ''}`}>{SOURCE_LABEL[r.source] || r.brand || r.source}</span></div>
                 <div className="search-macro-meta">P {Number(r.proteinPer100g || 0).toFixed(1)}g · C {Number(r.carbsPer100g || 0).toFixed(1)}g · G {Number(r.fatPer100g || 0).toFixed(1)}g por 100g</div>
               </div>
-              <button className="btn primary food" onClick={() => { onPick(r); setQ(''); setResults([]); }}>+</button>
+              <button type="button" className="btn primary food" aria-label={`Adicionar ${r.name}`} title={`Adicionar ${r.name}`} onClick={() => { onPick(r); setQ(''); setResults([]); }}>+</button>
             </div>
           ))}
         </div>
