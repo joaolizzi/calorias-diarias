@@ -17,6 +17,7 @@ import './appearance-runtime-fix.css';
 import './macro-system.css';
 import './history-charts.css';
 import './dashboard-density.css';
+import './dashboard-vitals.css';
 import App from './App.jsx';
 
 createRoot(document.getElementById('root')).render(
