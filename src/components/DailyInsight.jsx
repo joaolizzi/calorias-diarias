@@ -4,12 +4,8 @@ import { MEAL_LABELS } from '../lib/dates.js';
 import { today } from '../lib/dates.js';
 import { toast } from './Toast.jsx';
 
-// Card de insight diário. Pega o resumo do dia (já em estado no Dashboard)
-// e pede um texto curto ao Gemini. Cacheia o último resultado por dia em
-// localStorage — não incomoda o usuário a cada reload.
-
 const LS_KEY = (day) => `kcal-insight:${day}`;
-const LS_COOLDOWN = 'kcal-insight-cooldown'; // ISO timestamp até quando IA está desabilitada
+const LS_COOLDOWN = 'kcal-insight-cooldown';
 
 function buildMealSummary(foodEntries) {
   if (!foodEntries || foodEntries.length === 0) return 'sem registros';
@@ -21,12 +17,7 @@ function buildMealSummary(foodEntries) {
   return [...byMeal.entries()].map(([m, k]) => `${m} ${k}kcal`).join(', ');
 }
 
-export default function DailyInsight({
-  foodEntries,
-  waterEntries,
-  kcalGoal,
-  waterGoal,
-}) {
+export default function DailyInsight({ foodEntries, waterEntries, kcalGoal, waterGoal }) {
   const day = today();
   const [insight, setInsight] = useState(null);
   const [busy, setBusy] = useState(false);
@@ -36,7 +27,6 @@ export default function DailyInsight({
   });
 
   useEffect(() => {
-    // carrega insight cacheado do dia, se existir
     try {
       const raw = localStorage.getItem(LS_KEY(day));
       if (raw) setInsight(JSON.parse(raw));
@@ -69,7 +59,7 @@ export default function DailyInsight({
       }
     } catch (e) {
       if (e.status === 429) {
-        const until = Date.now() + 60 * 60 * 1000; // 1h
+        const until = Date.now() + 60 * 60 * 1000;
         localStorage.setItem(LS_COOLDOWN, String(until));
         setCooldownUntil(until);
         toast('Limite de IA atingido, tente em 1h', { type: 'error' });
@@ -91,7 +81,7 @@ export default function DailyInsight({
           Insight do dia
         </h2>
         {insight ? (
-          <button className="btn ghost" onClick={ask} disabled={busy || onCooldown} title="Pedir novo insight">
+          <button type="button" className="btn ghost" onClick={ask} disabled={busy || onCooldown} title="Pedir novo insight" aria-label="Pedir novo insight">
             ↻
           </button>
         ) : null}
@@ -99,15 +89,8 @@ export default function DailyInsight({
 
       {!insight && (
         <>
-          <p className="card-desc muted">
-            Receba um resumo do seu dia com uma sugestão prática e objetiva.
-          </p>
-          <button
-            className="btn primary"
-            onClick={ask}
-            disabled={busy || onCooldown}
-            style={{ width: '100%' }}
-          >
+          <p className="card-desc muted">Receba um resumo do seu dia com uma sugestão prática e objetiva.</p>
+          <button type="button" className="btn primary" onClick={ask} disabled={busy || onCooldown} style={{ width: '100%' }}>
             {busy ? 'Gerando…' : 'Pedir insight'}
           </button>
         </>
