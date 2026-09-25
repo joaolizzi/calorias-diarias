@@ -30,13 +30,121 @@ function suggestedMeal() {
   return 'dinner';
 }
 
-function DashboardHeader({ day, kcalConsumed, kcalGoal, waterConsumed, waterGoal, mealsLogged }) {
+function reportTime(value) {
+  if (!value) return '--:--';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '--:--';
+  return date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+}
+
+function round1(value) {
+  return Math.round((Number(value) || 0) * 10) / 10;
+}
+
+function buildDailyReport({
+  day,
+  kcalConsumed,
+  kcalGoal,
+  waterConsumed,
+  waterGoal,
+  macroTotals,
+  macroGoals,
+  foodEntries,
+  waterEntries,
+  waterStreak,
+  kcalStreak,
+}) {
+  const kcalRemaining = Math.max(0, kcalGoal - kcalConsumed);
+  const waterRemaining = Math.max(0, waterGoal - waterConsumed);
+  const lines = [];
+
+  lines.push('NUTRIX — RELATÓRIO DIÁRIO');
+  lines.push('='.repeat(42));
+  lines.push(`Data: ${fmtDateLabel(day)} (${day})`);
+  lines.push(`Gerado em: ${new Date().toLocaleString('pt-BR')}`);
+  lines.push('');
+
+  lines.push('RESUMO DO DIA');
+  lines.push('-'.repeat(42));
+  lines.push(`Calorias: ${Math.round(kcalConsumed)} / ${Math.round(kcalGoal)} kcal`);
+  lines.push(`Calorias restantes: ${Math.round(kcalRemaining)} kcal`);
+  lines.push(`Água: ${Math.round(waterConsumed)} / ${Math.round(waterGoal)} ml`);
+  lines.push(`Água restante: ${Math.round(waterRemaining)} ml`);
+  lines.push(`Sequência de água: ${waterStreak} dia(s)`);
+  lines.push(`Sequência de calorias: ${kcalStreak} dia(s)`);
+  lines.push('');
+
+  lines.push('MACRONUTRIENTES');
+  lines.push('-'.repeat(42));
+  lines.push(`Proteína: ${round1(macroTotals.protein)} / ${Math.round(macroGoals.protein)} g`);
+  lines.push(`Carboidratos: ${round1(macroTotals.carbs)} / ${Math.round(macroGoals.carbs)} g`);
+  lines.push(`Gorduras: ${round1(macroTotals.fat)} / ${Math.round(macroGoals.fat)} g`);
+  lines.push('');
+
+  lines.push('REFEIÇÕES');
+  lines.push('-'.repeat(42));
+  for (const meal of MEALS) {
+    const mealEntries = foodEntries
+      .filter((entry) => entry.meal === meal)
+      .sort((a, b) => new Date(a.consumed_at || 0) - new Date(b.consumed_at || 0));
+    const mealKcal = mealEntries.reduce((sum, entry) => sum + Number(entry.kcal || 0), 0);
+    const mealMacros = sumMacros(mealEntries);
+
+    lines.push(`${MEAL_META[meal].label.toUpperCase()} — ${Math.round(mealKcal)} kcal`);
+    if (!mealEntries.length) {
+      lines.push('  Nenhum alimento registrado.');
+    } else {
+      for (const entry of mealEntries) {
+        const grams = Number(entry.grams || 0);
+        const protein = Number(entry.protein_g ?? entry.protein ?? 0);
+        const carbs = Number(entry.carbs_g ?? entry.carbs ?? 0);
+        const fat = Number(entry.fat_g ?? entry.fat ?? 0);
+        lines.push(
+          `  ${reportTime(entry.consumed_at)} · ${entry.name}` +
+          `${grams > 0 ? ` · ${Math.round(grams)} g` : ''}` +
+          ` · ${Math.round(Number(entry.kcal || 0))} kcal` +
+          ` · P ${round1(protein)}g | C ${round1(carbs)}g | G ${round1(fat)}g`,
+        );
+      }
+      lines.push(`  Total: P ${round1(mealMacros.protein)}g | C ${round1(mealMacros.carbs)}g | G ${round1(mealMacros.fat)}g`);
+    }
+    lines.push('');
+  }
+
+  lines.push('HIDRATAÇÃO');
+  lines.push('-'.repeat(42));
+  const orderedWater = [...waterEntries].sort((a, b) => new Date(a.consumed_at || 0) - new Date(b.consumed_at || 0));
+  if (!orderedWater.length) {
+    lines.push('Nenhum registro de água.');
+  } else {
+    for (const entry of orderedWater) {
+      lines.push(`${reportTime(entry.consumed_at)} · +${Math.round(Number(entry.ml || 0))} ml`);
+    }
+    lines.push(`Total: ${Math.round(waterConsumed)} ml`);
+  }
+
+  lines.push('');
+  lines.push('Relatório gerado pelo Nutrix.');
+  return lines.join('\r\n');
+}
+
+function DashboardHeader({ day, kcalConsumed, kcalGoal, waterConsumed, waterGoal, mealsLogged, onDownloadReport }) {
   const kcalRemaining = Math.max(0, kcalGoal - kcalConsumed);
   const waterPct = waterGoal > 0 ? Math.min(100, Math.round((waterConsumed / waterGoal) * 100)) : 0;
   const kcalPct = kcalGoal > 0 ? Math.min(100, Math.round((kcalConsumed / kcalGoal) * 100)) : 0;
   return (
     <section className="product-dashboard-header">
-      <div className="product-dashboard-heading"><span className="product-dashboard-date">{fmtDateLabel(day)}</span><h1>Hoje</h1><p>Acompanhe calorias, água e seus macros em um só lugar.</p></div>
+      <div className="product-dashboard-heading dashboard-heading-with-action">
+        <div className="dashboard-heading-copy">
+          <span className="product-dashboard-date">{fmtDateLabel(day)}</span>
+          <h1>Hoje</h1>
+          <p>Acompanhe calorias, água e seus macros em um só lugar.</p>
+        </div>
+        <button type="button" className="daily-report-btn" onClick={onDownloadReport} title="Baixar relatório do dia em TXT">
+          <span className="daily-report-btn-icon" aria-hidden="true">⇩</span>
+          <span><strong>Relatório do dia</strong><small>Baixar TXT</small></span>
+        </button>
+      </div>
       <div className="product-summary-grid">
         <div className="product-summary-item primary"><span>Calorias restantes</span><strong>{kcalRemaining.toLocaleString('pt-BR')}</strong><small>de {kcalGoal.toLocaleString('pt-BR')} kcal</small></div>
         <div className="product-summary-item"><span>Consumido</span><strong>{kcalPct}%</strong><small>{kcalConsumed.toLocaleString('pt-BR')} kcal</small></div>
@@ -163,10 +271,35 @@ export default function Dashboard({ theme, accent, preset, setTheme, setAccent, 
   const activeMealEntries = foodEntries.filter((entry) => entry.meal === activeMeal);
   const focusAction = searchParams.get('focus') === 'ai' ? 'natural' : null;
 
+  const downloadDailyReport = () => {
+    const content = buildDailyReport({
+      day,
+      kcalConsumed,
+      kcalGoal,
+      waterConsumed,
+      waterGoal,
+      macroTotals,
+      macroGoals,
+      foodEntries,
+      waterEntries,
+      waterStreak,
+      kcalStreak,
+    });
+    const blob = new Blob(['\uFEFF', content], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = `nutrix-relatorio-${day}.txt`;
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
+
   return (
     <div className="app premium-dashboard dashboard-v3 product-dashboard">
       <ProfessionalHeader subtitle={`${fmtDateLabel(day)} — Hoje`} theme={theme} accent={accent} preset={preset} setTheme={setTheme} setAccent={setAccent} setPreset={setPreset} />
-      <DashboardHeader day={day} kcalConsumed={kcalConsumed} kcalGoal={kcalGoal} waterConsumed={waterConsumed} waterGoal={waterGoal} mealsLogged={mealsLogged} />
+      <DashboardHeader day={day} kcalConsumed={kcalConsumed} kcalGoal={kcalGoal} waterConsumed={waterConsumed} waterGoal={waterGoal} mealsLogged={mealsLogged} onDownloadReport={downloadDailyReport} />
 
       <section className="dashboard-vitals-grid">
         <div className="dashboard-vitals-left">
