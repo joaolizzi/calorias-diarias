@@ -19,6 +19,7 @@ import './history-charts.css';
 import './dashboard-density.css';
 import './dashboard-vitals.css';
 import './button-qa.css';
+import './pages/DashboardReport.css';
 import App from './App.jsx';
 
 createRoot(document.getElementById('root')).render(
