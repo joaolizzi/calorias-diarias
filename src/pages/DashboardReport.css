@@ -1,0 +1,82 @@
+.product-dashboard .dashboard-heading-with-action {
+  max-width: none !important;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.product-dashboard .dashboard-heading-copy {
+  min-width: 0;
+  max-width: 720px;
+}
+
+.product-dashboard .daily-report-btn {
+  flex: 0 0 auto;
+  display: grid;
+  grid-template-columns: 34px auto;
+  align-items: center;
+  gap: 9px;
+  min-height: 48px;
+  padding: 7px 12px 7px 8px;
+  border: 1px solid color-mix(in srgb, var(--saas-accent) 24%, var(--saas-border-soft));
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--saas-accent) 7%, var(--saas-surface));
+  color: var(--saas-text-2);
+  text-align: left;
+  box-shadow: none;
+  cursor: pointer;
+  transition: border-color .15s ease, background .15s ease, transform .15s ease;
+}
+
+.product-dashboard .daily-report-btn:hover {
+  border-color: color-mix(in srgb, var(--saas-accent) 44%, var(--saas-border-soft));
+  background: color-mix(in srgb, var(--saas-accent) 11%, var(--saas-surface));
+  transform: translateY(-1px);
+}
+
+.product-dashboard .daily-report-btn:active {
+  transform: translateY(0) scale(.985);
+}
+
+.product-dashboard .daily-report-btn-icon {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  background: var(--saas-accent-soft);
+  color: var(--saas-accent);
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.product-dashboard .daily-report-btn strong,
+.product-dashboard .daily-report-btn small {
+  display: block;
+  white-space: nowrap;
+}
+
+.product-dashboard .daily-report-btn strong {
+  color: var(--saas-text);
+  font-size: 10px;
+  font-weight: 750;
+}
+
+.product-dashboard .daily-report-btn small {
+  margin-top: 2px;
+  color: var(--saas-muted);
+  font-size: 8px;
+}
+
+@media (max-width: 620px) {
+  .product-dashboard .dashboard-heading-with-action {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .product-dashboard .daily-report-btn {
+    width: 100%;
+  }
+}
