@@ -11,6 +11,7 @@ import Dashboard from './pages/Dashboard.jsx';
 import GoalPage from './pages/GoalPage.jsx';
 import AdminPage from './pages/AdminPage.jsx';
 import WorkoutsPage from './pages/WorkoutsPage.jsx';
+import MealSuggestionsPage from './pages/MealSuggestionsPage.jsx';
 
 const THEME_KEY = 'nutrix-theme';
 const ACCENT_KEY = 'nutrix-accent';
@@ -80,6 +81,7 @@ export default function App() {
                   <Route path="/" element={<ProtectedRoute><ProfileGate><Dashboard {...appearanceProps} /></ProfileGate></ProtectedRoute>} />
                   <Route path="/goal" element={<ProtectedRoute><ProfileGate><GoalPage {...appearanceProps} /></ProfileGate></ProtectedRoute>} />
                   <Route path="/treinos" element={<ProtectedRoute><ProfileGate><WorkoutsPage {...appearanceProps} /></ProfileGate></ProtectedRoute>} />
+                  <Route path="/sugestoes" element={<ProtectedRoute><ProfileGate><MealSuggestionsPage {...appearanceProps} /></ProfileGate></ProtectedRoute>} />
                   <Route path="/admin" element={<ProtectedRoute><ProfileGate><AdminPage {...appearanceProps} /></ProfileGate></ProtectedRoute>} />
                   <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
