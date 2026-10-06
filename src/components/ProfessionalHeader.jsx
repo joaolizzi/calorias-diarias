@@ -18,6 +18,7 @@ const navigationGroups = [
     label: 'Nutrição',
     items: [
       { to: '/?panel=meals&focus=ai', icon: 'sparkles', label: 'Nutrix IA', description: 'Descrever uma refeição', badge: 'IA' },
+      { to: '/sugestoes', icon: 'meal', label: 'O que comer', description: 'Sugestões por calorias' },
       { to: '/?panel=insights', icon: 'target', label: 'Metas', description: 'Objetivos e análise' },
     ],
   },
@@ -37,6 +38,7 @@ function Icon({ name, size = 18 }) {
   if (name === 'history') return <svg {...common}><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/></svg>;
   if (name === 'sparkles') return <svg {...common}><path d="m12 3 1.2 3.3L16.5 7.5l-3.3 1.2L12 12l-1.2-3.3-3.3-1.2 3.3-1.2L12 3Z"/><path d="m18.5 13 .8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8.8-2.2Z"/><path d="m5.5 14 .7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7.7-1.8Z"/></svg>;
   if (name === 'target') return <svg {...common}><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3M22 12h-3M12 22v-3M2 12h3"/></svg>;
+  if (name === 'meal') return <svg {...common}><path d="M4 11h16"/><path d="M6 11a6 6 0 0 1 12 0"/><path d="M12 5V3"/><path d="M5 15h14"/><path d="M7 19h10"/></svg>;
   if (name === 'dumbbell') return <svg {...common}><path d="M6 7v10M3.5 9v6M18 7v10M20.5 9v6M6 12h12M2 12h1.5M20.5 12H22"/></svg>;
   if (name === 'goal') return <svg {...common}><path d="M6 3h12v18H6z"/><path d="M9 7h6M9 11h6M9 15h4"/></svg>;
   if (name === 'plus') return <svg {...common}><path d="M12 5v14M5 12h14"/></svg>;
