@@ -122,6 +122,31 @@ export const addFood = async (userId, day, { meal, name, kcal, grams, protein = 
 export const deleteFood = async (id) => { const { error } = await supabase.from('food_entries').delete().eq('id', id); if (error) throw error; };
 export const clearFoodMeal = async (userId, day, meal) => { const { error } = await supabase.from('food_entries').delete().eq('user_id', userId).eq('day', day).eq('meal', meal); if (error) throw error; };
 
+// ---------- alimentação recente para sugestões ----------
+export const getRecentFoodEntries = async (userId, fromDay, toDay) => {
+  let { data, error } = await supabase
+    .from('food_entries')
+    .select('name, kcal, grams, meal, day, protein_g, carbs_g, fat_g')
+    .eq('user_id', userId)
+    .gte('day', fromDay)
+    .lte('day', toDay)
+    .order('day', { ascending: false })
+    .limit(300);
+
+  if (error && isMissingColumn(error)) {
+    ({ data, error } = await supabase
+      .from('food_entries')
+      .select('name, kcal, grams, meal, day')
+      .eq('user_id', userId)
+      .gte('day', fromDay)
+      .lte('day', toDay)
+      .order('day', { ascending: false })
+      .limit(300));
+  }
+  if (error) throw error;
+  return data || [];
+};
+
 // ---------- histórico ----------
 export const getWaterRange = async (userId, fromDay, toDay) => { const { data, error } = await supabase.from('water_entries').select('ml, day').eq('user_id', userId).gte('day', fromDay).lte('day', toDay); if (error) throw error; return data || []; };
 export const getFoodRange = async (userId, fromDay, toDay) => {
