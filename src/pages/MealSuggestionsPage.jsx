@@ -35,6 +35,14 @@ const TYPE_LABELS = {
 };
 
 const emptyPreferences = () => ({ liked: [], disliked: [] });
+
+function loadStoredPreferences(userId) {
+  try {
+    const saved = JSON.parse(localStorage.getItem(`nutrix-meal-preferences:${userId}`) || 'null');
+    if (saved && Array.isArray(saved.liked) && Array.isArray(saved.disliked)) return saved;
+  } catch {}
+  return emptyPreferences();
+}
 const round1 = (value) => Math.round((Number(value) || 0) * 10) / 10;
 
 function currentMeal() {
@@ -138,9 +146,9 @@ export default function MealSuggestionsPage({ theme, accent, preset, setTheme, s
   const [style, setStyle] = useState('balanced');
   const [mode, setMode] = useState('mixed');
   const [notes, setNotes] = useState('');
-  const [pantryInput, setPantryInput] = useState('');
-  const [pantryMode, setPantryMode] = useState('prefer');
-  const [preferences, setPreferences] = useState(emptyPreferences);
+  const [pantryInput, setPantryInput] = useState(() => localStorage.getItem(`nutrix-pantry:${user.id}`) || '');
+  const [pantryMode, setPantryMode] = useState(() => localStorage.getItem(`nutrix-pantry-mode:${user.id}`) === 'only' ? 'only' : 'prefer');
+  const [preferences, setPreferences] = useState(() => loadStoredPreferences(user.id));
   const [suggestions, setSuggestions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
@@ -151,17 +159,6 @@ export default function MealSuggestionsPage({ theme, accent, preset, setTheme, s
   const preferenceKey = `nutrix-meal-preferences:${user.id}`;
   const pantryKey = `nutrix-pantry:${user.id}`;
   const pantryModeKey = `nutrix-pantry-mode:${user.id}`;
-
-  useEffect(() => {
-    try {
-      setPantryInput(localStorage.getItem(pantryKey) || '');
-      setPantryMode(localStorage.getItem(pantryModeKey) === 'only' ? 'only' : 'prefer');
-      const saved = JSON.parse(localStorage.getItem(preferenceKey) || 'null');
-      if (saved && Array.isArray(saved.liked) && Array.isArray(saved.disliked)) setPreferences(saved);
-    } catch {
-      setPreferences(emptyPreferences());
-    }
-  }, [pantryKey, pantryModeKey, preferenceKey]);
 
   useEffect(() => {
     localStorage.setItem(pantryKey, pantryInput);
