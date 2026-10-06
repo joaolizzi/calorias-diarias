@@ -42,6 +42,38 @@ const clamp = (value, min, max, fallback = 0) => {
 
 const round1 = (value) => Math.round((Number(value) || 0) * 10) / 10;
 
+function sanitizeStringList(value, limit = 30) {
+  if (!Array.isArray(value)) return [];
+  return value
+    .map((item) => String(item || '').trim().slice(0, 100))
+    .filter(Boolean)
+    .slice(0, limit);
+}
+
+function sanitizeFeedback(value) {
+  const clean = (items) => Array.isArray(items)
+    ? items.slice(0, 25).map((item) => ({
+        name: String(item?.name || '').trim().slice(0, 120),
+        ingredients: sanitizeStringList(item?.ingredients, 12),
+      })).filter((item) => item.name)
+    : [];
+  return { liked: clean(value?.liked), disliked: clean(value?.disliked) };
+}
+
+function shapeSwaps(parsed) {
+  if (!Array.isArray(parsed?.alternatives)) return [];
+  return parsed.alternatives.slice(0, 3).map((item, index) => ({
+    id: `swap-${index + 1}`,
+    name: String(item?.name || '').trim().slice(0, 100),
+    grams: Math.round(clamp(item?.grams, 1, 1500, 1)),
+    kcal: Math.round(clamp(item?.kcal, 1, 1500, 1)),
+    protein: round1(clamp(item?.protein, 0, 200, 0)),
+    carbs: round1(clamp(item?.carbs, 0, 300, 0)),
+    fat: round1(clamp(item?.fat, 0, 200, 0)),
+    reason: String(item?.reason || '').trim().slice(0, 180),
+  })).filter((item) => item.name);
+}
+
 function normalize(value) {
   return String(value || '')
     .normalize('NFD')
@@ -169,6 +201,51 @@ export default async function handler(req, res) {
   const auth = await authenticate(req);
   if (auth.error) return send(res, 401, { ok: false, error: auth.error });
 
+  if (req.body?.action === 'swap') {
+    const ingredient = req.body?.ingredient || {};
+    const ingredientName = String(ingredient?.name || '').trim().slice(0, 100);
+    const targetKcal = Math.round(clamp(ingredient?.kcal, 10, 1500, 100));
+    if (!ingredientName) return send(res, 400, { ok: false, error: 'Ingrediente inválido' });
+
+    const pantry = sanitizeStringList(req.body?.pantry, 40);
+    const pantryMode = req.body?.pantryMode === 'only' ? 'only' : 'prefer';
+    const history = sanitizeStringList(req.body?.history, 25);
+    const feedback = sanitizeFeedback(req.body?.feedback);
+    const otherIngredients = sanitizeStringList(req.body?.otherIngredients, 15);
+    const suggestionName = String(req.body?.suggestionName || '').trim().slice(0, 120);
+
+    const pantryRule = pantry.length
+      ? pantryMode === 'only'
+        ? `Use somente opções que possam ser feitas com estes ingredientes disponíveis: ${JSON.stringify(pantry)}. Água, sal e pimenta podem ser considerados básicos.`
+        : `Priorize substitutos presentes nesta lista do que a pessoa tem em casa: ${JSON.stringify(pantry)}.`
+      : 'Não há informação sobre ingredientes disponíveis em casa.';
+
+    const prompt = `Substitua um ingrediente de uma refeição mantendo calorias semelhantes.
+Ingrediente atual: ${JSON.stringify({ name: ingredientName, grams: ingredient?.grams, kcal: targetKcal, protein: ingredient?.protein, carbs: ingredient?.carbs, fat: ingredient?.fat })}.
+Refeição: ${JSON.stringify(suggestionName)}.
+Outros ingredientes da refeição: ${JSON.stringify(otherIngredients)}.
+${pantryRule}
+Alimentos frequentes: ${JSON.stringify(history)}.
+Preferências positivas: ${JSON.stringify(feedback.liked)}.
+Preferências negativas: ${JSON.stringify(feedback.disliked)}.
+Gere 3 substitutos plausíveis em alimentação brasileira, idealmente entre ${Math.max(5, Math.round(targetKcal * 0.9))} e ${Math.round(targetKcal * 1.1)} kcal.
+Ajuste a quantidade em gramas para aproximar as calorias do ingrediente atual. Não sugira o mesmo ingrediente com outro nome.
+Retorne SOMENTE JSON válido:
+{"alternatives":[{"name":string,"grams":number,"kcal":number,"protein":number,"carbs":number,"fat":number,"reason":string}]}`;
+
+    try {
+      const result = await generateGemini({ parts: [{ text: prompt }], timeoutMs: 22_000, temperature: 0.25 });
+      const parsed = extractJson(result.text);
+      if (!parsed) return send(res, 502, { ok: false, error: 'A IA respondeu em um formato inválido' });
+      const data = shapeSwaps(parsed);
+      if (!data.length) return send(res, 502, { ok: false, error: 'Não encontrei substituições válidas' });
+      return send(res, 200, { ok: true, data, model: result.model });
+    } catch (error) {
+      const status = error?.code === 'AI_TEMPORARILY_UNAVAILABLE' ? 503 : error?.status === 429 ? 429 : 502;
+      return send(res, status, { ok: false, error: error?.publicMessage || error?.message || 'Falha ao buscar substituições' });
+    }
+  }
+
   const targetKcal = Math.round(clamp(req.body?.targetKcal, 100, 2000, 500));
   const meal = ['breakfast', 'lunch', 'snack', 'dinner'].includes(req.body?.meal) ? req.body.meal : 'lunch';
   const mode = ['mixed', 'familiar', 'recipes'].includes(req.body?.mode) ? req.body.mode : 'mixed';
@@ -190,6 +267,13 @@ export default async function handler(req, res) {
       ? 'Priorize receitas completas e diferentes, usando as inspirações externas quando fizer sentido.'
       : 'Misture uma opção familiar, uma variação dos hábitos e receitas novas.';
 
+  const pantryInstruction = pantry.length
+    ? pantryMode === 'only'
+      ? `Use somente estes ingredientes disponíveis em casa: ${JSON.stringify(pantry)}. Água, sal e pimenta podem ser considerados básicos. Não adicione outros ingredientes.`
+      : `Priorize estes ingredientes disponíveis em casa sempre que fizer sentido: ${JSON.stringify(pantry)}.`
+    : 'Não há uma lista de ingredientes disponíveis em casa.';
+  const feedbackInstruction = `Preferências aprendidas: gostou de ${JSON.stringify(feedback.liked)}; não gostou de ${JSON.stringify(feedback.disliked)}. Favoreça padrões das opções curtidas e evite repetir as rejeitadas.`;
+
   const prompt = `Você é o recurso "O que comer?" de um app brasileiro de nutrição.
 Sua tarefa é sugerir refeições práticas em pt-BR, sem diagnóstico médico.
 Meta por refeição: aproximadamente ${targetKcal} kcal para ${mealNames[meal]}.
@@ -197,6 +281,8 @@ Preferência: ${style}. Modo: ${mode}. ${modeInstruction}
 Tente ficar entre ${Math.round(targetKcal * 0.9)} e ${Math.round(targetKcal * 1.1)} kcal. Se não for possível, chegue o mais perto possível.
 Use quantidades em gramas e valores nutricionais plausíveis compatíveis com alimentos brasileiros/TBCA/TACO.
 O histórico representa alimentos que a pessoa realmente costuma comer; use isso para personalizar, sem assumir alergias ou restrições que não foram informadas.
+${pantryInstruction}
+${feedbackInstruction}
 Observações do usuário: ${JSON.stringify(notes || 'nenhuma')}.
 Histórico frequente: ${JSON.stringify(history)}.
 Inspirações de receitas públicas: ${JSON.stringify(inspirations.map((item, index) => ({ index, title: item.title, category: item.category, area: item.area, ingredients: item.ingredients })))}.
