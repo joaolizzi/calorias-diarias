@@ -8,6 +8,7 @@ import { resolveTBCAFood } from './foods.js';
 
 const ENDPOINT = '/api/gemini';
 const IMAGE_ENDPOINT = '/api/food-image';
+const MEAL_SUGGESTIONS_ENDPOINT = '/api/meal-suggestions';
 
 let _cachedToken = null;
 let _cachedTokenExp = 0;
@@ -142,4 +143,10 @@ export async function getDailyInsight(payload, { signal } = {}) {
   if (!data || typeof data !== 'object') return null;
   if (!data.title || !data.body) return null;
   return { title: data.title, body: data.body };
+}
+
+
+export async function getMealSuggestions(payload, { signal } = {}) {
+  const data = await request(MEAL_SUGGESTIONS_ENDPOINT, payload, { signal });
+  return Array.isArray(data) ? data : [];
 }
