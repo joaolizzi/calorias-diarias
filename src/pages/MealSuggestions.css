@@ -658,3 +658,346 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
+
+
+/* Pantry, feedback and ingredient swaps */
+.meal-pantry-section {
+  margin-top: 17px;
+  padding: 13px;
+  border: 1px solid var(--saas-border-soft, var(--border));
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--saas-surface-2, var(--panel-2)) 72%, transparent);
+}
+
+.meal-pantry-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.meal-pantry-head > div:first-child > span,
+.meal-pantry-head > div:first-child > small {
+  display: block;
+}
+
+.meal-pantry-head > div:first-child > span {
+  color: var(--saas-text-2, var(--text-soft));
+  font-size: 10px;
+  font-weight: 750;
+}
+
+.meal-pantry-head > div:first-child > small {
+  margin-top: 3px;
+  color: var(--saas-muted, var(--muted));
+  font-size: 8px;
+}
+
+.meal-pantry-policy {
+  display: flex;
+  gap: 4px;
+  padding: 3px;
+  border: 1px solid var(--saas-border-soft, var(--border));
+  border-radius: 9px;
+  background: var(--saas-surface, var(--panel));
+}
+
+.meal-pantry-policy button {
+  min-height: 28px;
+  padding: 0 9px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--saas-muted, var(--muted));
+  font: inherit;
+  font-size: 8px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.meal-pantry-policy button.active {
+  background: var(--saas-accent-soft, var(--accent-soft));
+  color: var(--saas-accent, var(--accent));
+}
+
+.meal-pantry-section textarea {
+  width: 100%;
+  margin-top: 10px;
+  padding: 10px 11px;
+  border: 1px solid var(--saas-border, var(--border)) !important;
+  border-radius: 9px;
+  background: var(--saas-surface, var(--panel)) !important;
+  color: var(--saas-text, var(--text)) !important;
+  font: inherit;
+  font-size: 10px;
+  line-height: 1.45;
+  resize: vertical;
+}
+
+.meal-pantry-chips,
+.meal-pantry-frequent {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 8px;
+}
+
+.meal-pantry-chips button,
+.meal-pantry-frequent button {
+  min-height: 25px;
+  padding: 0 8px;
+  border: 1px solid var(--saas-border-soft, var(--border));
+  border-radius: 999px;
+  background: var(--saas-surface, var(--panel));
+  color: var(--saas-text-2, var(--text-soft));
+  font: inherit;
+  font-size: 8px;
+  cursor: pointer;
+}
+
+.meal-pantry-chips button {
+  border-color: color-mix(in srgb, var(--saas-accent, var(--accent)) 20%, var(--saas-border-soft, var(--border)));
+  background: var(--saas-accent-soft, var(--accent-soft));
+}
+
+.meal-pantry-chips button b {
+  margin-left: 5px;
+  color: var(--saas-muted, var(--muted));
+}
+
+.meal-pantry-frequent > span {
+  display: flex;
+  align-items: center;
+  color: var(--saas-muted, var(--muted));
+  font-size: 8px;
+}
+
+.meal-pantry-frequent button:hover {
+  border-color: color-mix(in srgb, var(--saas-accent, var(--accent)) 28%, transparent);
+  color: var(--saas-accent, var(--accent));
+}
+
+.meal-learning-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-top: 14px;
+}
+
+.meal-learning-stats > div {
+  padding: 9px 7px;
+  border: 1px solid var(--saas-border-soft, var(--border));
+  border-radius: 9px;
+  background: var(--saas-surface-2, var(--panel-2));
+  text-align: center;
+}
+
+.meal-learning-stats strong,
+.meal-learning-stats span {
+  display: block;
+}
+
+.meal-learning-stats strong {
+  color: var(--saas-text, var(--text));
+  font-size: 15px;
+}
+
+.meal-learning-stats span {
+  margin-top: 2px;
+  color: var(--saas-muted, var(--muted));
+  font-size: 7px;
+}
+
+.meal-feedback-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 11px;
+  padding: 8px 9px;
+  border: 1px solid var(--saas-border-soft, var(--border));
+  border-radius: 9px;
+  background: var(--saas-surface-2, var(--panel-2));
+}
+
+.meal-feedback-row > span {
+  color: var(--saas-muted, var(--muted));
+  font-size: 8px;
+}
+
+.meal-feedback-row > div {
+  display: flex;
+  gap: 5px;
+}
+
+.meal-feedback-row button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 28px;
+  padding: 0 8px;
+  border: 1px solid var(--saas-border-soft, var(--border));
+  border-radius: 7px;
+  background: var(--saas-surface, var(--panel));
+  color: var(--saas-muted, var(--muted));
+  font: inherit;
+  cursor: pointer;
+}
+
+.meal-feedback-row button small {
+  font-size: 7px;
+}
+
+.meal-feedback-row button.active {
+  border-color: color-mix(in srgb, var(--saas-accent, var(--accent)) 32%, transparent);
+  background: var(--saas-accent-soft, var(--accent-soft));
+  color: var(--saas-accent, var(--accent));
+}
+
+.meal-feedback-row button.active.dislike {
+  border-color: rgba(239,107,107,.28);
+  background: rgba(239,107,107,.07);
+  color: #df8585;
+}
+
+.meal-ingredient-list {
+  gap: 7px;
+}
+
+.meal-ingredient-block {
+  display: block !important;
+}
+
+.meal-ingredient-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 34px;
+  padding: 6px 8px;
+  border: 1px solid var(--saas-border-soft, var(--border));
+  border-radius: 8px;
+  background: var(--saas-surface-2, var(--panel-2));
+}
+
+.meal-ingredient-row > span {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--saas-text-2, var(--text-soft));
+  font-size: 9px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.meal-ingredient-row > div {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex: 0 0 auto;
+}
+
+.meal-ingredient-row small {
+  color: var(--saas-muted, var(--muted));
+  font-size: 8px;
+}
+
+.meal-ingredient-row button {
+  min-height: 24px;
+  padding: 0 7px;
+  border: 1px solid var(--saas-border, var(--border));
+  border-radius: 6px;
+  background: var(--saas-surface, var(--panel));
+  color: var(--saas-accent, var(--accent));
+  font: inherit;
+  font-size: 7px;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.meal-swap-panel {
+  display: grid;
+  gap: 5px;
+  margin-top: 5px;
+  padding: 7px;
+  border: 1px solid color-mix(in srgb, var(--saas-accent, var(--accent)) 18%, var(--saas-border-soft, var(--border)));
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--saas-accent-soft, var(--accent-soft)) 45%, var(--saas-surface, var(--panel)));
+}
+
+.meal-swap-panel > span {
+  padding: 5px;
+  color: var(--saas-muted, var(--muted));
+  font-size: 8px;
+}
+
+.meal-swap-panel > button {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(90px, .7fr);
+  gap: 9px;
+  align-items: center;
+  width: 100%;
+  padding: 8px 9px;
+  border: 1px solid var(--saas-border-soft, var(--border));
+  border-radius: 7px;
+  background: var(--saas-surface, var(--panel));
+  color: var(--saas-text-2, var(--text-soft));
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+}
+
+.meal-swap-panel > button:hover {
+  border-color: color-mix(in srgb, var(--saas-accent, var(--accent)) 28%, transparent);
+}
+
+.meal-swap-panel > button span,
+.meal-swap-panel > button strong,
+.meal-swap-panel > button small {
+  display: block;
+}
+
+.meal-swap-panel > button strong {
+  font-size: 9px;
+}
+
+.meal-swap-panel > button small {
+  margin-top: 2px;
+  color: var(--saas-muted, var(--muted));
+  font-size: 7px;
+}
+
+.meal-swap-panel > button em {
+  color: var(--saas-muted, var(--muted));
+  font-size: 7px;
+  font-style: normal;
+  line-height: 1.35;
+}
+
+@media (max-width: 680px) {
+  .meal-pantry-head,
+  .meal-feedback-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .meal-pantry-policy {
+    width: 100%;
+  }
+
+  .meal-pantry-policy button {
+    flex: 1;
+  }
+
+  .meal-swap-panel > button {
+    grid-template-columns: 1fr;
+  }
+
+  .meal-ingredient-row {
+    align-items: flex-start;
+  }
+
+  .meal-ingredient-row > div {
+    align-items: flex-end;
+    flex-direction: column;
+  }
+}
