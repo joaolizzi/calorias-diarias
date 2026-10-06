@@ -150,3 +150,9 @@ export async function getMealSuggestions(payload, { signal } = {}) {
   const data = await request(MEAL_SUGGESTIONS_ENDPOINT, payload, { signal });
   return Array.isArray(data) ? data : [];
 }
+
+
+export async function getIngredientSwaps(payload, { signal } = {}) {
+  const data = await request(MEAL_SUGGESTIONS_ENDPOINT, { ...payload, action: 'swap' }, { signal });
+  return Array.isArray(data) ? data : [];
+}
