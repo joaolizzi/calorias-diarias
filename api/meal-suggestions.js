@@ -251,6 +251,9 @@ Retorne SOMENTE JSON válido:
   const mode = ['mixed', 'familiar', 'recipes'].includes(req.body?.mode) ? req.body.mode : 'mixed';
   const style = ['balanced', 'protein', 'quick', 'budget'].includes(req.body?.style) ? req.body.style : 'balanced';
   const notes = String(req.body?.notes || '').trim().slice(0, 300);
+  const pantry = sanitizeStringList(req.body?.pantry, 40);
+  const pantryMode = req.body?.pantryMode === 'only' ? 'only' : 'prefer';
+  const feedback = sanitizeFeedback(req.body?.feedback);
   const history = Array.isArray(req.body?.history) ? req.body.history.slice(0, 25).map((item) => ({
     name: String(item?.name || '').trim().slice(0, 100),
     count: Math.round(clamp(item?.count, 1, 100, 1)),
