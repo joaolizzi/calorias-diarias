@@ -132,9 +132,11 @@ function shapeSuggestions(parsed, inspirations) {
       fat: total.fat + ingredient.fat,
     }), { kcal: 0, protein: 0, carbs: 0, fat: 0 });
 
-    const sourceIndex = Number.isInteger(Number(suggestion?.sourceIndex))
-      ? Number(suggestion.sourceIndex)
-      : null;
+    const sourceIndex = suggestion?.sourceIndex == null
+      ? null
+      : Number.isInteger(Number(suggestion.sourceIndex))
+        ? Number(suggestion.sourceIndex)
+        : null;
     const source = sourceIndex != null && inspirations[sourceIndex] ? inspirations[sourceIndex] : null;
     const type = ['familiar', 'variation', 'recipe', 'new'].includes(suggestion?.type)
       ? suggestion.type
