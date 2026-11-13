@@ -1001,3 +1001,21 @@
     flex-direction: column;
   }
 }
+
+/* Celular: áreas de toque confortáveis. */
+@media (max-width: 760px) {
+  .meal-kcal-presets button {
+    min-width: 50px;
+    min-height: 38px;
+  }
+
+  .meal-pantry-frequent button,
+  .meal-pantry-chips button,
+  .meal-pantry-policy button {
+    min-height: 36px;
+  }
+
+  .meal-budget-card button {
+    min-height: 40px;
+  }
+}

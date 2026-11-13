@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import Icon from './Icon.jsx';
 
 const MODES = [
-  { id: 'dark', label: 'Escuro', icon: '☾' },
-  { id: 'light', label: 'Claro', icon: '☀' },
-  { id: 'system', label: 'Sistema', icon: '◐' },
+  { id: 'dark', label: 'Escuro', icon: 'moon' },
+  { id: 'light', label: 'Claro', icon: 'sun' },
+  { id: 'system', label: 'Sistema', icon: 'monitor' },
 ];
 
 const PRESETS = [
@@ -51,9 +52,9 @@ export default function AppearanceMenu({ theme, accent, preset, setTheme, setAcc
   return (
     <div className="appearance-menu" ref={ref}>
       <button className="appearance-trigger" onClick={() => setOpen((v) => !v)} aria-expanded={open} title="Personalizar aparência">
-        <span className="appearance-trigger-icon">◐</span>
+        <span className="appearance-trigger-icon"><Icon name="palette" size={16} /></span>
         <span className="appearance-trigger-label">Aparência</span>
-        <span className="appearance-chevron">⌄</span>
+        <span className="appearance-chevron"><Icon name="chevronDown" size={15} /></span>
       </button>
 
       {open && (
@@ -86,7 +87,7 @@ export default function AppearanceMenu({ theme, accent, preset, setTheme, setAcc
             <div className="appearance-mode-row">
               {MODES.map((item) => (
                 <button key={item.id} className={`appearance-mode-option ${theme === item.id ? 'active' : ''}`} onClick={() => setTheme?.(item.id)}>
-                  <span>{item.icon}</span>{item.label}
+                  <Icon name={item.icon} size={15} /><span>{item.label}</span>
                 </button>
               ))}
             </div>

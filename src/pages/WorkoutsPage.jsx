@@ -10,6 +10,7 @@ import {
   saveWorkoutPlan,
   localizeExerciseName,
 } from '../lib/workouts.js';
+import Icon from '../components/Icon.jsx';
 import './WorkoutPlans.css';
 
 const makeSet = (source = {}) => ({ kg: source.kg ?? '', reps: source.reps ?? '', done: Boolean(source.done) });
@@ -129,12 +130,12 @@ function ImportWorkoutModal({ catalog, onImport, onClose }) {
         </div>
         <label className="import-file-drop">
           <input type="file" accept="image/*,.txt,.json" onChange={(e) => handleFile(e.target.files?.[0])} />
-          <strong>📎 Importar arquivo ou foto</strong>
+          <strong><Icon name="paperclip" size={16} /> Importar arquivo ou foto</strong>
           <span>{fileName || 'PNG, JPG, TXT ou JSON'}</span>
         </label>
         <textarea className="input import-textarea" placeholder={`Exemplo:\nSEGUNDA — Push A\nVoador 3x10\nSupino inclinado máquina 3x8-12\nTríceps máquina 3x10 — descanso 90s\n\nTERÇA — Pull A\nPuxada alta 3x10`} value={text} onChange={(e) => { setText(e.target.value); window.__nutrixWorkoutImportImage = null; }} />
         {error && <div className="workout-error import-error">{error}</div>}
-        <div className="import-actions"><button type="button" className="btn" onClick={onClose} disabled={busy}>Cancelar</button><button type="button" className="btn btn-primary" onClick={submit} disabled={busy || (!text.trim() && !window.__nutrixWorkoutImportImage)}>{busy ? 'Lendo treino…' : '✨ Importar e organizar'}</button></div>
+        <div className="import-actions"><button type="button" className="btn" onClick={onClose} disabled={busy}>Cancelar</button><button type="button" className="btn btn-primary" onClick={submit} disabled={busy || (!text.trim() && !window.__nutrixWorkoutImportImage)}>{busy ? 'Lendo treino…' : 'Importar e organizar'}</button></div>
       </div>
     </div>
   );
@@ -235,8 +236,8 @@ export default function WorkoutsPage({ theme, accent, setTheme, setAccent }) {
       <ProfessionalHeader subtitle="Treinos · academia" theme={theme} accent={accent} setTheme={setTheme} setAccent={setAccent} />
       <main className="workouts-page">
         <div className="workouts-hero card">
-          <div><div className="eyebrow">🏋️ PLANO SEMANAL</div><h1>Monte seus treinos</h1><p className="muted">Escolha o dia, dê um nome ao treino e adicione os exercícios que você realiza.</p></div>
-          <div className="hero-actions"><button type="button" className="btn btn-import" onClick={() => setImporter(true)}>✨ Importar treino</button><button type="button" className="btn btn-primary" onClick={save} disabled={saving}>{saving ? 'Salvando…' : 'Salvar semana'}</button></div>
+          <div><div className="eyebrow">PLANO SEMANAL</div><h1>Monte seus treinos</h1><p className="muted">Escolha o dia, dê um nome ao treino e adicione os exercícios que você realiza.</p></div>
+          <div className="hero-actions"><button type="button" className="btn btn-import" onClick={() => setImporter(true)}><Icon name="sparkles" size={16} /> Importar treino</button><button type="button" className="btn btn-primary" onClick={save} disabled={saving}>{saving ? 'Salvando…' : 'Salvar semana'}</button></div>
         </div>
 
         {error && <div className="card workout-error">{error}</div>}

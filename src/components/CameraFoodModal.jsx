@@ -6,6 +6,7 @@ import { analyzeFoodImage } from '../lib/gemini.js';
 import { searchFoods, searchTBCA } from '../lib/foods.js';
 import { nutritionForGrams } from '../lib/macros.js';
 import { toast } from './Toast.jsx';
+import Icon from './Icon.jsx';
 import './CameraFoodModal.css';
 
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
@@ -168,7 +169,7 @@ export default function CameraFoodModal({ meal: defaultMeal, onClose, onSaved })
 
         {!image ? (
           <div className="camera-empty">
-            <div className="camera-icon">📷</div>
+            <div className="camera-icon"><Icon name="camera" size={26} /></div>
             <strong>Mostre sua refeição</strong>
             <span>Boa iluminação e o prato inteiro visível ajudam a IA a identificar melhor os alimentos.</span>
             <button type="button" className="btn primary food camera-open-btn" onClick={openPicker} disabled={busy}>{busy ? 'Preparando…' : 'Abrir câmera'}</button>

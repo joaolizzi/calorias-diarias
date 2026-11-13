@@ -12,14 +12,15 @@ import FoodSection from '../components/FoodSection.jsx';
 import GoalsSettings from '../components/GoalsSettings.jsx';
 import HistoryChart from '../components/HistoryChart.jsx';
 import DailyInsight from '../components/DailyInsight.jsx';
+import Icon from '../components/Icon.jsx';
 
 const MEALS = ['breakfast', 'lunch', 'snack', 'dinner'];
 const VALID_PANELS = new Set(['meals', 'insights', 'history']);
 const MEAL_META = {
-  breakfast: { label: 'Café da manhã', icon: '☀' },
-  lunch: { label: 'Almoço', icon: '◐' },
-  snack: { label: 'Lanche', icon: '◇' },
-  dinner: { label: 'Jantar', icon: '☾' },
+  breakfast: { label: 'Café da manhã', icon: 'sunrise' },
+  lunch: { label: 'Almoço', icon: 'sun' },
+  snack: { label: 'Lanche', icon: 'apple' },
+  dinner: { label: 'Jantar', icon: 'moon' },
 };
 
 function suggestedMeal() {
@@ -141,7 +142,7 @@ function DashboardHeader({ day, kcalConsumed, kcalGoal, waterConsumed, waterGoal
           <p>Acompanhe calorias, água e seus macros em um só lugar.</p>
         </div>
         <button type="button" className="daily-report-btn" onClick={onDownloadReport} title="Baixar relatório do dia em TXT">
-          <span className="daily-report-btn-icon" aria-hidden="true">⇩</span>
+          <span className="daily-report-btn-icon" aria-hidden="true"><Icon name="download" size={17} /></span>
           <span><strong>Relatório do dia</strong><small>Baixar TXT</small></span>
         </button>
       </div>
@@ -213,7 +214,7 @@ function MealRoutineSelector({ activeMeal, setActiveMeal, foodEntries }) {
           const meta = MEAL_META[meal];
           const entries = foodEntries.filter((entry) => entry.meal === meal);
           const kcal = entries.reduce((sum, entry) => sum + Number(entry.kcal || 0), 0);
-          return <button key={meal} type="button" role="tab" aria-selected={activeMeal === meal} className={`meal-routine-option ${activeMeal === meal ? 'active' : ''} ${entries.length ? 'logged' : ''}`} onClick={() => setActiveMeal(meal)}><span className="meal-routine-icon">{meta.icon}</span><span className="meal-routine-option-copy"><strong>{meta.label}</strong><small>{entries.length ? `${entries.length} ${entries.length === 1 ? 'item' : 'itens'} · ${kcal} kcal` : 'Sem registro'}</small></span><span className="meal-routine-state">{entries.length ? '✓' : '›'}</span></button>;
+          return <button key={meal} type="button" role="tab" aria-selected={activeMeal === meal} className={`meal-routine-option ${activeMeal === meal ? 'active' : ''} ${entries.length ? 'logged' : ''}`} onClick={() => setActiveMeal(meal)}><span className="meal-routine-icon"><Icon name={meta.icon} size={17} /></span><span className="meal-routine-option-copy"><strong>{meta.label}</strong><small>{entries.length ? `${entries.length} ${entries.length === 1 ? 'item' : 'itens'} · ${kcal} kcal` : 'Sem registro'}</small></span><span className="meal-routine-state">{entries.length ? '✓' : '›'}</span></button>;
         })}
       </div>
     </div>
@@ -305,6 +306,7 @@ export default function Dashboard({ theme, accent, preset, setTheme, setAccent, 
         <div className="dashboard-vitals-left">
           <ProgressCard title="Calorias" unit="kcal" consumed={kcalConsumed} goal={kcalGoal} variant="food" />
           <CompactStreaks waterStreak={waterStreak} kcalStreak={kcalStreak} waterDone={waterConsumed >= waterGoal} kcalDone={kcalConsumed >= kcalGoal} />
+          <MacroOverview totals={macroTotals} goals={macroGoals} />
         </div>
         <div className="dashboard-vitals-water">
           <ProgressCard title="Água" unit="ml" consumed={waterConsumed} goal={waterGoal} variant="water">
@@ -312,8 +314,6 @@ export default function Dashboard({ theme, accent, preset, setTheme, setAccent, 
           </ProgressCard>
         </div>
       </section>
-
-      <MacroOverview totals={macroTotals} goals={macroGoals} />
 
       <section className="dashboard-workspace product-workspace">
         <div className="dashboard-workspace-head"><div><span className="product-section-label">Painel diário</span><h2>Detalhes</h2></div><div className="dashboard-tabs" role="tablist" aria-label="Painéis do dashboard"><button className={activePanel === 'meals' ? 'active' : ''} onClick={() => openPanel('meals')}>Rotina</button><button className={activePanel === 'insights' ? 'active' : ''} onClick={() => openPanel('insights')}>Metas</button><button className={activePanel === 'history' ? 'active' : ''} onClick={() => openPanel('history')}>Histórico</button></div></div>

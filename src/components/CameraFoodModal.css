@@ -413,3 +413,10 @@
   .camera-open-btn { width: 100%; min-width: 0; }
   .camera-preview { max-height: 300px; }
 }
+
+@media (max-width: 760px) {
+  .camera-close {
+    width: 40px !important;
+    height: 40px !important;
+  }
+}

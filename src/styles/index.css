@@ -1,5 +1,4 @@
-/* Fonte externa — @import precisa vir antes de qualquer outra regra. */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+/* A fonte Inter é carregada no index.html (link + preconnect). */
 
 /* A ordem importa: cada camada refina a anterior (cascata). */
 @import './base.css';
