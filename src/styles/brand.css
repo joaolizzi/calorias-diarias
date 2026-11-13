@@ -1,0 +1,167 @@
+/* ==========================================================================
+   Marca Nutrix — logo, paleta e acentos base
+   ========================================================================== */
+
+/* --- origem: brand-system.css --- */
+
+/* Nutrix Brand System — professional emerald / cyan / petrol palette */
+
+:root {
+  --accent-2: #5dc9d6;
+  --shadow-sm: 0 8px 26px rgba(0, 0, 0, .18);
+  --shadow: 0 18px 50px rgba(0, 0, 0, .26);
+  --shadow-lg: 0 34px 90px rgba(0, 0, 0, .38);
+}
+
+/* Logo */
+
+.nutrix-logo {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: var(--nutrix-logo-size, 42px);
+  height: var(--nutrix-logo-size, 42px);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.nutrix-logo::after {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,.035);
+  pointer-events: none;
+}
+
+.nutrix-logo svg {
+  width: 72%;
+  height: 72%;
+  overflow: visible;
+}
+
+.brand-logo-mark,
+.auth-logo-mark {
+  transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
+}
+
+.sidebar-brand:hover .brand-logo-mark,
+.mobile-brand:hover .brand-logo-mark {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 30px rgba(0,0,0,.24), inset 0 1px rgba(255,255,255,.07);
+}
+
+/* Sidebar refinement */
+
+.app-sidebar {
+  border-color: rgba(155,190,184,.09);
+}
+
+.sidebar-context {
+  border-color: rgba(101,217,165,.11);
+}
+
+.sidebar-link.active .sidebar-link-icon {
+  background: rgba(101,217,165,.10);
+}
+
+.sidebar-premium-card {
+  background: linear-gradient(135deg, rgba(101,217,165,.065), rgba(93,201,214,.018)), #0b171c;
+  border-color: rgba(101,217,165,.12);
+}
+
+/* Dashboard / shared surfaces */
+
+.dashboard-v3 .dashboard-hero-v3,
+.dashboard-workspace,
+.compact-streak-card,
+.premium-dashboard .card,
+.goal-screen .goal-section,
+.goal-screen .goal-result,
+.workouts-page .workout-card,
+.admin-page .admin-panel,
+.admin-page .admin-stat {
+  border-color: rgba(155,190,184,.085);
+  background: linear-gradient(145deg, rgba(255,255,255,.018), rgba(255,255,255,.004)), #0d171d;
+  box-shadow: 0 18px 50px rgba(0,0,0,.20), inset 0 1px rgba(255,255,255,.02);
+}
+
+.dashboard-v3 .dashboard-hero-v3 {
+  background: radial-gradient(circle at 48% 48%, rgba(101,217,165,.075), transparent 25%), radial-gradient(circle at 76% 16%, rgba(93,201,214,.038), transparent 25%), linear-gradient(155deg, rgba(255,255,255,.02), transparent 60%), #0c171c;
+}
+
+.dashboard-v3 .hero-stat {
+  background: linear-gradient(145deg, rgba(255,255,255,.022), rgba(255,255,255,.006)), #0b151a;
+}
+
+.dashboard-v3 .hero-stat-primary {
+  border-color: rgba(101,217,165,.17);
+  background: linear-gradient(145deg, rgba(101,217,165,.085), rgba(255,255,255,.006)), #0b151a;
+}
+
+.dashboard-tabs {
+  background: #091317;
+  border-color: rgba(155,190,184,.09);
+}
+
+.dashboard-tabs button.active {
+  color: #eef9f5;
+  background: linear-gradient(135deg, rgba(101,217,165,.14), rgba(93,201,214,.045));
+  box-shadow: inset 0 0 0 1px rgba(101,217,165,.13);
+}
+
+.meal-routine-option.active {
+  border-color: rgba(101,217,165,.34) !important;
+  background: linear-gradient(145deg, rgba(101,217,165,.12), rgba(93,201,214,.025)), #0d181d !important;
+  box-shadow: 0 14px 34px rgba(0,0,0,.18), inset 0 0 0 1px rgba(101,217,165,.05);
+}
+
+/* Buttons and inputs */
+
+.btn.primary,
+.btn-primary,
+.auth-primary-action {
+  box-shadow: 0 12px 28px rgba(55,151,112,.18) !important;
+}
+
+.btn.primary:hover,
+.btn-primary:hover,
+.auth-primary-action:hover {
+  box-shadow: 0 16px 34px rgba(55,151,112,.23) !important;
+}
+
+/* Auth */
+
+.auth-preview-card {
+  box-shadow: 0 28px 70px rgba(0,0,0,.30), inset 0 1px rgba(255,255,255,.035);
+}
+
+/* Light theme keeps the same brand language */
+
+html[data-theme='light'] {
+  --bg-soft: #e8f1ed;
+  --panel-hover: #f2f8f5;
+  --panel-2: #edf5f1;
+}
+
+html[data-theme='light'] .app-sidebar,
+html[data-theme='light'] .dashboard-v3 .dashboard-hero-v3,
+html[data-theme='light'] .dashboard-workspace,
+html[data-theme='light'] .compact-streak-card {
+  background: rgba(255,255,255,.92);
+  border-color: rgba(21,70,56,.08);
+  box-shadow: 0 18px 45px rgba(37,73,61,.09);
+}
+
+html[data-theme='light'] .nutrix-logo {
+  background: linear-gradient(145deg, rgba(101,217,165,.13), rgba(93,201,214,.06)), #f8fbfa;
+  border-color: rgba(35,151,108,.16);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brand-logo-mark,
+  .auth-logo-mark {
+    transition: none !important;
+  }
+}

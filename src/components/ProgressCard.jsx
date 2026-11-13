@@ -1,5 +1,4 @@
 import { statusFor } from '../lib/dates.js';
-import './ProgressCard3D.css';
 
 export default function ProgressCard({
   title,

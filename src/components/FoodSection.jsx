@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { deleteFood, clearFoodMeal } from '../lib/supabase.js';
 import { fmtTime, MEAL_LABELS } from '../lib/dates.js';
@@ -6,8 +6,8 @@ import { entryMacros, sumMacros } from '../lib/macros.js';
 import { toast } from './Toast.jsx';
 import FoodSearch from './FoodSearch.jsx';
 import AddFoodModal from './AddFoodModal.jsx';
-import NaturalFoodModal from './NaturalFoodModal.jsx';
-import CameraFoodModal from './CameraFoodModal.jsx';
+const NaturalFoodModal = lazy(() => import('./NaturalFoodModal.jsx'));
+const CameraFoodModal = lazy(() => import('./CameraFoodModal.jsx'));
 
 const SOURCE_LABEL = { tbca: 'TBCA', openfoodfacts: 'Rótulo', gemini: 'IA', 'gemini-vision': 'IA foto', manual: 'Manual' };
 
@@ -80,8 +80,10 @@ export default function FoodSection({ meal, entries, onChange, initialAction = n
 
       {modalItem && <AddFoodModal item={modalItem} meal={meal} onClose={() => setModalItem(null)} onSaved={onChange} />}
       {showManual && <AddFoodModal item={null} meal={meal} onClose={() => setShowManual(false)} onSaved={onChange} />}
-      {showNatural && <NaturalFoodModal meal={meal} onClose={() => setShowNatural(false)} onSaved={onChange} />}
-      {showCamera && <CameraFoodModal meal={meal} onClose={() => setShowCamera(false)} onSaved={onChange} />}
+      <Suspense fallback={null}>
+        {showNatural && <NaturalFoodModal meal={meal} onClose={() => setShowNatural(false)} onSaved={onChange} />}
+        {showCamera && <CameraFoodModal meal={meal} onClose={() => setShowCamera(false)} onSaved={onChange} />}
+      </Suspense>
     </div>
   );
 }
