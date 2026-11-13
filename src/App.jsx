@@ -1,17 +1,16 @@
-import './theme.css';
-import './color-system.css';
-import './brand-accent.css';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { AuthProvider, useAuth } from './contexts/AuthContext.jsx';
 import { getProfile } from './lib/supabase.js';
 import AuthGate from './components/AuthGate.jsx';
 import Toast from './components/Toast.jsx';
 import Dashboard from './pages/Dashboard.jsx';
-import GoalPage from './pages/GoalPage.jsx';
-import AdminPage from './pages/AdminPage.jsx';
-import WorkoutsPage from './pages/WorkoutsPage.jsx';
-import MealSuggestionsPage from './pages/MealSuggestionsPage.jsx';
+
+// Dashboard fica no bundle principal (rota inicial). As demais carregam sob demanda.
+const GoalPage = lazy(() => import('./pages/GoalPage.jsx'));
+const AdminPage = lazy(() => import('./pages/AdminPage.jsx'));
+const WorkoutsPage = lazy(() => import('./pages/WorkoutsPage.jsx'));
+const MealSuggestionsPage = lazy(() => import('./pages/MealSuggestionsPage.jsx'));
 
 const THEME_KEY = 'nutrix-theme';
 const ACCENT_KEY = 'nutrix-accent';
@@ -77,6 +76,7 @@ export default function App() {
             return (
               <>
                 <Toast />
+                <Suspense fallback={<div className="route-loading">Carregando…</div>}>
                 <Routes>
                   <Route path="/" element={<ProtectedRoute><ProfileGate><Dashboard {...appearanceProps} /></ProfileGate></ProtectedRoute>} />
                   <Route path="/goal" element={<ProtectedRoute><ProfileGate><GoalPage {...appearanceProps} /></ProfileGate></ProtectedRoute>} />
@@ -85,6 +85,7 @@ export default function App() {
                   <Route path="/admin" element={<ProtectedRoute><ProfileGate><AdminPage {...appearanceProps} /></ProfileGate></ProtectedRoute>} />
                   <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
+                </Suspense>
               </>
             );
           }}

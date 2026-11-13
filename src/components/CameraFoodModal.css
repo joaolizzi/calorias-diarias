@@ -34,7 +34,7 @@
   border-radius: 999px;
   background: var(--ai-soft);
   color: var(--ai);
-  font-size: 8px;
+  font-size: 11px;
   font-weight: 800;
   letter-spacing: .75px;
 }
@@ -49,7 +49,7 @@
 .camera-heading p {
   margin: 0 !important;
   color: var(--saas-muted, var(--muted)) !important;
-  font-size: 10px !important;
+  font-size: 11.5px !important;
   line-height: 1.5;
 }
 
@@ -112,7 +112,7 @@
 .camera-empty > span {
   max-width: 470px;
   color: var(--saas-muted, var(--muted));
-  font-size: 9px;
+  font-size: 11px;
   line-height: 1.55;
 }
 
@@ -145,7 +145,7 @@
   border-radius: 9px;
   background: rgba(8,11,16,.82);
   color: #f4f7fb;
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 750;
   backdrop-filter: blur(10px);
   cursor: pointer;
@@ -186,7 +186,7 @@
   display: block;
   margin-top: 3px;
   color: var(--saas-muted, var(--muted));
-  font-size: 9px;
+  font-size: 11px;
 }
 
 .camera-total {
@@ -197,7 +197,7 @@
   flex: 0 0 auto;
 }
 .camera-total strong { color: var(--food); font-size: 16px; }
-.camera-total small { color: var(--saas-muted, var(--muted)); font-size: 8px; }
+.camera-total small { color: var(--saas-muted, var(--muted)); font-size: 11px; }
 
 .camera-results {
   max-height: 315px !important;
@@ -241,7 +241,7 @@
 .camera-item-content .when {
   margin-top: 4px;
   color: var(--saas-muted, var(--muted)) !important;
-  font-size: 8px !important;
+  font-size: 11px !important;
   line-height: 1.45;
 }
 
@@ -256,7 +256,7 @@
   border-radius: 8px;
   background: transparent;
   color: var(--saas-muted, var(--muted));
-  font-size: 8px;
+  font-size: 11px;
   font-weight: 750;
   cursor: pointer;
 }
@@ -285,7 +285,7 @@
 .camera-edit-row label > span,
 .camera-replace > span {
   color: var(--saas-muted, var(--muted));
-  font-size: 8px;
+  font-size: 11px;
   font-weight: 750;
 }
 
@@ -308,7 +308,7 @@
   box-shadow: none !important;
   font-size: 12px;
 }
-.camera-grams-input b { padding-right: 9px; color: var(--saas-muted, var(--muted)); font-size: 9px; }
+.camera-grams-input b { padding-right: 9px; color: var(--saas-muted, var(--muted)); font-size: 11px; }
 
 .camera-replace { margin-top: 12px; }
 .camera-replace > input {
@@ -320,13 +320,13 @@
   border: 1px solid var(--saas-border, var(--border-hover)) !important;
   border-radius: 9px !important;
   outline: 0;
-  font-size: 10px;
+  font-size: 11.5px;
 }
 .camera-replace > input:focus {
   border-color: color-mix(in srgb, var(--saas-accent) 48%, var(--saas-border)) !important;
   box-shadow: 0 0 0 3px var(--saas-accent-soft) !important;
 }
-.camera-replace > small { color: var(--saas-muted, var(--muted)); font-size: 8px; }
+.camera-replace > small { color: var(--saas-muted, var(--muted)); font-size: 11px; }
 
 .camera-food-results {
   display: flex;
@@ -354,10 +354,10 @@
 }
 .camera-food-results button:last-child { border-bottom: 0; }
 .camera-food-results button:hover { background: var(--saas-accent-soft); }
-.camera-food-results span { font-size: 10px; font-weight: 700; }
-.camera-food-results small { color: var(--saas-muted, var(--muted)); font-size: 8px; }
+.camera-food-results span { font-size: 11.5px; font-weight: 700; }
+.camera-food-results small { color: var(--saas-muted, var(--muted)); font-size: 11px; }
 
-.camera-edit-cancel { width: 100%; margin-top: 9px; font-size: 9px !important; }
+.camera-edit-cancel { width: 100%; margin-top: 9px; font-size: 11px !important; }
 
 .camera-disclaimer {
   margin: 10px 20px 0;
@@ -366,7 +366,7 @@
   border-radius: 9px;
   background: color-mix(in srgb, var(--warn) 5%, transparent);
   color: var(--saas-muted, var(--muted));
-  font-size: 8px;
+  font-size: 11px;
   line-height: 1.45;
 }
 
@@ -374,7 +374,7 @@
   padding: 11px 20px 14px;
   border-top: 1px solid var(--saas-border-soft, var(--border));
   color: var(--saas-muted, var(--muted));
-  font-size: 8px;
+  font-size: 11px;
 }
 .camera-meal strong { color: var(--saas-text-2, var(--text-soft)); }
 
@@ -409,7 +409,7 @@
   .camera-edit-row .btn { width: 100%; }
   .camera-edit-btn { margin-left: 0; width: 100%; }
   .camera-actions { display: grid; grid-template-columns: 1fr 1fr; }
-  .camera-actions .btn { width: 100%; min-width: 0; padding-inline: 9px !important; font-size: 9px !important; }
+  .camera-actions .btn { width: 100%; min-width: 0; padding-inline: 9px !important; font-size: 11px !important; }
   .camera-open-btn { width: 100%; min-width: 0; }
   .camera-preview { max-height: 300px; }
 }
