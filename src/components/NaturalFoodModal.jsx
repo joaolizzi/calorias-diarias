@@ -11,11 +11,16 @@ import { today, MEAL_LABELS } from '../lib/dates.js';
 import { parseNaturalFood } from '../lib/gemini.js';
 import { nutritionForGrams } from '../lib/macros.js';
 import { toast } from './Toast.jsx';
+import Modal from './Modal.jsx';
+import Icon from './Icon.jsx';
+import { fmtNum, fmtInt } from './format.js';
 
-const SOURCE_LABEL = { tbca: 'TBCA', gemini: 'Estimativa IA', 'gemini-vision': 'IA por foto', openfoodfacts: 'Rótulo' };
+const SOURCE_LABEL = { tbca: 'TBCA', gemini: 'Estimativa IA', 'gemini-vision': 'Estimativa IA', openfoodfacts: 'Rótulo', manual: 'Manual' };
+const IS_ESTIMATE = (source) => source === 'gemini' || source === 'gemini-vision' || !source;
 const CONFIDENCE_LABEL = { high: 'Alta confiança', medium: 'Média confiança', low: 'Baixa confiança' };
+const CONFIDENCE_LEVEL = { high: 3, medium: 2, low: 1 };
 
-export default function NaturalFoodModal({ meal: defaultMeal, onClose, onSaved }) {
+export default function NaturalFoodModal({ meal: defaultMeal, onClose, onSaved, dayKcal = 0, kcalGoal = 0 }) {
   const { user } = useAuth();
   const [text, setText] = useState('');
   const [items, setItems] = useState(null);
@@ -129,55 +134,159 @@ export default function NaturalFoodModal({ meal: defaultMeal, onClose, onSaved }
     finally { setSaving(false); }
   };
 
+  const mealName = MEAL_LABELS[defaultMeal] || defaultMeal;
+  const dayAfter = Math.round(dayKcal + selectedTotals.kcal);
+  const pctBefore = kcalGoal > 0 ? Math.min(100, (dayKcal / kcalGoal) * 100) : 0;
+  const pctAdd = kcalGoal > 0 ? Math.min(100 - pctBefore, (selectedTotals.kcal / kcalGoal) * 100) : 0;
+
   return (
-    <div className="modal-bg" onClick={onClose}>
-      <div className="modal natural-food-modal" onClick={(e) => e.stopPropagation()}>
-        <div className="natural-modal-head">
-          <div><span className="natural-modal-kicker">Registro inteligente</span><h3>Descrever refeição</h3><small>{MEAL_LABELS[defaultMeal] || defaultMeal}</small></div>
-          <button className="natural-modal-close" onClick={onClose} aria-label="Fechar">×</button>
-        </div>
+    <Modal title="Descrever refeição" onClose={onClose} className="natural-food-modal">
+      <p className="modal-sub">{mealName} · a IA separa os alimentos e estima as quantidades que você não informar</p>
 
-        <div className="field natural-food-field">
-          <label>O que você comeu?</label>
-          <textarea value={text} onChange={(e) => { setText(e.target.value); setSavedCurrent(false); }} placeholder='ex: "150g de arroz, 120g de frango e uma concha de feijão"' rows={3} />
-        </div>
-
-        {!items && <div className="actions natural-modal-actions"><button className="btn" onClick={onClose} disabled={busy}>Cancelar</button><button className="btn primary" onClick={interpret} disabled={busy || text.trim().length < 3}>{busy ? 'Interpretando…' : 'Interpretar'}</button></div>}
-
-        {items && items.length > 0 && (
-          <>
-            <div className="natural-items-label">Confira e ajuste as quantidades</div>
-            <ul className="log natural-items-list macro-ai-list">
-              {items.map((it, idx) => (
-                <li key={`${it.name}-${idx}`} className={!it.selected ? 'macro-item-disabled' : ''}>
-                  <label className="natural-item-check"><input type="checkbox" checked={it.selected} onChange={() => toggle(idx)} /><div className="macro-ai-item-main"><div className="amt">{it.name} <span className="meal-tag">{it.kcal} kcal</span></div><div className="macro-source-row"><span className={`ai-source-badge ${it.source === 'tbca' ? 'tbca' : 'gemini'}`}>{SOURCE_LABEL[it.source] || 'Estimativa'}</span>{it.confidence ? <span>{CONFIDENCE_LABEL[it.confidence] || it.confidence}</span> : null}</div></div></label>
-                  <div className="macro-ai-controls">
-                    <label><span>Quantidade</span><div className="macro-grams-control"><button type="button" onClick={() => setGrams(idx, Number(it.grams) - 10)}>−</button><input type="number" min="1" max="3000" value={it.grams || ''} onChange={(e) => setGrams(idx, e.target.value)} /><b>g</b><button type="button" onClick={() => setGrams(idx, Number(it.grams) + 10)}>+</button></div></label>
-                    <div className="macro-inline-stats"><span><b>{Number(it.protein || 0).toFixed(1)}</b> P</span><span><b>{Number(it.carbs || 0).toFixed(1)}</b> C</span><span><b>{Number(it.fat || 0).toFixed(1)}</b> G</span></div>
-                  </div>
-                </li>
-              ))}
-            </ul>
-
-            <div className="macro-ai-total"><span>Total selecionado</span><strong>{Math.round(selectedTotals.kcal)} kcal</strong><small>P {selectedTotals.protein.toFixed(1)}g · C {selectedTotals.carbs.toFixed(1)}g · G {selectedTotals.fat.toFixed(1)}g</small></div>
-
-            <div className="actions natural-modal-actions natural-modal-actions-wrap">
-              <button className="btn" onClick={() => setItems(null)} disabled={saving}>Voltar</button>
-              <button className="btn" onClick={saveCurrentHistory} disabled={saving || savedCurrent || !user?.id}>{savedCurrent ? '✓ Rotina salva' : saving ? 'Salvando…' : 'Salvar rotina'}</button>
-              <button className="btn primary food" onClick={save} disabled={saving || selected.length === 0}>{saving ? 'Salvando…' : `Adicionar ${selected.length} ${selected.length === 1 ? 'item' : 'itens'}`}</button>
-            </div>
-          </>
-        )}
-
-        {items && items.length === 0 && <div className="actions natural-modal-actions"><button className="btn" onClick={() => setItems(null)}>Voltar</button><button className="btn" onClick={onClose}>Fechar</button></div>}
-
-        <section className="saved-routines-panel">
-          <div className="saved-routines-head"><div><span className="natural-modal-kicker">Atalhos</span><strong>Suas rotinas salvas</strong></div><span className="saved-routines-count">{history.length}/30</span></div>
-          {historyBusy ? <div className="saved-routines-empty">Carregando rotinas…</div> : history.length === 0 ? <div className="saved-routines-empty"><strong>Nenhuma rotina salva</strong><small>Interprete uma refeição e use “Salvar rotina” para repetir depois sem chamar a IA novamente.</small></div> : (
-            <div className="saved-routines-list">{history.map((entry) => <article className="saved-routine-card" key={entry.id}><button className="saved-routine-main" onClick={() => useHistory(entry)}><strong>{entry.description}</strong><small>{(entry.items || []).length} {(entry.items || []).length === 1 ? 'item' : 'itens'} · {new Date(entry.created_at).toLocaleDateString('pt-BR')}</small></button><div className="saved-routine-actions"><button onClick={() => editHistory(entry)} aria-label="Editar rotina">✎</button><button className="danger" onClick={() => removeHistory(entry)} aria-label="Excluir rotina">×</button></div></article>)}</div>
-          )}
-        </section>
+      <div className="field natural-food-field">
+        <label htmlFor="nf-text">O que você comeu?</label>
+        <textarea id="nf-text" value={text} onChange={(e) => { setText(e.target.value); setSavedCurrent(false); }} placeholder="Por exemplo: 150 g de arroz, 120 g de frango e uma concha de feijão" rows={3} />
       </div>
-    </div>
+
+      {!items && (
+        <div className="actions">
+          <button type="button" className="btn" onClick={onClose} disabled={busy}>Cancelar</button>
+          <button type="button" className="btn primary" onClick={interpret} disabled={busy || text.trim().length < 3}>{busy ? 'Interpretando…' : 'Interpretar'}</button>
+        </div>
+      )}
+
+      {items && items.length > 0 && (
+        <section className="ai-result" aria-labelledby="nf-res">
+          <div className="ai-result-head">
+            <h4 id="nf-res">Confira e ajuste as quantidades</h4>
+            <p className="ai-legend">
+              <span><i className="legend-swatch" />tabela TBCA</span>
+              <span><i className="legend-swatch estimate" />estimativa da IA</span>
+            </p>
+          </div>
+
+          <div className="ai-table" role="table" aria-label="Alimentos identificados">
+            <div className="ai-row ai-row-head" role="row">
+              <span role="columnheader"><span className="sr-only">Incluir</span></span>
+              <span role="columnheader">Alimento</span>
+              <span role="columnheader">Quantidade</span>
+              <span role="columnheader" className="r">kcal</span>
+              <span role="columnheader" className="r">P (g)</span>
+              <span role="columnheader" className="r">C (g)</span>
+              <span role="columnheader" className="r">G (g)</span>
+            </div>
+
+            {items.map((it, idx) => {
+              const estimate = IS_ESTIMATE(it.source);
+              const level = CONFIDENCE_LEVEL[it.confidence] || 0;
+              return (
+                <div key={`${it.name}-${idx}`} className={`ai-row ${!it.selected ? 'off' : ''}`} role="row">
+                  <label className="ai-check" role="cell">
+                    <input type="checkbox" checked={it.selected} onChange={() => toggle(idx)} aria-label={`Incluir ${it.name}`} />
+                  </label>
+                  <div className="ai-name" role="cell">
+                    <div className="ai-name-main">{it.name}</div>
+                    <div className="ai-name-meta">
+                      <span className={`source-chip ${estimate ? 'estimate' : ''}`}>{SOURCE_LABEL[it.source] || 'Estimativa IA'}</span>
+                      {it.confidence ? (
+                        <span className="confidence">
+                          <span className="conf-bars" role="img" aria-label={CONFIDENCE_LABEL[it.confidence] || it.confidence}>
+                            {[1, 2, 3].map((n) => <i key={n} className={n <= level ? 'on' : ''} />)}
+                          </span>
+                          {CONFIDENCE_LABEL[it.confidence] || it.confidence}
+                        </span>
+                      ) : null}
+                    </div>
+                  </div>
+                  <div className="ai-qty" role="cell">
+                    <button type="button" className="step-btn" onClick={() => setGrams(idx, Number(it.grams) - 10)} aria-label={`Diminuir 10 gramas de ${it.name}`}>−</button>
+                    <input className={estimate ? 'estimate' : ''} type="number" min="1" max="3000" value={it.grams || ''} onChange={(e) => setGrams(idx, e.target.value)} aria-label={`Gramas de ${it.name}`} />
+                    <span className="unit">g</span>
+                    <button type="button" className="step-btn" onClick={() => setGrams(idx, Number(it.grams) + 10)} aria-label={`Aumentar 10 gramas de ${it.name}`}>+</button>
+                  </div>
+                  <span className="r num ai-kcal" role="cell"><span className="cell-label">kcal</span>{fmtInt(it.kcal)}</span>
+                  <span className="r num" role="cell"><span className="cell-label">P</span>{fmtNum(it.protein)}</span>
+                  <span className="r num" role="cell"><span className="cell-label">C</span>{fmtNum(it.carbs)}</span>
+                  <span className="r num" role="cell"><span className="cell-label">G</span>{fmtNum(it.fat)}</span>
+                </div>
+              );
+            })}
+
+            <div className="ai-row ai-row-total" role="row">
+              <span role="cell" />
+              <span role="cell" className="ai-total-name">Total selecionado</span>
+              <span role="cell" />
+              <span role="cell" className="r num ai-kcal"><span className="cell-label">kcal</span>{fmtInt(selectedTotals.kcal)}</span>
+              <span role="cell" className="r num"><span className="cell-label">P</span>{fmtNum(selectedTotals.protein)}</span>
+              <span role="cell" className="r num"><span className="cell-label">C</span>{fmtNum(selectedTotals.carbs)}</span>
+              <span role="cell" className="r num"><span className="cell-label">G</span>{fmtNum(selectedTotals.fat)}</span>
+            </div>
+          </div>
+
+          {kcalGoal > 0 && (
+            <div className="day-effect">
+              <div className="day-effect-top">
+                <span>Com este {mealName.toLowerCase()}, o dia chega a <strong className="num">{fmtInt(dayAfter)} de {fmtInt(kcalGoal)} kcal</strong></span>
+                <span className="muted num">{Math.round(((dayKcal + selectedTotals.kcal) / kcalGoal) * 100)}% da meta</span>
+              </div>
+              <div className="day-effect-bar" role="img" aria-label={`${Math.round(pctBefore)}% da meta já consumida e mais ${Math.round(pctAdd)}% com este ${mealName.toLowerCase()}`}>
+                <span style={{ width: `${pctBefore}%` }} className="before" />
+                <span style={{ width: `${pctAdd}%` }} className="added" />
+              </div>
+              <div className="day-effect-legend">
+                <span><i className="before" />já registrado</span>
+                <span><i className="added" />este {mealName.toLowerCase()}</span>
+              </div>
+            </div>
+          )}
+
+          <div className="actions ai-actions">
+            <button type="button" className="btn ghost back" onClick={() => setItems(null)} disabled={saving}>Voltar</button>
+            <button type="button" className="btn" onClick={saveCurrentHistory} disabled={saving || savedCurrent || !user?.id}>
+              {savedCurrent ? <><Icon name="check" size={16} /> Rotina salva</> : saving ? 'Salvando…' : 'Salvar como rotina'}
+            </button>
+            <button type="button" className="btn primary" onClick={save} disabled={saving || selected.length === 0}>
+              {saving ? 'Salvando…' : `Adicionar ${selected.length} ${selected.length === 1 ? 'item' : 'itens'} ao ${mealName.toLowerCase()}`}
+            </button>
+          </div>
+        </section>
+      )}
+
+      {items && items.length === 0 && (
+        <div className="actions">
+          <button type="button" className="btn" onClick={() => setItems(null)}>Voltar</button>
+          <button type="button" className="btn" onClick={onClose}>Fechar</button>
+        </div>
+      )}
+
+      <section className="saved-routines" aria-labelledby="nf-rot">
+        <div className="saved-routines-head">
+          <h4 id="nf-rot">Suas rotinas salvas</h4>
+          <span className="muted">{history.length} de 30</span>
+        </div>
+        <p className="saved-routines-sub">Repita uma refeição sem chamar a IA de novo.</p>
+        {historyBusy ? (
+          <div className="saved-routines-empty">Carregando rotinas…</div>
+        ) : history.length === 0 ? (
+          <div className="saved-routines-empty">
+            <strong>Nenhuma rotina salva</strong>
+            <small>Interprete uma refeição e use “Salvar como rotina” para repetir depois.</small>
+          </div>
+        ) : (
+          <ul className="saved-routines-list">
+            {history.map((entry) => (
+              <li key={entry.id}>
+                <button type="button" className="saved-routine-main" onClick={() => useHistory(entry)}>
+                  <span className="saved-routine-text">{entry.description}</span>
+                  <span className="saved-routine-meta">{(entry.items || []).length} {(entry.items || []).length === 1 ? 'item' : 'itens'} · {new Date(entry.created_at).toLocaleDateString('pt-BR')}</span>
+                </button>
+                <button type="button" className="icon-btn" onClick={() => editHistory(entry)} aria-label={`Editar rotina: ${entry.description}`}><Icon name="pencil" size={18} /></button>
+                <button type="button" className="icon-btn" onClick={() => removeHistory(entry)} aria-label={`Excluir rotina: ${entry.description}`}><Icon name="trash" size={18} /></button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+    </Modal>
   );
 }

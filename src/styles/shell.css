@@ -1,0 +1,200 @@
+/* ==========================================================================
+   Estrutura do app — menu lateral (≥960px), barra superior e barra inferior
+   (celular), cabeçalho de página
+   ========================================================================== */
+
+.app-shell { min-height: 100vh; }
+
+/* ---------- Marca ---------- */
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text);
+  text-decoration: none;
+}
+.brand:hover { text-decoration: none; }
+.brand-mark { color: var(--accent); display: inline-flex; }
+.nutrix-logo { display: inline-flex; width: var(--nutrix-logo-size, 32px); height: var(--nutrix-logo-size, 32px); }
+.nutrix-logo svg { width: 100%; height: 100%; }
+.brand-name { font-size: 21px; font-weight: var(--fw-semibold); letter-spacing: -.3px; }
+.brand-dot { color: var(--accent); }
+
+/* ---------- Menu lateral ---------- */
+.app-sidebar {
+  position: fixed;
+  inset: 0 auto 0 0;
+  z-index: 50;
+  width: min(320px, 88vw);
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  padding: 28px 16px 24px;
+  background: var(--bg);
+  border-right: 1px solid var(--line);
+  overflow-y: auto;
+  transform: translateX(-100%);
+  visibility: hidden;
+  transition: transform 220ms var(--ease), visibility 220ms;
+}
+.app-sidebar.open { transform: none; visibility: visible; }
+
+.sidebar-top { display: flex; align-items: center; justify-content: space-between; padding: 0 8px; }
+.sidebar-top .brand .brand-mark { width: 30px; height: 30px; }
+
+.sidebar-actions { display: flex; gap: 8px; }
+.sidebar-register { flex: 1; min-height: 46px; font-size: var(--fs-base); white-space: nowrap; }
+.sidebar-register:hover { text-decoration: none; }
+
+.sidebar-nav { display: flex; flex-direction: column; gap: 4px; }
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: var(--tap);
+  padding: 0 12px;
+  border-radius: var(--r-md);
+  color: var(--text-2);
+  font-size: var(--fs-base);
+  text-decoration: none;
+  transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
+}
+.nav-link:hover { background: var(--surface); color: var(--text); text-decoration: none; }
+.nav-link.active { background: var(--surface-3); color: var(--text); font-weight: var(--fw-medium); }
+.nav-link.active svg { color: var(--accent); }
+
+.sidebar-foot { margin-top: auto; display: flex; flex-direction: column; gap: 16px; }
+.appearance-modes { display: flex; }
+.appearance-modes button { flex: 1; }
+
+.sidebar-account { display: flex; align-items: center; gap: 12px; padding: 0 8px; min-width: 0; }
+.avatar,
+.avatar-btn {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--active);
+  color: var(--text-2);
+  font-weight: var(--fw-semibold);
+}
+.sidebar-account-copy { flex: 1; min-width: 0; display: grid; }
+.sidebar-account-copy strong { font-size: var(--fs-ui); font-weight: var(--fw-regular); color: var(--text-2); }
+.sidebar-account-copy small { color: var(--muted); font-size: var(--fs-sm); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+  border: 0;
+  background: var(--overlay);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 220ms var(--ease);
+}
+.sidebar-backdrop.show { opacity: 1; pointer-events: auto; }
+
+/* ---------- Barra superior (celular) ---------- */
+.mobile-appbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--appbar-h);
+  padding: 0 16px 0 20px;
+  background: var(--bg);
+}
+.mobile-appbar .brand { gap: 8px; }
+.mobile-appbar .brand-name { font-size: 20px; }
+.avatar-btn { width: var(--tap); height: var(--tap); border: 0; font-size: var(--fs-base); cursor: pointer; }
+
+/* ---------- Barra inferior (celular) ---------- */
+.tabbar {
+  position: fixed;
+  inset: auto 0 0 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  height: calc(var(--tabbar-h) + env(safe-area-inset-bottom));
+  padding: 6px 8px env(safe-area-inset-bottom);
+  background: var(--bar);
+  border-top: 1px solid var(--line);
+}
+.tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  min-height: 56px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text-2);
+  font-size: var(--fs-sm);
+  cursor: pointer;
+  text-decoration: none;
+}
+.tab:hover { text-decoration: none; }
+.tab.active { color: var(--text); font-weight: var(--fw-medium); }
+.tab.active svg { color: var(--accent); }
+.tab-register {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  margin: 0 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+.tab-register:hover { text-decoration: none; filter: brightness(1.08); }
+
+/* ---------- Conteúdo ---------- */
+.page { padding: 8px 16px calc(var(--tabbar-h) + 36px + env(safe-area-inset-bottom)); }
+.page-inner { max-width: var(--page-max); margin: 0 auto; display: flex; flex-direction: column; gap: 24px; }
+
+.page-head { display: flex; flex-direction: column; gap: 12px; }
+.page-date { margin-bottom: 2px; font-size: var(--fs-ui); color: var(--muted); }
+.page-head h1 { font-size: 30px; }
+.page-head-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+
+.streak-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  color: var(--text-2);
+  font-size: var(--fs-ui);
+}
+.streak-pill svg { color: var(--muted); }
+.streak-pill.on svg { color: var(--accent); }
+
+.section-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px; }
+.section-head h2 { font-size: 20px; }
+
+/* ---------- Desktop: menu fixo ---------- */
+@media (min-width: 960px) {
+  .app-shell { padding-left: var(--sidebar-w); }
+  .app-sidebar { transform: none; visibility: visible; width: var(--sidebar-w); }
+  .sidebar-backdrop, .sidebar-close, .mobile-appbar, .tabbar { display: none; }
+
+  .page { padding: 40px 48px 64px; }
+  .page-inner { gap: 32px; }
+  .page-head { flex-direction: row; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px; }
+  .page-head h1 { font-size: var(--fs-3xl); }
+}
+
+@media (max-width: 959px) {
+  .app-sidebar { box-shadow: var(--shadow-pop); }
+}

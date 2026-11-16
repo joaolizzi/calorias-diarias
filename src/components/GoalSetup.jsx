@@ -76,95 +76,78 @@ export default function GoalSetup({ onComplete, compact = false }) {
     }
   };
 
+  const activityHint = { sedentary: 'Pouco ou nenhum exercício', light: '1–3 treinos por semana', moderate: '3–5 treinos por semana', active: '6–7 treinos por semana' };
+  const goalHint = { lose: 'Déficit moderado', gain: 'Superávit moderado', maintain: 'Equilíbrio energético' };
+
   return (
-    <div className={compact ? 'goal-setup goal-setup-compact' : 'goal-setup'}>
-      <div className="goal-hero">
-        <div className="eyebrow">SEU PLANO</div>
+    <div className="goal-setup">
+      <header className="goal-intro">
         <h1>{compact ? 'Ajuste seu objetivo' : 'Monte seu plano em 1 minuto'}</h1>
         <p>Informe seus dados e o app estima suas calorias e hidratação. Você pode ajustar tudo depois.</p>
-      </div>
+      </header>
 
       <form onSubmit={submit} className="goal-form">
-        <section className="goal-section">
-          <div className="section-heading">
-            <span className="section-icon">01</span>
-            <div>
-              <strong>Seus dados</strong>
-              <span>Precisamos de informações básicas para a estimativa.</span>
-            </div>
-          </div>
-          <div className="goal-grid two">
+        <section className="goal-section" aria-labelledby="gs-dados">
+          <div className="goal-section-head"><h2 id="gs-dados">Seus dados</h2><p>Precisamos de informações básicas para a estimativa.</p></div>
+          <div className="goal-grid">
             <label className="field-modern"><span>Nome</span><input value={form.displayName} onChange={(e) => set('displayName', e.target.value)} placeholder="Como podemos te chamar?" /></label>
-            <label className="field-modern"><span>Idade</span><input type="number" min="13" max="100" value={form.age} onChange={(e) => set('age', e.target.value)} placeholder="18" required /></label>
-            <label className="field-modern"><span>Peso <small>kg</small></span><input type="number" min="25" max="350" step="0.1" value={form.weightKg} onChange={(e) => set('weightKg', e.target.value)} placeholder="70" required /></label>
-            <label className="field-modern"><span>Altura <small>cm</small></span><input type="number" min="100" max="230" value={form.heightCm} onChange={(e) => set('heightCm', e.target.value)} placeholder="175" required /></label>
+            <label className="field-modern"><span>Idade</span><input type="number" min="13" max="100" value={form.age} onChange={(e) => set('age', e.target.value)} placeholder="Por exemplo: 28" required /></label>
+            <label className="field-modern"><span>Peso <small>(kg)</small></span><input type="number" min="25" max="350" step="0.1" value={form.weightKg} onChange={(e) => set('weightKg', e.target.value)} placeholder="Por exemplo: 70" required /></label>
+            <label className="field-modern"><span>Altura <small>(cm)</small></span><input type="number" min="100" max="230" value={form.heightCm} onChange={(e) => set('heightCm', e.target.value)} placeholder="Por exemplo: 175" required /></label>
           </div>
           <div className="choice-row">
-            <span className="choice-label">Sexo biológico</span>
-            <div className="choice-group">
-              <button type="button" className={form.sex === 'male' ? 'choice active' : 'choice'} onClick={() => set('sex', 'male')}>Masculino</button>
-              <button type="button" className={form.sex === 'female' ? 'choice active' : 'choice'} onClick={() => set('sex', 'female')}>Feminino</button>
+            <span className="choice-label" id="gs-sexo">Sexo biológico</span>
+            <div className="segmented" role="group" aria-labelledby="gs-sexo">
+              <button type="button" aria-pressed={form.sex === 'male'} className={form.sex === 'male' ? 'active' : ''} onClick={() => set('sex', 'male')}>Masculino</button>
+              <button type="button" aria-pressed={form.sex === 'female'} className={form.sex === 'female' ? 'active' : ''} onClick={() => set('sex', 'female')}>Feminino</button>
             </div>
           </div>
         </section>
 
-        <section className="goal-section">
-          <div className="section-heading">
-            <span className="section-icon">02</span>
-            <div>
-              <strong>Seu objetivo</strong>
-              <span>Escolha o resultado que quer priorizar.</span>
-            </div>
-          </div>
-          <div className="goal-cards">
+        <section className="goal-section" aria-labelledby="gs-obj">
+          <div className="goal-section-head"><h2 id="gs-obj">Seu objetivo</h2><p>Escolha o resultado que quer priorizar.</p></div>
+          <div className="option-grid three" role="group" aria-labelledby="gs-obj">
             {GOALS.map((item) => (
-              <button type="button" key={item.value} className={form.goal === item.value ? 'goal-card active' : 'goal-card'} onClick={() => set('goal', item.value)}>
-                <span className="goal-card-title">{item.label}</span>
-                <span>{item.value === 'lose' ? 'Déficit moderado' : item.value === 'gain' ? 'Superávit moderado' : 'Equilíbrio energético'}</span>
-              </button>
-            ))}
-          </div>
-        </section>
-
-        <section className="goal-section">
-          <div className="section-heading">
-            <span className="section-icon">03</span>
-            <div>
-              <strong>Nível de atividade</strong>
-              <span>Isso influencia sua necessidade diária.</span>
-            </div>
-          </div>
-          <div className="activity-grid">
-            {ACTIVITY_LEVELS.map((item) => (
-              <button type="button" key={item.value} className={form.activity === item.value ? 'activity-card active' : 'activity-card'} onClick={() => set('activity', item.value)}>
+              <button type="button" key={item.value} aria-pressed={form.goal === item.value} className={`option-card ${form.goal === item.value ? 'active' : ''}`} onClick={() => set('goal', item.value)}>
                 <strong>{item.label}</strong>
-                <span>{item.value === 'sedentary' ? 'Pouco ou nenhum exercício' : item.value === 'light' ? '1–3 treinos/semana' : item.value === 'moderate' ? '3–5 treinos/semana' : '6–7 treinos/semana'}</span>
+                <span>{goalHint[item.value]}</span>
               </button>
             ))}
           </div>
         </section>
 
-        <section className="goal-result">
+        <section className="goal-section" aria-labelledby="gs-ativ">
+          <div className="goal-section-head"><h2 id="gs-ativ">Nível de atividade</h2><p>Isso influencia sua necessidade diária.</p></div>
+          <div className="option-grid four" role="group" aria-labelledby="gs-ativ">
+            {ACTIVITY_LEVELS.map((item) => (
+              <button type="button" key={item.value} aria-pressed={form.activity === item.value} className={`option-card ${form.activity === item.value ? 'active' : ''}`} onClick={() => set('activity', item.value)}>
+                <strong>{item.label}</strong>
+                <span>{activityHint[item.value] || activityHint.active}</span>
+              </button>
+            ))}
+          </div>
+        </section>
+
+        <section className="card goal-result" aria-labelledby="gs-plano">
           <div>
-            <span className="eyebrow">ESTIMATIVA PARA {goalLabel.toUpperCase()}</span>
-            <h2>Seu plano diário</h2>
-            <p>Baseado nos dados informados. Não substitui orientação médica ou nutricional.</p>
+            <h2 id="gs-plano">Seu plano diário</h2>
+            <p className="muted">Estimativa para {goalLabel.toLowerCase()}, baseada nos dados informados. Não substitui orientação médica ou nutricional.</p>
           </div>
           <div className="result-grid">
-            <div className="result-card"><span>Calorias</span><strong>{kcal.toLocaleString('pt-BR')}</strong><small>kcal / dia</small></div>
-            <div className="result-card water-result"><span>Água</span><strong>{water.toLocaleString('pt-BR')}</strong><small>ml / dia</small></div>
+            <div className="result-cell"><span>Calorias</span><strong className="num">{kcal.toLocaleString('pt-BR')}</strong><small>kcal por dia</small></div>
+            <div className="result-cell"><span>Água</span><strong className="num">{water.toLocaleString('pt-BR')}</strong><small>ml por dia</small></div>
           </div>
         </section>
 
         <div className="manual-toggle-row">
           <div><strong>Quer personalizar?</strong><span>Você pode substituir as metas calculadas.</span></div>
-          <button type="button" className={useManual ? 'switch on' : 'switch'} onClick={() => setUseManual((value) => !value)} aria-pressed={useManual}><span /></button>
+          <button type="button" className={useManual ? 'switch on' : 'switch'} onClick={() => setUseManual((value) => !value)} aria-pressed={useManual} aria-label="Personalizar metas"><span /></button>
         </div>
 
         {useManual && (
-          <div className="goal-grid two manual-goals">
-            <label className="field-modern"><span>Meta de calorias <small>kcal/dia</small></span><input type="number" min="1200" max="10000" step="50" value={manual.kcal || kcal} onChange={(e) => setManual((p) => ({ ...p, kcal: e.target.value }))} /></label>
-            <label className="field-modern"><span>Meta de água <small>ml/dia</small></span><input type="number" min="1000" max="10000" step="50" value={manual.water || water} onChange={(e) => setManual((p) => ({ ...p, water: e.target.value }))} /></label>
+          <div className="goal-grid">
+            <label className="field-modern"><span>Meta de calorias <small>(kcal por dia)</small></span><input type="number" min="1200" max="10000" step="50" value={manual.kcal || kcal} onChange={(e) => setManual((p) => ({ ...p, kcal: e.target.value }))} /></label>
+            <label className="field-modern"><span>Meta de água <small>(ml por dia)</small></span><input type="number" min="1000" max="10000" step="50" value={manual.water || water} onChange={(e) => setManual((p) => ({ ...p, water: e.target.value }))} /></label>
           </div>
         )}
 

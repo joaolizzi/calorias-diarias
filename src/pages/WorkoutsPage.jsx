@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import ProfessionalHeader from '../components/ProfessionalHeader.jsx';
+import Modal from '../components/Modal.jsx';
+import Icon from '../components/Icon.jsx';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { supabase } from '../lib/supabase.js';
 import {
@@ -10,7 +12,6 @@ import {
   saveWorkoutPlan,
   localizeExerciseName,
 } from '../lib/workouts.js';
-import './WorkoutPlans.css';
 
 const makeSet = (source = {}) => ({ kg: source.kg ?? '', reps: source.reps ?? '', done: Boolean(source.done) });
 const clone = (value) => JSON.parse(JSON.stringify(value));
@@ -36,28 +37,27 @@ function ExercisePicker({ catalog, selectedIds, onAdd, onClose }) {
   }, [catalog, muscle, query]);
 
   return (
-    <div className="exercise-picker-overlay" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
-      <div className="exercise-picker-modal card">
-        <div className="exercise-picker-head">
-          <div><span className="eyebrow">BANCO DE EXERCÍCIOS</span><h2>Escolha os exercícios</h2><p className="muted">Pesquise por nome ou músculo.</p></div>
-          <button type="button" className="modal-close" onClick={onClose} aria-label="Fechar">×</button>
-        </div>
-        <div className="exercise-picker-filters">
-          <input className="input" autoFocus placeholder="Ex.: supino, tríceps, costas..." value={query} onChange={(e) => setQuery(e.target.value)} />
-          <select className="input" value={muscle} onChange={(e) => setMuscle(e.target.value)}>{muscles.map((m) => <option key={m}>{m}</option>)}</select>
-        </div>
-        <div className="exercise-picker-grid">
-          {filtered.length === 0 ? <div className="empty-state card">Nenhum exercício encontrado.</div> : filtered.map((exercise) => {
-            const selected = selectedIds.has(exercise.id);
-            return <button type="button" className={`exercise-option ${selected ? 'selected' : ''}`} key={exercise.id} onClick={() => onAdd(exercise)}>
-              <span className="exercise-option-name">{exercise.name}</span>
-              <span>{exercise.muscle} · {exercise.equipment}</span>
-              {selected && <strong>✓ Adicionado</strong>}
-            </button>;
-          })}
-        </div>
+    <Modal title="Escolha os exercícios" onClose={onClose} className="exercise-picker-modal">
+      <p className="modal-sub">Pesquise por nome ou músculo.</p>
+      <div className="exercise-picker-filters">
+        <label className="sr-only" htmlFor="ex-q">Buscar exercício</label>
+        <input id="ex-q" placeholder="Por exemplo: supino, tríceps, costas" value={query} onChange={(e) => setQuery(e.target.value)} />
+        <label className="sr-only" htmlFor="ex-m">Grupo muscular</label>
+        <select id="ex-m" value={muscle} onChange={(e) => setMuscle(e.target.value)}>{muscles.map((m) => <option key={m}>{m}</option>)}</select>
       </div>
-    </div>
+      <div className="exercise-picker-grid">
+        {filtered.length === 0 ? <div className="empty-state">Nenhum exercício encontrado.</div> : filtered.map((exercise) => {
+          const selected = selectedIds.has(exercise.id);
+          return (
+            <button type="button" className={`exercise-option ${selected ? 'selected' : ''}`} key={exercise.id} onClick={() => onAdd(exercise)} aria-pressed={selected}>
+              <span className="exercise-option-name">{exercise.name}</span>
+              <span className="muted">{exercise.muscle} · {exercise.equipment}</span>
+              {selected && <strong className="exercise-added"><Icon name="check" size={14} /> Adicionado</strong>}
+            </button>
+          );
+        })}
+      </div>
+    </Modal>
   );
 }
 
@@ -121,22 +121,24 @@ function ImportWorkoutModal({ catalog, onImport, onClose }) {
   };
 
   return (
-    <div className="exercise-picker-overlay" onMouseDown={(e) => e.target === e.currentTarget && !busy && onClose()}>
-      <div className="import-workout-modal card">
-        <div className="exercise-picker-head">
-          <div><span className="eyebrow">IA · IMPORTAR TREINO</span><h2>Seu treino já está pronto?</h2><p className="muted">Cole o texto ou envie uma foto do treino. A IA organiza os dias automaticamente.</p></div>
-          <button type="button" className="modal-close" onClick={onClose} disabled={busy} aria-label="Fechar">×</button>
-        </div>
-        <label className="import-file-drop">
-          <input type="file" accept="image/*,.txt,.json" onChange={(e) => handleFile(e.target.files?.[0])} />
-          <strong>📎 Importar arquivo ou foto</strong>
-          <span>{fileName || 'PNG, JPG, TXT ou JSON'}</span>
-        </label>
-        <textarea className="input import-textarea" placeholder={`Exemplo:\nSEGUNDA — Push A\nVoador 3x10\nSupino inclinado máquina 3x8-12\nTríceps máquina 3x10 — descanso 90s\n\nTERÇA — Pull A\nPuxada alta 3x10`} value={text} onChange={(e) => { setText(e.target.value); window.__nutrixWorkoutImportImage = null; }} />
-        {error && <div className="workout-error import-error">{error}</div>}
-        <div className="import-actions"><button type="button" className="btn" onClick={onClose} disabled={busy}>Cancelar</button><button type="button" className="btn btn-primary" onClick={submit} disabled={busy || (!text.trim() && !window.__nutrixWorkoutImportImage)}>{busy ? 'Lendo treino…' : '✨ Importar e organizar'}</button></div>
+    <Modal title="Importar treino" onClose={() => { if (!busy) onClose(); }} className="import-workout-modal">
+      <p className="modal-sub">Cole o texto ou envie uma foto do treino. A IA organiza os dias automaticamente.</p>
+      <label className="import-file-drop">
+        <input type="file" accept="image/*,.txt,.json" onChange={(e) => handleFile(e.target.files?.[0])} />
+        <Icon name="upload" size={22} />
+        <strong>Importar arquivo ou foto</strong>
+        <span>{fileName || 'PNG, JPG, TXT ou JSON'}</span>
+      </label>
+      <div className="field">
+        <label htmlFor="imp-text">Ou cole o treino</label>
+        <textarea id="imp-text" className="import-textarea" rows={8} placeholder={`Exemplo:\nSEGUNDA — Push A\nVoador 3x10\nSupino inclinado máquina 3x8-12\nTríceps máquina 3x10 — descanso 90s\n\nTERÇA — Pull A\nPuxada alta 3x10`} value={text} onChange={(e) => { setText(e.target.value); window.__nutrixWorkoutImportImage = null; }} />
       </div>
-    </div>
+      {error && <div className="err" role="alert">{error}</div>}
+      <div className="actions">
+        <button type="button" className="btn" onClick={onClose} disabled={busy}>Cancelar</button>
+        <button type="button" className="btn primary" onClick={submit} disabled={busy || (!text.trim() && !window.__nutrixWorkoutImportImage)}>{busy ? 'Lendo treino…' : 'Importar e organizar'}</button>
+      </div>
+    </Modal>
   );
 }
 
@@ -144,27 +146,34 @@ function ExerciseCard({ exercise, index, onChange, onRemove }) {
   const updateSet = (setIndex, patch) => onChange({ ...exercise, sets: exercise.sets.map((set, i) => i === setIndex ? { ...set, ...patch } : set) });
   const addSet = () => onChange({ ...exercise, sets: [...exercise.sets, makeSet()] });
   return (
-    <section className="workout-card">
+    <section className="card workout-card" aria-label={exercise.name}>
       <div className="workout-card-head">
-        <div className="exercise-title-wrap"><span className="exercise-order">{index + 1}</span><div><h2>{exercise.name}</h2><span className="muted">{exercise.muscle} · {exercise.equipment}</span></div></div>
-        <button type="button" className="card-remove" onClick={onRemove} title="Remover exercício" aria-label="Remover exercício">×</button>
+        <div className="exercise-title-wrap">
+          <span className="exercise-order num">{index + 1}</span>
+          <div><h2>{exercise.name}</h2><span className="muted">{exercise.muscle} · {exercise.equipment}</span></div>
+        </div>
+        <button type="button" className="icon-btn" onClick={onRemove} title="Remover exercício" aria-label={`Remover ${exercise.name}`}><Icon name="trash" size={18} /></button>
       </div>
-      <div className="workout-set-labels"><span>Série</span><span>kg</span><span>reps</span><span></span></div>
-      {exercise.sets.map((set, setIndex) => <div className={`workout-set ${set.done ? 'done' : ''}`} key={setIndex}>
-        <span className="set-number">{setIndex + 1}</span>
-        <input className="input" inputMode="decimal" placeholder="0" value={set.kg} onChange={(e) => updateSet(setIndex, { kg: e.target.value })} />
-        <input className="input" inputMode="text" placeholder="8-12" value={set.reps} onChange={(e) => updateSet(setIndex, { reps: e.target.value })} />
-        <button type="button" className="set-check" onClick={() => updateSet(setIndex, { done: !set.done })}>{set.done ? '✓' : '○'}</button>
-      </div>)}
+      <div className="workout-set-labels" aria-hidden="true"><span>Série</span><span>kg</span><span>reps</span><span /></div>
+      {exercise.sets.map((set, setIndex) => (
+        <div className={`workout-set ${set.done ? 'done' : ''}`} key={setIndex}>
+          <span className="set-number num">{setIndex + 1}</span>
+          <input inputMode="decimal" placeholder="0" value={set.kg} onChange={(e) => updateSet(setIndex, { kg: e.target.value })} aria-label={`Carga da série ${setIndex + 1} em quilos`} />
+          <input inputMode="text" placeholder="8-12" value={set.reps} onChange={(e) => updateSet(setIndex, { reps: e.target.value })} aria-label={`Repetições da série ${setIndex + 1}`} />
+          <button type="button" className={`set-check ${set.done ? 'on' : ''}`} onClick={() => updateSet(setIndex, { done: !set.done })} aria-pressed={set.done} aria-label={`Série ${setIndex + 1} concluída`}>
+            {set.done ? <Icon name="check" size={18} /> : null}
+          </button>
+        </div>
+      ))}
       <div className="exercise-footer-row">
-        <button type="button" className="btn btn-ghost add-set" onClick={addSet}>+ Adicionar série</button>
-        <label className="notes-field"><span>Observação <em>opcional</em></span><textarea className="input" rows="2" placeholder="Ex.: última série até a falha, controlar a descida..." value={exercise.notes || ''} onChange={(e) => onChange({ ...exercise, notes: e.target.value })} /></label>
+        <button type="button" className="btn ghost add-set" onClick={addSet}><Icon name="plus" size={16} /> Adicionar série</button>
+        <label className="notes-field"><span>Observação <small className="muted">(opcional)</small></span><textarea rows="2" placeholder="Por exemplo: última série até a falha, controlar a descida" value={exercise.notes || ''} onChange={(e) => onChange({ ...exercise, notes: e.target.value })} /></label>
       </div>
     </section>
   );
 }
 
-export default function WorkoutsPage({ theme, accent, setTheme, setAccent }) {
+export default function WorkoutsPage({ theme, setTheme }) {
   const { user } = useAuth();
   const [days, setDays] = useState(emptyWorkoutPlan);
   const [activeDay, setActiveDay] = useState('monday');
@@ -228,35 +237,70 @@ export default function WorkoutsPage({ theme, accent, setTheme, setAccent }) {
     finally { setSaving(false); }
   };
 
-  if (loading) return <div className="app"><ProfessionalHeader subtitle="Treinos · academia" theme={theme} accent={accent} setTheme={setTheme} setAccent={setAccent} /><div className="route-loading">Carregando banco de exercícios e seus treinos…</div></div>;
+  const shell = (content) => (
+    <div className="app-shell">
+      <ProfessionalHeader theme={theme} setTheme={setTheme} />
+      <main className="page" id="conteudo"><div className="page-inner">{content}</div></main>
+    </div>
+  );
+
+  if (loading) return shell(<div className="route-loading">Carregando banco de exercícios e seus treinos…</div>);
+
+  const dayLabel = WORKOUT_PLAN_DAYS.find((d) => d.id === activeDay)?.label;
 
   return (
-    <div className="app">
-      <ProfessionalHeader subtitle="Treinos · academia" theme={theme} accent={accent} setTheme={setTheme} setAccent={setAccent} />
-      <main className="workouts-page">
-        <div className="workouts-hero card">
-          <div><div className="eyebrow">🏋️ PLANO SEMANAL</div><h1>Monte seus treinos</h1><p className="muted">Escolha o dia, dê um nome ao treino e adicione os exercícios que você realiza.</p></div>
-          <div className="hero-actions"><button type="button" className="btn btn-import" onClick={() => setImporter(true)}>✨ Importar treino</button><button type="button" className="btn btn-primary" onClick={save} disabled={saving}>{saving ? 'Salvando…' : 'Salvar semana'}</button></div>
+    <div className="app-shell">
+      <ProfessionalHeader theme={theme} setTheme={setTheme} />
+      <main className="page" id="conteudo">
+        <div className="page-inner">
+          <header className="page-head">
+            <div>
+              <p className="page-date">Plano semanal</p>
+              <h1>Treinos</h1>
+            </div>
+            <div className="page-head-actions">
+              <button type="button" className="btn" onClick={() => setImporter(true)}><Icon name="sparkles" size={17} /> Importar treino</button>
+              <button type="button" className="btn primary" onClick={save} disabled={saving}>{saving ? 'Salvando…' : 'Salvar semana'}</button>
+            </div>
+          </header>
+
+          {error && <div className="card err" role="alert">{error}</div>}
+          {savedAt && <div className="workout-saved" role="status">Salvo às {savedAt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</div>}
+
+          <div className="workout-day-tabs" role="group" aria-label="Dia da semana">
+            {WORKOUT_PLAN_DAYS.map((day) => {
+              const configured = days[day.id]?.exercises?.length > 0 || days[day.id]?.name;
+              return (
+                <button type="button" key={day.id} aria-pressed={activeDay === day.id} className={`workout-day-tab ${activeDay === day.id ? 'active' : ''}`} onClick={() => setActiveDay(day.id)}>
+                  <strong>{day.label}</strong>
+                  <span>{days[day.id]?.name || 'Sem treino'}{configured && ` · ${days[day.id].exercises.length}`}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          <section className="card workout-plan-editor" aria-labelledby="h-treino">
+            <div className="workout-plan-heading">
+              <div><p className="page-date">{dayLabel}</p><h2 id="h-treino">Configuração do treino</h2></div>
+              <button type="button" className="btn" onClick={() => setPicker(true)}><Icon name="plus" size={17} /> Adicionar exercício</button>
+            </div>
+            <div className="workout-name-row">
+              <div className="field"><label htmlFor="w-name">Nome do treino</label><input id="w-name" placeholder="Por exemplo: Push A, Peito e tríceps" value={currentDay.name} onChange={(e) => updateDay({ name: e.target.value })} /></div>
+              <div className="field"><label htmlFor="w-rest">Descanso padrão</label><select id="w-rest" value={currentDay.restSeconds} onChange={(e) => updateDay({ restSeconds: Number(e.target.value) })}><option value={45}>45 s</option><option value={60}>60 s</option><option value={90}>90 s</option><option value={120}>120 s</option><option value={180}>180 s</option></select></div>
+            </div>
+          </section>
+
+          <dl className="workout-summary">
+            <div><dd className="num">{currentDay.exercises.length}</dd><dt>exercícios</dt></div>
+            <div><dd className="num">{totalSets}</dd><dt>séries</dt></div>
+            <div><dd className="num">{volume.toLocaleString('pt-BR')} kg</dd><dt>volume planejado</dt></div>
+            <div><dd className="num">{currentDay.restSeconds} s</dd><dt>descanso padrão</dt></div>
+          </dl>
+
+          {currentDay.exercises.length === 0
+            ? <div className="card empty-state"><p>Nenhum exercício neste dia. Use <strong>Adicionar exercício</strong> para montar o treino.</p></div>
+            : currentDay.exercises.map((exercise, index) => <ExerciseCard key={`${exercise.id}-${index}`} exercise={exercise} index={index} onChange={(next) => updateExercise(index, next)} onRemove={() => removeExercise(index)} />)}
         </div>
-
-        {error && <div className="card workout-error">{error}</div>}
-        {savedAt && <div className="workout-saved">Salvo às {savedAt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</div>}
-
-        <div className="workout-day-tabs">
-          {WORKOUT_PLAN_DAYS.map((day) => {
-            const configured = days[day.id]?.exercises?.length > 0 || days[day.id]?.name;
-            return <button type="button" key={day.id} className={`workout-day-tab ${activeDay === day.id ? 'active' : ''}`} onClick={() => setActiveDay(day.id)}><strong>{day.label}</strong><span>{days[day.id]?.name || 'Sem treino'}{configured && ` · ${days[day.id].exercises.length}`}</span></button>;
-          })}
-        </div>
-
-        <section className="workout-plan-editor card">
-          <div className="workout-plan-heading"><div><span className="eyebrow">{WORKOUT_PLAN_DAYS.find((d) => d.id === activeDay)?.label.toUpperCase()}</span><h2>Configuração do treino</h2></div><button type="button" className="btn" onClick={() => setPicker(true)}>+ Adicionar exercício</button></div>
-          <div className="workout-name-row"><label>Nome do treino<input className="input" placeholder="Ex.: Push A, Peito + Tríceps..." value={currentDay.name} onChange={(e) => updateDay({ name: e.target.value })} /></label><label>Descanso padrão<select className="input" value={currentDay.restSeconds} onChange={(e) => updateDay({ restSeconds: Number(e.target.value) })}><option value={45}>45s</option><option value={60}>60s</option><option value={90}>90s</option><option value={120}>120s</option><option value={180}>180s</option></select></label></div>
-        </section>
-
-        <div className="workout-summary"><div><strong>{currentDay.exercises.length}</strong><span>exercícios</span></div><div><strong>{totalSets}</strong><span>séries</span></div><div><strong>{volume.toLocaleString('pt-BR')} kg</strong><span>volume planejado</span></div><div><strong>{currentDay.restSeconds}s</strong><span>descanso padrão</span></div></div>
-
-        {currentDay.exercises.length === 0 ? <div className="card empty-state">Nenhum exercício nesse dia. Clique em <strong>+ Adicionar exercício</strong> para montar seu treino.</div> : currentDay.exercises.map((exercise, index) => <ExerciseCard key={`${exercise.id}-${index}`} exercise={exercise} index={index} onChange={(next) => updateExercise(index, next)} onRemove={() => removeExercise(index)} />)}
       </main>
       {picker && <ExercisePicker catalog={catalog} selectedIds={selectedIds} onAdd={addExercise} onClose={() => setPicker(false)} />}
       {importer && <ImportWorkoutModal catalog={catalog} onImport={importPlan} onClose={() => setImporter(false)} />}

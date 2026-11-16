@@ -5,6 +5,7 @@ import { today } from '../lib/dates.js';
 import { parseNaturalFood } from '../lib/gemini.js';
 import { nutritionForGrams } from '../lib/macros.js';
 import { toast } from './Toast.jsx';
+import Modal from './Modal.jsx';
 
 export default function AddFoodModal({ item, meal: defaultMeal, onClose, onSaved }) {
   const { user } = useAuth();
@@ -83,37 +84,58 @@ export default function AddFoodModal({ item, meal: defaultMeal, onClose, onSaved
   };
 
   return (
-    <div className="modal-bg" onClick={onClose}>
-      <div className="modal add-food-modal" onClick={(e) => e.stopPropagation()}>
-        <h3>{item ? `Adicionar: ${item.name}` : 'Adicionar manualmente'}</h3>
-
-        <div className="field"><label>Refeição</label><select value={meal} onChange={(e) => setMeal(e.target.value)}><option value="breakfast">Café da manhã</option><option value="lunch">Almoço</option><option value="dinner">Jantar</option><option value="snack">Lanche</option></select></div>
-
-        {item ? (
-          <>
-            <div className="field"><label>Porção (gramas)</label><input type="number" min="1" max="3000" value={grams} onChange={(e) => setGrams(e.target.value)} inputMode="numeric" /></div>
-            <div className="preview macro-food-preview">
-              <div className="muted">{item.kcalPer100g} kcal / 100g × {grams || 0}g</div>
-              <div className="v">{calculated?.kcal || 0} kcal</div>
-              <div className="macro-inline-stats"><span><b>{Number(calculated?.protein || 0).toFixed(1)}</b> P</span><span><b>{Number(calculated?.carbs || 0).toFixed(1)}</b> C</span><span><b>{Number(calculated?.fat || 0).toFixed(1)}</b> G</span></div>
-            </div>
-          </>
-        ) : (
-          <>
-            <div className="field"><label>Nome do alimento</label><input value={name} onChange={(e) => setName(e.target.value)} placeholder="ex: maçã" /></div>
-            <div className="manual-estimate-row"><button className="btn" onClick={estimateKcal} disabled={estimating || busy || name.trim().length < 2}>{estimating ? 'Estimando…' : <><span className="pill ai">IA</span> Preencher valores</>}</button></div>
-            <div className="manual-nutrition-grid">
-              <div className="field"><label>Quantidade</label><div className="goal-field-row"><input type="number" min="1" max="3000" value={grams} onChange={(e) => setGrams(e.target.value)} inputMode="numeric" /><span className="goal-field-unit muted">g</span></div></div>
-              <div className="field"><label>Calorias</label><div className="goal-field-row"><input type="number" min="0" max="5000" value={kcalManual} onChange={(e) => setKcalManual(e.target.value)} inputMode="numeric" /><span className="goal-field-unit muted">kcal</span></div></div>
-              <div className="field"><label>Proteína</label><div className="goal-field-row"><input type="number" min="0" max="500" step="0.1" value={proteinManual} onChange={(e) => setProteinManual(e.target.value)} /><span className="goal-field-unit muted">g</span></div></div>
-              <div className="field"><label>Carboidratos</label><div className="goal-field-row"><input type="number" min="0" max="1000" step="0.1" value={carbsManual} onChange={(e) => setCarbsManual(e.target.value)} /><span className="goal-field-unit muted">g</span></div></div>
-              <div className="field"><label>Gorduras</label><div className="goal-field-row"><input type="number" min="0" max="500" step="0.1" value={fatManual} onChange={(e) => setFatManual(e.target.value)} /><span className="goal-field-unit muted">g</span></div></div>
-            </div>
-          </>
-        )}
-
-        <div className="actions"><button className="btn" onClick={onClose} disabled={busy}>Cancelar</button><button className="btn primary food" onClick={save} disabled={busy}>{busy ? 'Salvando…' : 'Salvar'}</button></div>
+    <Modal title={item ? `Adicionar: ${item.name}` : 'Adicionar manualmente'} onClose={onClose} className="add-food-modal">
+      <div className="field">
+        <label htmlFor="af-meal">Refeição</label>
+        <select id="af-meal" value={meal} onChange={(e) => setMeal(e.target.value)}>
+          <option value="breakfast">Café da manhã</option>
+          <option value="lunch">Almoço</option>
+          <option value="dinner">Jantar</option>
+          <option value="snack">Lanche</option>
+        </select>
       </div>
-    </div>
+
+      {item ? (
+        <>
+          <div className="field">
+            <label htmlFor="af-grams">Porção (gramas)</label>
+            <input id="af-grams" type="number" min="1" max="3000" value={grams} onChange={(e) => setGrams(e.target.value)} inputMode="numeric" />
+          </div>
+          <div className="nutrition-preview">
+            <div className="muted num">{item.kcalPer100g} kcal / 100 g × {grams || 0} g</div>
+            <div className="nutrition-preview-kcal num">{calculated?.kcal || 0} kcal</div>
+            <div className="nutrition-preview-macros num">
+              <span><b>{Number(calculated?.protein || 0).toFixed(1)}</b> g proteína</span>
+              <span><b>{Number(calculated?.carbs || 0).toFixed(1)}</b> g carboidratos</span>
+              <span><b>{Number(calculated?.fat || 0).toFixed(1)}</b> g gorduras</span>
+            </div>
+          </div>
+        </>
+      ) : (
+        <>
+          <div className="field">
+            <label htmlFor="af-name">Nome do alimento</label>
+            <input id="af-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Por exemplo: maçã" />
+          </div>
+          <div>
+            <button type="button" className="btn" onClick={estimateKcal} disabled={estimating || busy || name.trim().length < 2}>
+              {estimating ? 'Estimando…' : <><span className="source-chip estimate">IA</span> Preencher valores</>}
+            </button>
+          </div>
+          <div className="manual-nutrition-grid">
+            <div className="goal-field"><label htmlFor="af-g">Quantidade</label><div className="goal-field-row"><input id="af-g" type="number" min="1" max="3000" value={grams} onChange={(e) => setGrams(e.target.value)} inputMode="numeric" /><span className="goal-field-unit muted">g</span></div></div>
+            <div className="goal-field"><label htmlFor="af-k">Calorias</label><div className="goal-field-row"><input id="af-k" type="number" min="0" max="5000" value={kcalManual} onChange={(e) => setKcalManual(e.target.value)} inputMode="numeric" /><span className="goal-field-unit muted">kcal</span></div></div>
+            <div className="goal-field"><label htmlFor="af-p">Proteína</label><div className="goal-field-row"><input id="af-p" type="number" min="0" max="500" step="0.1" value={proteinManual} onChange={(e) => setProteinManual(e.target.value)} /><span className="goal-field-unit muted">g</span></div></div>
+            <div className="goal-field"><label htmlFor="af-c">Carboidratos</label><div className="goal-field-row"><input id="af-c" type="number" min="0" max="1000" step="0.1" value={carbsManual} onChange={(e) => setCarbsManual(e.target.value)} /><span className="goal-field-unit muted">g</span></div></div>
+            <div className="goal-field"><label htmlFor="af-f">Gorduras</label><div className="goal-field-row"><input id="af-f" type="number" min="0" max="500" step="0.1" value={fatManual} onChange={(e) => setFatManual(e.target.value)} /><span className="goal-field-unit muted">g</span></div></div>
+          </div>
+        </>
+      )}
+
+      <div className="actions">
+        <button type="button" className="btn" onClick={onClose} disabled={busy}>Cancelar</button>
+        <button type="button" className="btn primary" onClick={save} disabled={busy}>{busy ? 'Salvando…' : 'Salvar'}</button>
+      </div>
+    </Modal>
   );
 }

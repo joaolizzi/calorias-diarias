@@ -1,11 +1,13 @@
-/* Fonte externa — @import precisa vir antes de qualquer outra regra. */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-
-/* A ordem importa: cada camada refina a anterior (cascata). */
+/* Nutrix — camadas do design system.
+   tokens (cores, tipo, espaços) → base → componentes → estrutura → telas. */
+@import './tokens.css';
 @import './base.css';
-@import './app-shell.css';
-@import './brand.css';
-@import './surfaces.css';
-@import './palette.css';
-@import './features.css';
-@import './refinements.css';
+@import './ui.css';
+@import './shell.css';
+@import './dashboard.css';
+@import './history.css';
+@import './modals.css';
+@import './auth.css';
+@import './workouts.css';
+@import './suggestions.css';
+@import './admin.css';

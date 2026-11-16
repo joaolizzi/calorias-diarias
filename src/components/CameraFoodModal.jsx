@@ -6,7 +6,9 @@ import { analyzeFoodImage } from '../lib/gemini.js';
 import { searchFoods, searchTBCA } from '../lib/foods.js';
 import { nutritionForGrams } from '../lib/macros.js';
 import { toast } from './Toast.jsx';
-import './CameraFoodModal.css';
+import Modal from './Modal.jsx';
+import Icon from './Icon.jsx';
+import { fmtNum, fmtInt } from './format.js';
 
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 const MAX_SIDE = 1600;
@@ -157,57 +159,96 @@ export default function CameraFoodModal({ meal: defaultMeal, onClose, onSaved })
   };
 
   return (
-    <div className="modal-bg" onClick={onClose}>
-      <div className="modal camera-modal" onClick={(e) => e.stopPropagation()}>
-        <input ref={inputRef} type="file" accept="image/*" capture="environment" onChange={chooseImage} hidden />
+    <Modal title="Fotografar refeição" onClose={onClose} className="camera-modal">
+      <input ref={inputRef} type="file" accept="image/*" capture="environment" onChange={chooseImage} hidden />
+      <p className="modal-sub">{MEAL_LABELS[defaultMeal] || defaultMeal} · tire uma foto, confira o que a IA encontrou e ajuste antes de registrar</p>
 
-        <div className="camera-heading">
-          <div><span className="eyebrow">IA NUTRICIONAL</span><h3>Fotografar refeição</h3><p className="muted">Tire uma foto, confira o que a IA encontrou e ajuste antes de registrar.</p></div>
-          <button type="button" className="x camera-close" onClick={onClose} disabled={busy || saving} aria-label="Fechar">×</button>
+      {!image ? (
+        <div className="camera-empty">
+          <Icon name="camera" size={36} />
+          <strong>Mostre sua refeição</strong>
+          <span>Boa iluminação e o prato inteiro visível ajudam a IA a identificar melhor os alimentos.</span>
+          <button type="button" className="btn primary" onClick={openPicker} disabled={busy}>{busy ? 'Preparando…' : 'Abrir câmera'}</button>
         </div>
-
-        {!image ? (
-          <div className="camera-empty">
-            <div className="camera-icon">📷</div>
-            <strong>Mostre sua refeição</strong>
-            <span>Boa iluminação e o prato inteiro visível ajudam a IA a identificar melhor os alimentos.</span>
-            <button type="button" className="btn primary food camera-open-btn" onClick={openPicker} disabled={busy}>{busy ? 'Preparando…' : 'Abrir câmera'}</button>
+      ) : (
+        <>
+          <div className="camera-preview-wrap">
+            <img className="camera-preview" src={image} alt="Foto da refeição" />
+            <button type="button" className="btn camera-retake" onClick={openPicker} disabled={busy || saving}>Trocar foto</button>
           </div>
-        ) : (
-          <>
-            <div className="camera-preview-wrap">
-              <img className="camera-preview" src={image} alt="Foto da refeição" />
-              <button type="button" className="camera-retake" onClick={openPicker} disabled={busy || saving}>Trocar foto</button>
+
+          {!items && (
+            <div className="actions">
+              <button type="button" className="btn" onClick={onClose} disabled={busy}>Cancelar</button>
+              <button type="button" className="btn primary" onClick={analyze} disabled={busy}>{busy ? 'Analisando…' : 'Analisar com IA'}</button>
             </div>
+          )}
 
-            {!items && <div className="camera-actions"><button type="button" className="btn" onClick={onClose} disabled={busy}>Cancelar</button><button type="button" className="btn primary food" onClick={analyze} disabled={busy}>{busy ? 'Analisando…' : 'Analisar com IA'}</button></div>}
-
-            {items && items.length > 0 && (
-              <>
-                <div className="camera-result-head"><div><strong>Resultado da análise</strong><span>Confira cada alimento e ajuste o que for necessário.</span></div><div className="camera-total"><strong>{Math.round(totals.kcal)} kcal</strong><small>P {totals.protein.toFixed(1)} · C {totals.carbs.toFixed(1)} · G {totals.fat.toFixed(1)}</small></div></div>
-                <ul className="log camera-results">
-                  {items.map((it, idx) => (
-                    <li key={`${it.name}-${idx}`} className={!it.selected ? 'camera-item-off' : ''}>
-                      <label className="camera-item-label"><input type="checkbox" checked={it.selected} onChange={() => toggle(idx)} /><div className="camera-item-content"><div className="amt">{it.name} <span className="meal-tag">{it.kcal} kcal</span></div><div className="when">{it.grams} g · P {Number(it.protein || 0).toFixed(1)} g · C {Number(it.carbs || 0).toFixed(1)} g · G {Number(it.fat || 0).toFixed(1)} g</div></div></label>
-                      {editingIndex === idx ? (
-                        <div className="camera-editor">
-                          <div className="camera-edit-row"><label><span>Quantidade</span><div className="camera-grams-input"><input type="number" min="1" max="3000" value={gramDraft} onChange={(e) => setGramDraft(e.target.value)} /><b>g</b></div></label><button type="button" className="btn primary food" onClick={() => updateGrams(idx)}>Aplicar</button></div>
-                          <div className="camera-replace"><span>Trocar alimento</span><input value={foodQuery} onChange={(e) => setFoodQuery(e.target.value)} placeholder="Ex.: banana, arroz, frango…" autoFocus />{foodLoading && <small>Buscando alimentos…</small>}{!foodLoading && foodQuery.trim().length >= 2 && foodResults.length === 0 && <small>Nenhum alimento encontrado.</small>}{foodResults.length > 0 && <div className="camera-food-results">{foodResults.map((result) => <button key={`${result.source}:${result.id}`} type="button" onClick={() => replaceFood(idx, result)}><span>{result.name}</span><small>{result.kcalPer100g} kcal / 100 g · {result.source === 'tbca' ? 'TBCA' : 'Open Food Facts'}</small></button>)}</div>}</div>
-                          <button type="button" className="btn ghost camera-edit-cancel" onClick={cancelEdit}>Cancelar edição</button>
+          {items && items.length > 0 && (
+            <>
+              <div className="camera-result-head">
+                <h4>Resultado da análise</h4>
+                <div className="camera-total num"><strong>{fmtInt(totals.kcal)} kcal</strong><small>P {fmtNum(totals.protein)} · C {fmtNum(totals.carbs)} · G {fmtNum(totals.fat)}</small></div>
+              </div>
+              <p className="ai-legend-note"><span className="source-chip estimate">Estimativa IA</span> Confira cada alimento e ajuste o que for necessário.</p>
+              <ul className="camera-results">
+                {items.map((it, idx) => (
+                  <li key={`${it.name}-${idx}`} className={!it.selected ? 'off' : ''}>
+                    <label className="camera-item-label">
+                      <input type="checkbox" checked={it.selected} onChange={() => toggle(idx)} aria-label={`Incluir ${it.name}`} />
+                      <span className="camera-item-content">
+                        <span className="camera-item-name">{it.name} <span className="muted num">{fmtInt(it.kcal)} kcal</span></span>
+                        <span className="camera-item-meta num">{it.grams} g · P {fmtNum(it.protein)} · C {fmtNum(it.carbs)} · G {fmtNum(it.fat)}</span>
+                      </span>
+                    </label>
+                    {editingIndex === idx ? (
+                      <div className="camera-editor">
+                        <div className="camera-edit-row">
+                          <div className="goal-field">
+                            <label htmlFor={`cam-g-${idx}`}>Quantidade</label>
+                            <div className="goal-field-row"><input id={`cam-g-${idx}`} type="number" min="1" max="3000" value={gramDraft} onChange={(e) => setGramDraft(e.target.value)} /><span className="goal-field-unit muted">g</span></div>
+                          </div>
+                          <button type="button" className="btn primary" onClick={() => updateGrams(idx)}>Aplicar</button>
                         </div>
-                      ) : <button type="button" className="camera-edit-btn" onClick={() => startEdit(idx)}>Editar quantidade ou alimento</button>}
-                    </li>
-                  ))}
-                </ul>
-                <div className="camera-disclaimer">Os valores são estimativas. Ajuste a quantidade quando souber o peso real.</div>
-                <div className="camera-actions"><button type="button" className="btn" onClick={() => setItems(null)} disabled={saving}>Refazer análise</button><button type="button" className="btn primary food" onClick={save} disabled={saving || !selected.length}>{saving ? 'Salvando…' : `Adicionar ${selected.length} ${selected.length === 1 ? 'item' : 'itens'}`}</button></div>
-              </>
-            )}
-            {items && items.length === 0 && <div className="camera-actions"><button type="button" className="btn" onClick={() => setItems(null)}>Tentar novamente</button><button type="button" className="btn" onClick={onClose}>Fechar</button></div>}
-          </>
-        )}
-        <div className="camera-meal">Refeição: <strong>{MEAL_LABELS[defaultMeal] || defaultMeal}</strong></div>
-      </div>
-    </div>
+                        <div className="camera-replace">
+                          <label htmlFor={`cam-q-${idx}`}>Trocar alimento</label>
+                          <input id={`cam-q-${idx}`} value={foodQuery} onChange={(e) => setFoodQuery(e.target.value)} placeholder="Por exemplo: banana, arroz, frango" autoFocus />
+                          {foodLoading && <small className="muted">Buscando alimentos…</small>}
+                          {!foodLoading && foodQuery.trim().length >= 2 && foodResults.length === 0 && <small className="muted">Nenhum alimento encontrado.</small>}
+                          {foodResults.length > 0 && (
+                            <div className="camera-food-results">
+                              {foodResults.map((result) => (
+                                <button key={`${result.source}:${result.id}`} type="button" onClick={() => replaceFood(idx, result)}>
+                                  <span>{result.name}</span>
+                                  <small>{result.kcalPer100g} kcal / 100 g · {result.source === 'tbca' ? 'TBCA' : 'Open Food Facts'}</small>
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                        <button type="button" className="btn ghost" onClick={cancelEdit}>Cancelar edição</button>
+                      </div>
+                    ) : (
+                      <button type="button" className="btn ghost camera-edit-btn" onClick={() => startEdit(idx)}>Editar quantidade ou alimento</button>
+                    )}
+                  </li>
+                ))}
+              </ul>
+              <p className="camera-disclaimer">Os valores são estimativas. Ajuste a quantidade quando souber o peso real.</p>
+              <div className="actions">
+                <button type="button" className="btn" onClick={() => setItems(null)} disabled={saving}>Refazer análise</button>
+                <button type="button" className="btn primary" onClick={save} disabled={saving || !selected.length}>{saving ? 'Salvando…' : `Adicionar ${selected.length} ${selected.length === 1 ? 'item' : 'itens'}`}</button>
+              </div>
+            </>
+          )}
+          {items && items.length === 0 && (
+            <div className="actions">
+              <button type="button" className="btn" onClick={() => setItems(null)}>Tentar novamente</button>
+              <button type="button" className="btn" onClick={onClose}>Fechar</button>
+            </div>
+          )}
+        </>
+      )}
+    </Modal>
   );
 }

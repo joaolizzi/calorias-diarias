@@ -1,0 +1,141 @@
+/* ==========================================================================
+   Diálogos de registro — adicionar alimento, descrever (IA) e fotografar (IA)
+   ========================================================================== */
+
+.modal-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin: -4px -8px 4px 0; }
+.modal-head h3 { padding-top: 6px; font-size: 24px; line-height: 1.15; letter-spacing: -.4px; }
+.modal-sub { margin: 2px 0 var(--sp-4); font-size: var(--fs-ui); color: var(--text-2); }
+.modal h4 { font-size: var(--fs-lg); font-weight: var(--fw-semibold); }
+.modal > * + * { margin-top: var(--sp-4); }
+.modal > .modal-head + * { margin-top: 0; }
+.modal .actions { margin-top: var(--sp-5); }
+
+/* Adicionar alimento */
+.nutrition-preview { display: grid; gap: 4px; padding: 16px; border-radius: var(--r-md); background: var(--surface-2); }
+.nutrition-preview-kcal { font-size: var(--fs-2xl); font-weight: var(--fw-bold); letter-spacing: -.5px; }
+.nutrition-preview-macros { display: flex; flex-wrap: wrap; gap: 4px 16px; color: var(--text-2); font-size: var(--fs-ui); }
+.nutrition-preview-macros b { color: var(--text); }
+.manual-nutrition-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--sp-4); }
+
+/* Descrever por texto */
+.natural-food-modal { width: min(880px, 100%); }
+.ai-result { border-top: 1px solid var(--line); padding-top: var(--sp-4); }
+.ai-result-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 24px; padding-bottom: 12px; }
+.ai-legend { display: flex; align-items: center; gap: 12px; font-size: var(--fs-sm); color: var(--text-2); }
+.ai-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend-swatch { display: inline-block; width: 22px; height: 12px; border-radius: 3px; border: 1px solid var(--line-strong); }
+.legend-swatch.estimate { border: 1px dashed var(--estimate); }
+
+.ai-row {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 176px 76px 52px 52px 52px;
+  align-items: center;
+  column-gap: 12px;
+  padding: 12px 0;
+  border-top: 1px solid var(--line);
+  font-variant-numeric: tabular-nums;
+}
+.ai-row-head { padding: 0 0 8px; border-top: 0; font-size: var(--fs-sm); color: var(--muted); }
+.ai-row .r { text-align: right; }
+.ai-row.off { opacity: .5; }
+.ai-check { display: grid; place-items: center; width: 44px; height: 44px; cursor: pointer; }
+.ai-name { min-width: 0; }
+.ai-name-main { font-size: var(--fs-base); font-weight: var(--fw-medium); }
+.ai-name-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; margin-top: 4px; font-size: var(--fs-sm); color: var(--text-2); }
+.confidence { display: inline-flex; align-items: center; gap: 6px; }
+.conf-bars { display: inline-flex; gap: 2px; }
+.conf-bars i { width: 10px; height: 4px; border-radius: 2px; background: var(--line-strong); }
+.conf-bars i.on { background: var(--ink); }
+.ai-qty { display: flex; align-items: center; gap: 4px; }
+.ai-qty input { width: 52px; min-height: 44px; padding: 0; text-align: center; border-radius: var(--r-sm); font-size: var(--fs-base); }
+.ai-qty input.estimate { border-style: dashed; border-color: var(--estimate); }
+.ai-qty .unit { font-size: var(--fs-ui); color: var(--muted); }
+.step-btn { width: var(--tap); height: var(--tap); border: 0; border-radius: var(--r-md); background: var(--surface-3); color: var(--text); font-size: 20px; cursor: pointer; }
+.step-btn:hover { background: var(--active); }
+.ai-kcal { font-weight: var(--fw-semibold); }
+.ai-row .r:not(.ai-kcal) { color: var(--text-2); }
+.cell-label { display: none; }
+
+.ai-row-total { align-items: baseline; padding: 14px 0 6px; border-top: 2px solid var(--ink); }
+.ai-total-name { font-weight: var(--fw-semibold); }
+.ai-row-total .ai-kcal { font-size: var(--fs-xl); font-weight: var(--fw-bold); }
+.ai-row-total .r:not(.ai-kcal) { font-weight: var(--fw-semibold); }
+
+.day-effect { margin-top: 14px; padding: 16px 18px; border-radius: var(--r-md); background: var(--surface-2); }
+.day-effect-top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 4px 16px; font-size: var(--fs-ui); }
+.day-effect-bar { display: flex; gap: 2px; height: 10px; margin-top: 10px; border-radius: 5px; background: var(--track); overflow: hidden; }
+.day-effect-bar .before, .day-effect-legend .before { background: var(--ink); }
+.day-effect-bar .added, .day-effect-legend .added { background: var(--muted); }
+.day-effect-legend { display: flex; gap: 20px; margin-top: 8px; font-size: var(--fs-sm); color: var(--text-2); }
+.day-effect-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.day-effect-legend i { width: 10px; height: 10px; border-radius: 2px; }
+
+.ai-actions .back { margin-right: auto; }
+
+.saved-routines { border-top: 1px solid var(--line); padding-top: var(--sp-4); }
+.saved-routines-head { display: flex; align-items: baseline; justify-content: space-between; }
+.saved-routines-head h4 { font-size: var(--fs-md); }
+.saved-routines-head .muted { font-size: var(--fs-sm); }
+.saved-routines-sub { margin: 4px 0 8px; font-size: var(--fs-ui); color: var(--text-2); }
+.saved-routines-empty { display: grid; gap: 2px; padding: 8px 0; color: var(--muted); font-size: var(--fs-ui); }
+.saved-routines-empty strong { color: var(--text); font-weight: var(--fw-medium); }
+.saved-routines-list li { display: flex; align-items: center; gap: 4px; border-top: 1px solid var(--line); }
+.saved-routine-main { flex: 1; min-width: 0; min-height: 60px; padding: 8px 0; border: 0; background: transparent; color: var(--text); text-align: left; cursor: pointer; }
+.saved-routine-text { display: block; font-size: var(--fs-base); font-weight: var(--fw-medium); }
+.saved-routine-meta { display: block; font-size: var(--fs-sm); color: var(--muted); }
+
+/* Fotografar */
+.camera-modal { width: min(720px, 100%); }
+.camera-empty { display: grid; justify-items: center; gap: 10px; padding: 36px 20px; border: 1px dashed var(--line-strong); border-radius: var(--r-lg); text-align: center; color: var(--text-2); }
+.camera-empty svg { color: var(--muted); }
+.camera-empty strong { color: var(--text); font-size: var(--fs-md); }
+.camera-empty span { max-width: 38ch; font-size: var(--fs-ui); }
+.camera-preview-wrap { position: relative; overflow: hidden; border-radius: var(--r-lg); background: var(--bg); }
+.camera-preview { width: 100%; max-height: 320px; object-fit: contain; }
+.camera-retake { position: absolute; right: 10px; bottom: 10px; background: var(--surface); }
+.camera-result-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
+.camera-total { display: grid; justify-items: end; }
+.camera-total small { color: var(--text-2); font-size: var(--fs-sm); }
+.ai-legend-note { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: var(--fs-ui); color: var(--text-2); }
+.camera-results > li { padding: 10px 0; border-top: 1px solid var(--line); }
+.camera-results > li.off { opacity: .5; }
+.camera-item-label { display: flex; align-items: center; gap: 12px; min-height: var(--tap); cursor: pointer; }
+.camera-item-content { display: grid; }
+.camera-item-name { font-weight: var(--fw-medium); }
+.camera-item-meta { font-size: var(--fs-sm); color: var(--muted); }
+.camera-edit-btn { margin-left: 32px; min-height: var(--tap); }
+.camera-editor { display: grid; gap: 14px; margin: 8px 0 4px 32px; padding: 14px; border-radius: var(--r-md); background: var(--surface-2); }
+.camera-edit-row { display: flex; align-items: flex-end; gap: 12px; }
+.camera-edit-row .goal-field { flex: 1; }
+.camera-replace { display: grid; gap: 8px; }
+.camera-replace > label { font-size: var(--fs-ui); font-weight: var(--fw-medium); }
+.camera-food-results { display: grid; border: 1px solid var(--line); border-radius: var(--r-md); overflow: hidden; background: var(--bg); }
+.camera-food-results button { display: grid; gap: 2px; min-height: var(--tap); padding: 8px 12px; border: 0; border-top: 1px solid var(--line); background: transparent; color: var(--text); text-align: left; cursor: pointer; }
+.camera-food-results button:first-child { border-top: 0; }
+.camera-food-results button:hover { background: var(--surface-3); }
+.camera-food-results small { color: var(--muted); font-size: var(--fs-sm); }
+.camera-disclaimer { font-size: var(--fs-sm); color: var(--muted); }
+
+/* ---------- Celular: a tabela da IA vira cartões ---------- */
+@media (max-width: 760px) {
+  .modal-head h3 { font-size: var(--fs-xl); }
+  .ai-row-head { display: none; }
+  .ai-row {
+    grid-template-columns: 44px repeat(4, minmax(0, 1fr));
+    grid-template-areas: 'chk name name name name' '. qty qty qty qty' '. k p c g';
+    row-gap: 8px;
+  }
+  .ai-row .r { display: inline-flex; flex-direction: column; align-items: flex-start; }
+  .cell-label { display: block; font-size: var(--fs-sm); color: var(--muted); font-weight: var(--fw-regular); }
+  .ai-row > :nth-child(1) { grid-area: chk; }
+  .ai-row > :nth-child(2) { grid-area: name; }
+  .ai-row > :nth-child(3) { grid-area: qty; }
+  .ai-row > :nth-child(4) { grid-area: k; }
+  .ai-row > :nth-child(5) { grid-area: p; }
+  .ai-row > :nth-child(6) { grid-area: c; }
+  .ai-row > :nth-child(7) { grid-area: g; }
+  .ai-row-total { grid-template-areas: '. name name name name' '. k p c g'; }
+  .ai-row-total > :nth-child(1), .ai-row-total > :nth-child(3) { display: none; }
+  .ai-actions .back { margin-right: 0; }
+  .camera-edit-btn, .camera-editor { margin-left: 0; }
+}

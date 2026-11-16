@@ -1,0 +1,186 @@
+/* ==========================================================================
+   Nutrix — tokens do design system
+   Uma única fonte de verdade: cores (escuro / claro), tipografia, espaços,
+   raios e sombras. Nenhum componente deve usar valores soltos.
+   ========================================================================== */
+
+:root {
+  /* Tipografia */
+  --font: 'Instrument Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --fs-sm: 13px;
+  --fs-ui: 14px;
+  --fs-base: 15px;
+  --fs-md: 16px;
+  --fs-lg: 18px;
+  --fs-xl: 22px;
+  --fs-2xl: 28px;
+  --fs-3xl: 32px;
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+
+  /* Espaçamento (escala de 4) */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+  --sp-7: 48px;
+  --sp-8: 64px;
+
+  /* Raios */
+  --r-sm: 8px;
+  --r-md: 10px;
+  --r-lg: 14px;
+  --r-xl: 16px;
+  --r-pill: 999px;
+
+  /* Layout */
+  --sidebar-w: 248px;
+  --page-max: 1080px;
+  --tap: 44px;
+  --appbar-h: 60px;
+  --tabbar-h: 76px;
+
+  /* Movimento */
+  --ease: cubic-bezier(.2, .7, .2, 1);
+  --dur: 160ms;
+
+  color-scheme: dark;
+}
+
+/* ---------- Escuro (padrão) ---------- */
+:root,
+html[data-theme='dark'] {
+  --bg: #0e1113;
+  --surface: #151a1d;
+  --surface-2: #1a2125;
+  --surface-3: #1b2226;
+  --bar: #11161a;
+  --active: #26303a;
+  --line: #232b30;
+  --line-strong: #2c363c;
+  --ink: #eceeec;
+  --text: #eceeec;
+  --text-2: #b4bdb8;
+  --muted: #8e9993;
+  --accent: #55b98c;
+  --accent-ink: #07130d;
+  --accent-text: #8fd0b0;
+  --accent-soft: rgba(85, 185, 140, .14);
+  --danger: #f08ba0;
+  --danger-soft: rgba(240, 139, 160, .14);
+  --warn: #e0a03a;
+  --track: #232b30;
+  --estimate: #8a9a93;
+  --overlay: rgba(4, 6, 7, .72);
+  --shadow-pop: 0 24px 80px rgba(0, 0, 0, .55);
+
+  /* Dados (validados com a skill dataviz no fundo escuro) */
+  --water: #3987e5;
+  --protein: #c98500;
+  --carbs: #9085e9;
+  --fat: #d55181;
+  color-scheme: dark;
+}
+
+/* ---------- Claro ---------- */
+html[data-theme='light'] {
+  --bg: #f3f4f2;
+  --surface: #ffffff;
+  --surface-2: #f7f8f6;
+  --surface-3: #eef0ed;
+  --bar: #ffffff;
+  --active: #e3e7e2;
+  --line: #e1e4e0;
+  --line-strong: #cbd1cc;
+  --ink: #14171a;
+  --text: #14171a;
+  --text-2: #3a4540;
+  --muted: #5c6760;
+  --accent: #1f6f4a;
+  --accent-ink: #ffffff;
+  --accent-text: #1f6f4a;
+  --accent-soft: rgba(31, 111, 74, .1);
+  --danger: #b4233f;
+  --danger-soft: rgba(180, 35, 63, .09);
+  --warn: #a8670a;
+  --track: #e6e9e5;
+  --estimate: #6b7770;
+  --overlay: rgba(20, 23, 26, .5);
+  --shadow-pop: 0 24px 80px rgba(20, 23, 26, .22);
+
+  --water: #2a78d6;
+  --protein: #b87500;
+  --carbs: #6250d6;
+  --fat: #d4376f;
+  color-scheme: light;
+}
+
+/* ---------- Sistema (segue o aparelho) ---------- */
+@media (prefers-color-scheme: light) {
+  html[data-theme='system'] {
+    --bg: #f3f4f2;
+    --surface: #ffffff;
+    --surface-2: #f7f8f6;
+    --surface-3: #eef0ed;
+    --bar: #ffffff;
+    --active: #e3e7e2;
+    --line: #e1e4e0;
+    --line-strong: #cbd1cc;
+    --ink: #14171a;
+    --text: #14171a;
+    --text-2: #3a4540;
+    --muted: #5c6760;
+    --accent: #1f6f4a;
+    --accent-ink: #ffffff;
+    --accent-text: #1f6f4a;
+    --accent-soft: rgba(31, 111, 74, .1);
+    --danger: #b4233f;
+    --danger-soft: rgba(180, 35, 63, .09);
+    --warn: #a8670a;
+    --track: #e6e9e5;
+    --estimate: #6b7770;
+    --overlay: rgba(20, 23, 26, .5);
+    --shadow-pop: 0 24px 80px rgba(20, 23, 26, .22);
+    --water: #2a78d6;
+    --protein: #b87500;
+    --carbs: #6250d6;
+    --fat: #d4376f;
+    color-scheme: light;
+  }
+}
+@media (prefers-color-scheme: dark) {
+  html[data-theme='system'] {
+    --bg: #0e1113;
+    --surface: #151a1d;
+    --surface-2: #1a2125;
+    --surface-3: #1b2226;
+    --bar: #11161a;
+    --active: #26303a;
+    --line: #232b30;
+    --line-strong: #2c363c;
+    --ink: #eceeec;
+    --text: #eceeec;
+    --text-2: #b4bdb8;
+    --muted: #8e9993;
+    --accent: #55b98c;
+    --accent-ink: #07130d;
+    --accent-text: #8fd0b0;
+    --accent-soft: rgba(85, 185, 140, .14);
+    --danger: #f08ba0;
+    --danger-soft: rgba(240, 139, 160, .14);
+    --warn: #e0a03a;
+    --track: #232b30;
+    --estimate: #8a9a93;
+    --overlay: rgba(4, 6, 7, .72);
+    --shadow-pop: 0 24px 80px rgba(0, 0, 0, .55);
+    --water: #3987e5;
+    --protein: #c98500;
+    --carbs: #9085e9;
+    --fat: #d55181;
+    color-scheme: dark;
+  }
+}

@@ -38,80 +38,63 @@ export default function AuthGate() {
   };
 
   return (
-    <main className="auth-premium-shell">
-      <section className="auth-premium-panel">
-        <div className="auth-brand-row">
-          <NutrixLogo className="auth-logo-mark" size={46} decorative />
-          <div>
-            <div className="auth-brand-name">Nutrix<span>.</span></div>
-            <div className="auth-brand-tagline">Nutrição simples. Progresso visível.</div>
-          </div>
+    <main className="auth-shell">
+      <section className="auth-panel" aria-labelledby="auth-title">
+        <div className="auth-brand">
+          <NutrixLogo className="brand-mark" size={36} decorative />
+          <span className="brand-name">Nutrix<span className="brand-dot">.</span></span>
         </div>
 
-        <div className="auth-premium-copy">
-          <span className="auth-eyebrow">BEM-VINDO</span>
-          <h1>{mode === 'login' ? 'Entre na sua conta' : 'Crie sua conta'}</h1>
+        <div className="auth-copy">
+          <h1 id="auth-title">{mode === 'login' ? 'Entre na sua conta' : 'Crie sua conta'}</h1>
           <p>Acompanhe calorias, água, refeições e treinos em um só lugar.</p>
         </div>
 
-        <form className="auth-premium-form" onSubmit={submit}>
-          <div className="field auth-field">
+        <form className="auth-form" onSubmit={submit}>
+          <div className="field">
             <label htmlFor="email">Email</label>
             <input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email" placeholder="seu@email.com" />
           </div>
 
-          <div className="field auth-field">
+          <div className="field">
             <label htmlFor="password">Senha</label>
-            <input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} autoComplete={mode === 'login' ? 'current-password' : 'new-password'} placeholder="••••••••" />
+            <input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} autoComplete={mode === 'login' ? 'current-password' : 'new-password'} placeholder="Mínimo de 6 caracteres" />
           </div>
 
-          {err && <div className="err auth-error">{err}</div>}
+          {err && <div className="err" role="alert">{err}</div>}
 
-          <button className="btn primary submit auth-primary-action" type="submit" disabled={busy || guestBusy}>
-            {busy ? 'Aguarde…' : mode === 'login' ? 'Entrar no Nutrix' : 'Criar minha conta'}
+          <button className="btn primary auth-submit" type="submit" disabled={busy || guestBusy}>
+            {busy ? 'Aguarde…' : mode === 'login' ? 'Entrar' : 'Criar conta'}
           </button>
         </form>
 
-        <div className="toggle auth-mode-toggle">
+        <p className="auth-toggle">
           {mode === 'login' ? (
             <>Ainda não tem conta? <button type="button" onClick={() => setMode('signup')}>Criar conta</button></>
           ) : (
             <>Já tem conta? <button type="button" onClick={() => setMode('login')}>Entrar</button></>
           )}
-        </div>
+        </p>
 
-        <div className="auth-divider"><span />ou<span /></div>
+        <div className="auth-divider" role="separator"><span>ou</span></div>
 
-        <button className="btn submit auth-guest-action" type="button" onClick={enterAsGuest} disabled={busy || guestBusy}>
+        <button className="btn auth-submit" type="button" onClick={enterAsGuest} disabled={busy || guestBusy}>
           {guestBusy ? 'Entrando…' : 'Testar sem criar conta'}
         </button>
-
         <p className="auth-footnote">Entre como visitante para explorar o app sem informar email ou senha.</p>
 
         {mode === 'signup' && (
-          <p className="auth-footnote auth-signup-note">Se a confirmação por email estiver habilitada, verifique sua caixa de entrada após o cadastro.</p>
+          <p className="auth-footnote">Se a confirmação por email estiver habilitada, verifique sua caixa de entrada após o cadastro.</p>
         )}
       </section>
 
-      <aside className="auth-premium-visual" aria-hidden="true">
-        <div className="auth-visual-orb auth-orb-one" />
-        <div className="auth-visual-orb auth-orb-two" />
-        <div className="auth-preview-card auth-preview-main">
-          <span>Seu dia</span>
-          <strong>1.842 kcal</strong>
-          <small>de 2.400 kcal</small>
-          <div className="auth-preview-progress"><i /></div>
-        </div>
-        <div className="auth-preview-card auth-preview-small auth-preview-water">
-          <span>Água</span>
-          <strong>2,1 L</strong>
-          <small>meta 3,0 L</small>
-        </div>
-        <div className="auth-preview-card auth-preview-small auth-preview-streak">
-          <span>Consistência</span>
-          <strong>7 dias</strong>
-          <small>sequência atual</small>
-        </div>
+      <aside className="auth-aside" aria-label="Como o Nutrix mostra seus números">
+        <h2>Cada número mostra de onde veio.</h2>
+        <p>Alimentos de tabelas e rótulos têm contorno sólido. Quando a IA estima uma quantidade ou um valor, o contorno é tracejado e você pode ajustar antes de registrar.</p>
+        <ul className="auth-legend">
+          <li><span className="source-chip">TBCA</span><span>Valor de tabela de composição de alimentos</span></li>
+          <li><span className="source-chip estimate">Estimativa IA</span><span>Valor estimado, revise antes de salvar</span></li>
+        </ul>
       </aside>
     </main>
   );

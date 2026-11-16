@@ -17,7 +17,10 @@ const ACCENT_KEY = 'nutrix-accent';
 const PRESET_KEY = 'nutrix-preset';
 
 function ThemeProvider({ children }) {
-  const [theme, setTheme] = useState(() => localStorage.getItem(THEME_KEY) || 'dark');
+  const [theme, setTheme] = useState(() => {
+    const saved = localStorage.getItem(THEME_KEY);
+    return ['light', 'dark', 'system'].includes(saved) ? saved : 'dark';
+  });
   const [accent, setAccent] = useState(() => localStorage.getItem(ACCENT_KEY) || 'green');
   const [preset, setPreset] = useState(() => localStorage.getItem(PRESET_KEY) || 'graphite');
 

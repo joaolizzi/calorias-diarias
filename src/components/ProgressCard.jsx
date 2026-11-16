@@ -1,98 +1,74 @@
-import { statusFor } from '../lib/dates.js';
+import { fmtInt, fmtLitres, fmtLitresNum, pctOf } from './format.js';
 
-export default function ProgressCard({
-  title,
-  unit,
-  consumed,
-  goal,
-  variant = 'water',
-  children,
-}) {
-  const pct = goal > 0 ? Math.min(100, Math.round((consumed / goal) * 100)) : 0;
-  const over = goal > 0 && consumed > goal;
-  const status = statusFor(consumed, goal);
-  const fillClass = `progress-fill ${over ? 'over' : variant === 'food' ? 'food' : ''}`;
-  const isWater = variant === 'water';
-  const remaining = Math.max(0, Number(goal || 0) - Number(consumed || 0));
+// Cartão de progresso no formato "rótulo nutricional": número grande, régua e,
+// para as calorias, a tabela de macronutrientes logo abaixo (children).
+export default function ProgressCard({ title, unit, consumed, goal, variant = 'water', children }) {
+  const safeConsumed = Number(consumed) || 0;
+  const safeGoal = Number(goal) || 0;
+  const pct = pctOf(safeConsumed, safeGoal);
+  const over = safeGoal > 0 && safeConsumed > safeGoal;
 
   if (variant === 'food') {
+    const remaining = Math.max(0, safeGoal - safeConsumed);
+    const headingId = 'h-calorias';
     return (
-      <div className="card progress-card progress-card-food calorie-3d-card">
-        <div className="progress-card-head calorie-3d-head">
-          <div>
-            <span className="progress-card-label">{title}</span>
-            <small>Energia do dia</small>
-          </div>
-          <span className={`pill ${status.cls}`}>{status.label}</span>
+      <section className="card label-card progress-card progress-card-food" aria-labelledby={headingId}>
+        <div className="label-card-head">
+          <h2 id={headingId}>{title}</h2>
+          <span className="muted">Meta de {fmtInt(safeGoal)} {unit}</span>
         </div>
-
-        <div className="calorie-3d-layout">
-          <div
-            className={`calorie-3d-stage ${over ? 'is-over' : ''}`}
-            style={{ '--calorie-angle': `${pct * 3.6}deg`, '--calorie-pct': `${pct}%` }}
-            aria-label={`${pct}% da meta de calorias`}
-          >
-            <div className="calorie-3d-shadow" />
-            <div className="calorie-3d-ring"><span /></div>
-            <div className="calorie-3d-core">
-              <span>consumido</span>
-              <strong>{Number(consumed || 0).toLocaleString('pt-BR')}</strong>
-              <small>{unit}</small>
-            </div>
-            <div className="calorie-3d-orbit orbit-a" />
-            <div className="calorie-3d-orbit orbit-b" />
-          </div>
-
-          <div className="calorie-3d-stats">
-            <div className="calorie-stat calorie-stat-main">
-              <span>Restante</span>
-              <strong>{Math.round(remaining).toLocaleString('pt-BR')}</strong>
-              <small>kcal</small>
-            </div>
-            <div className="calorie-stat">
-              <span>Meta</span>
-              <strong>{Number(goal || 0).toLocaleString('pt-BR')}</strong>
-              <small>kcal</small>
-            </div>
-            <div className="calorie-stat">
-              <span>Progresso</span>
-              <strong>{pct}%</strong>
-              <small>{over ? 'meta atingida' : 'do objetivo'}</small>
-            </div>
-          </div>
+        <div className="label-hero">
+          <span className="label-hero-num">{fmtInt(over ? safeConsumed - safeGoal : remaining)}</span>
+          <span className="label-hero-unit">{over ? `${unit} acima da meta` : `${unit} restantes`}</span>
         </div>
-
-        <div className="calorie-3d-footer">
-          <span><i /> Consumido</span>
-          <span><i /> Restante</span>
-          <b>{over ? 'Meta diária atingida' : `${Math.round(remaining).toLocaleString('pt-BR')} kcal para a meta`}</b>
+        <div
+          className="meter"
+          role="img"
+          aria-label={`${fmtInt(safeConsumed)} de ${fmtInt(safeGoal)} quilocalorias consumidas, ${pct}% da meta`}
+        >
+          <div className="meter-fill" style={{ width: `${pct}%` }} />
         </div>
-      </div>
+        <div className="meter-legend">
+          <span>{fmtInt(safeConsumed)} {unit} consumidas</span>
+          <span>{pct}% da meta</span>
+        </div>
+        {children}
+      </section>
     );
   }
 
+  const headingId = 'h-agua';
+  const BLOCK = safeGoal / 250 > 16 ? 500 : 250;
+  const blocks = Math.max(4, Math.min(24, Math.ceil(safeGoal / BLOCK) || 8));
+  const filled = Math.min(blocks, Math.floor(safeConsumed / BLOCK));
+  const remaining = Math.max(0, safeGoal - safeConsumed);
+
   return (
-    <div className={`card progress-card progress-card-${variant}`}>
-      <div className="progress-card-head">
-        <span className="progress-card-label">{title}</span>
-        <span className={`pill ${status.cls}`}>{status.label}</span>
+    <section className="card label-card progress-card progress-card-water" aria-labelledby={headingId}>
+      <div className="label-card-head">
+        <h2 id={headingId}>{title}</h2>
+        <span className="muted">Meta de {fmtLitres(safeGoal)}</span>
       </div>
-
-      <div className={`big num ${isWater ? 'water' : ''}`}>
-        {consumed.toLocaleString('pt-BR')}
-        <span className="unit">{unit}</span>
+      <div className="label-hero label-hero-sm">
+        <span className="label-hero-num">{fmtLitresNum(safeConsumed)}</span>
+        <span className="label-hero-unit">litros</span>
       </div>
-
-      <div className="progress-card-meta">
-        Meta diária: <span className="num">{goal.toLocaleString('pt-BR')}</span> {unit}
+      <div>
+        <div
+          className="ruler"
+          role="img"
+          aria-label={`${filled} de ${blocks} blocos de ${BLOCK} mililitros, ${pct}% da meta de água`}
+        >
+          {Array.from({ length: blocks }, (_, i) => (
+            <span key={i} className={i < filled ? 'on' : ''} />
+          ))}
+        </div>
+        <div className="meter-legend small">
+          <span>Cada bloco equivale a {BLOCK} ml</span>
+          <span>{over ? 'meta atingida' : `${fmtInt(remaining)} ml restantes`}</span>
+        </div>
       </div>
-
-      <div className={`progress progress-gradient ${isWater ? 'water-gradient' : 'kcal-gradient'}`}>
-        <div className={fillClass} style={{ width: `${pct}%` }} />
-        <div className="progress-label num">{over ? '🎉 ' : ''}{pct}%{over ? ' — meta atingida' : ''}</div>
-      </div>
-
       {children}
-    </div>
+    </section>
   );
 }

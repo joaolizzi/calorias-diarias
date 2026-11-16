@@ -12,7 +12,7 @@ export default function WaterTracker({ entries, onChange }) {
   const day = today();
 
   const add = async (mlRaw) => {
-    let ml = Math.round(Number(mlRaw));
+    const ml = Math.round(Number(mlRaw));
     if (!Number.isFinite(ml) || ml <= 0) {
       toast('Valor inválido', { type: 'error' });
       return;
@@ -25,7 +25,7 @@ export default function WaterTracker({ entries, onChange }) {
       await addWater(user.id, day, ml);
       setCustom('');
       await onChange();
-      toast(`+${ml} ml registrado 💧`);
+      toast(`+${ml} ml registrado`);
     } catch (e) {
       toast(e.message || 'Falha ao salvar', { type: 'error' });
     }
@@ -48,52 +48,46 @@ export default function WaterTracker({ entries, onChange }) {
     <>
       <div className="quick">
         {QUICK.map((ml) => (
-          <button type="button" key={ml} className="btn" onClick={() => add(ml)} aria-label={`Adicionar ${ml} ml de água`}>
-            +{ml >= 1000 ? `${ml / 1000}L` : `${ml} ml`}
+          <button type="button" key={ml} className="chip-btn" onClick={() => add(ml)} aria-label={`Adicionar ${ml} ml de água`}>
+            +{ml >= 1000 ? `${ml / 1000} L` : `${ml} ml`}
           </button>
         ))}
       </div>
+
       <div className="custom">
+        <label htmlFor="water-custom" className="sr-only">Quantidade de água em mililitros</label>
         <input
+          id="water-custom"
           type="number"
           min="1"
           max="5000"
           step="1"
-          placeholder="ml (ex: 450)"
+          placeholder="Outra quantidade, em ml"
           value={custom}
           onChange={(e) => setCustom(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') add(custom);
-          }}
+          onKeyDown={(e) => { if (e.key === 'Enter') add(custom); }}
           inputMode="numeric"
-          aria-label="Quantidade de água em mililitros"
         />
-        <button type="button" className="btn primary" onClick={() => add(custom)}>
-          Adicionar
-        </button>
-      </div>
-      <div className="water-hint">
-        <span>1 copo ≈ 200–250 ml</span>
-        <span>1 garrafa ≈ 500 ml</span>
+        <button type="button" className="btn primary" onClick={() => add(custom)}>Adicionar</button>
       </div>
 
-      {items.length > 0 && (
-        <ul className="log" style={{ marginTop: 14 }}>
-          {items.map((e) => (
-            <li key={e.id}>
-              <div>
-                <div className="amt">+{e.ml} ml</div>
-                <div className="when">{fmtTime(e.consumed_at)}</div>
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
-
-      <div style={{ marginTop: 12, display: 'flex', justifyContent: 'flex-end' }}>
-        <button type="button" className="btn danger" onClick={clearDay} disabled={!entries.length}>
-          Limpar água do dia
-        </button>
+      <div className="water-log">
+        <h3>Registros de hoje</h3>
+        {items.length === 0 ? (
+          <p className="muted water-empty">Nenhuma água registrada ainda.</p>
+        ) : (
+          <ul className="log">
+            {items.map((e) => (
+              <li key={e.id}>
+                <span className="when">{fmtTime(e.consumed_at)}</span>
+                <span className="amt">+{e.ml} ml</span>
+              </li>
+            ))}
+          </ul>
+        )}
+        <div className="water-log-foot">
+          <button type="button" className="btn-quiet" onClick={clearDay} disabled={!entries.length}>Limpar água do dia</button>
+        </div>
       </div>
     </>
   );

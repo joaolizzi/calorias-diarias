@@ -12,15 +12,18 @@ import FoodSection from '../components/FoodSection.jsx';
 import GoalsSettings from '../components/GoalsSettings.jsx';
 import HistoryChart from '../components/HistoryChart.jsx';
 import DailyInsight from '../components/DailyInsight.jsx';
+import Icon from '../components/Icon.jsx';
+import { fmtNum, fmtInt, pctOf } from '../components/format.js';
 
 const MEALS = ['breakfast', 'lunch', 'snack', 'dinner'];
 const VALID_PANELS = new Set(['meals', 'insights', 'history']);
 const MEAL_META = {
-  breakfast: { label: 'Café da manhã', icon: '☀' },
-  lunch: { label: 'Almoço', icon: '◐' },
-  snack: { label: 'Lanche', icon: '◇' },
-  dinner: { label: 'Jantar', icon: '☾' },
+  breakfast: { label: 'Café da manhã' },
+  lunch: { label: 'Almoço' },
+  snack: { label: 'Lanche' },
+  dinner: { label: 'Jantar' },
 };
+const PANEL_TITLES = { meals: 'Hoje', insights: 'Metas', history: 'Histórico' };
 
 function suggestedMeal() {
   const hour = new Date().getHours();
@@ -128,101 +131,89 @@ function buildDailyReport({
   return lines.join('\r\n');
 }
 
-function DashboardHeader({ day, kcalConsumed, kcalGoal, waterConsumed, waterGoal, mealsLogged, onDownloadReport }) {
-  const kcalRemaining = Math.max(0, kcalGoal - kcalConsumed);
-  const waterPct = waterGoal > 0 ? Math.min(100, Math.round((waterConsumed / waterGoal) * 100)) : 0;
-  const kcalPct = kcalGoal > 0 ? Math.min(100, Math.round((kcalConsumed / kcalGoal) * 100)) : 0;
+function longDateLabel(day) {
+  const d = new Date(`${day}T00:00:00`);
+  return d.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
+}
+
+function MacroRows({ totals, goals }) {
+  const rows = [
+    { key: 'protein', name: 'Proteína', value: totals.protein, goal: goals.protein },
+    { key: 'carbs', name: 'Carboidratos', value: totals.carbs, goal: goals.carbs },
+    { key: 'fat', name: 'Gorduras', value: totals.fat, goal: goals.fat },
+  ];
   return (
-    <section className="product-dashboard-header">
-      <div className="product-dashboard-heading dashboard-heading-with-action">
-        <div className="dashboard-heading-copy">
-          <span className="product-dashboard-date">{fmtDateLabel(day)}</span>
-          <h1>Hoje</h1>
-          <p>Acompanhe calorias, água e seus macros em um só lugar.</p>
-        </div>
-        <button type="button" className="daily-report-btn" onClick={onDownloadReport} title="Baixar relatório do dia em TXT">
-          <span className="daily-report-btn-icon" aria-hidden="true">⇩</span>
-          <span><strong>Relatório do dia</strong><small>Baixar TXT</small></span>
-        </button>
+    <div className="macro-table">
+      <div className="macro-rule" aria-hidden="true" />
+      <div className="macro-table-head">
+        <h3>Macronutrientes</h3>
+        <span>consumido / meta</span>
       </div>
-      <div className="product-summary-grid">
-        <div className="product-summary-item primary"><span>Calorias restantes</span><strong>{kcalRemaining.toLocaleString('pt-BR')}</strong><small>de {kcalGoal.toLocaleString('pt-BR')} kcal</small></div>
-        <div className="product-summary-item"><span>Consumido</span><strong>{kcalPct}%</strong><small>{kcalConsumed.toLocaleString('pt-BR')} kcal</small></div>
-        <div className="product-summary-item"><span>Água</span><strong>{waterPct}%</strong><small>{waterConsumed.toLocaleString('pt-BR')} ml</small></div>
-        <div className="product-summary-item"><span>Refeições</span><strong>{mealsLogged}/4</strong><small>registradas hoje</small></div>
-      </div>
-    </section>
+      {rows.map((row) => {
+        const pct = pctOf(row.value, row.goal);
+        const label = `${row.name}: ${fmtNum(row.value, 0)} de ${fmtNum(row.goal, 0)} gramas, ${pct}%`;
+        return (
+          <div className={`macro-row macro-${row.key}`} key={row.key}>
+            <span className="macro-name">{row.name}</span>
+            <div className="macro-bar" role="img" aria-label={label}><i style={{ width: `${pct}%` }} /></div>
+            <span className="macro-values num">{fmtNum(row.value, 0)} / {fmtNum(row.goal, 0)} g</span>
+            <span className="macro-pct num">{pct}%</span>
+          </div>
+        );
+      })}
+    </div>
   );
 }
 
-function CompactStreaks({ waterStreak, kcalStreak, waterDone, kcalDone }) {
-  const streak = Math.min(waterStreak, kcalStreak);
-  const active = streak > 0 || waterDone || kcalDone;
+function MealAccordion({ meals, openMeal, onToggle, foodEntries, onChange, focusAction, dayKcal, kcalGoal }) {
   return (
-    <section className="streak-inline-card">
-      <div className="streak-fire-wrap" aria-hidden="true">
-        <span className="streak-fire-glow" />
-        <span className={`streak-fire ${active ? '' : 'inactive'}`} />
-      </div>
-      <div className="streak-inline-copy">
-        <span>Sequência</span>
-        <strong>{streak}</strong>
-        <small>{streak === 1 ? 'dia consistente' : 'dias consistentes'}</small>
-      </div>
-      <div className="streak-inline-status">
-        <span className={`streak-chip ${waterDone ? 'done' : ''}`}><i /> Água <b>{waterStreak}d</b></span>
-        <span className={`streak-chip ${kcalDone ? 'done' : ''}`}><i /> Calorias <b>{kcalStreak}d</b></span>
-      </div>
-    </section>
-  );
-}
+    <div className="meal-list">
+      {meals.map((meal) => {
+        const entries = foodEntries.filter((entry) => entry.meal === meal);
+        const label = MEAL_META[meal].label;
+        const isOpen = openMeal === meal;
+        const kcal = entries.reduce((sum, entry) => sum + Number(entry.kcal || 0), 0);
+        const macros = sumMacros(entries);
+        const count = `${entries.length} ${entries.length === 1 ? 'item' : 'itens'}`;
+        const empty = entries.length === 0;
+        const panelId = `meal-panel-${meal}`;
 
-function MacroCard({ label, value, goal, type }) {
-  const safeGoal = Math.max(1, Number(goal) || 1);
-  const consumed = Math.max(0, Number(value) || 0);
-  const pct = Math.min(100, Math.round(consumed / safeGoal * 100));
-  const remaining = Math.max(0, safeGoal - consumed);
-  return (
-    <article className={`macro-card macro-${type}`}>
-      <div className="macro-card-head"><span>{label}</span><strong>{Math.round(consumed)}<small> / {Math.round(safeGoal)}g</small></strong></div>
-      <div className="macro-progress"><i style={{ width: `${pct}%` }} /></div>
-      <div className="macro-card-foot"><span>{pct}%</span><small>{Math.round(remaining)}g restantes</small></div>
-    </article>
-  );
-}
-
-function MacroOverview({ totals, goals }) {
-  return (
-    <section className="macro-overview-section">
-      <div className="macro-overview-head"><div><span className="product-section-label">Macronutrientes</span><h2>Distribuição do dia</h2></div><small>Valores de registros novos passam a usar TBCA, rótulo ou estimativa da IA.</small></div>
-      <div className="macro-overview-grid">
-        <MacroCard label="Proteína" value={totals.protein} goal={goals.protein} type="protein" />
-        <MacroCard label="Carboidratos" value={totals.carbs} goal={goals.carbs} type="carbs" />
-        <MacroCard label="Gorduras" value={totals.fat} goal={goals.fat} type="fat" />
-      </div>
-    </section>
-  );
-}
-
-function MealRoutineSelector({ activeMeal, setActiveMeal, foodEntries }) {
-  return (
-    <div className="meal-routine product-meal-routine">
-      <div className="meal-routine-copy"><span className="product-section-label">Próxima refeição</span><strong>O que você quer registrar?</strong><small>Selecione uma refeição para abrir o registro.</small></div>
-      <div className="meal-routine-options" role="tablist" aria-label="Escolher refeição para registrar">
-        {MEALS.map((meal) => {
-          const meta = MEAL_META[meal];
-          const entries = foodEntries.filter((entry) => entry.meal === meal);
-          const kcal = entries.reduce((sum, entry) => sum + Number(entry.kcal || 0), 0);
-          return <button key={meal} type="button" role="tab" aria-selected={activeMeal === meal} className={`meal-routine-option ${activeMeal === meal ? 'active' : ''} ${entries.length ? 'logged' : ''}`} onClick={() => setActiveMeal(meal)}><span className="meal-routine-icon">{meta.icon}</span><span className="meal-routine-option-copy"><strong>{meta.label}</strong><small>{entries.length ? `${entries.length} ${entries.length === 1 ? 'item' : 'itens'} · ${kcal} kcal` : 'Sem registro'}</small></span><span className="meal-routine-state">{entries.length ? '✓' : '›'}</span></button>;
-        })}
-      </div>
+        return (
+          <div className={`meal-row ${isOpen ? 'open' : ''}`} key={meal}>
+            {empty && !isOpen ? (
+              <div className="meal-head meal-head-empty">
+                <span className="meal-name">{label}</span>
+                <span className="meal-summary">Nada registrado ainda</span>
+                <button type="button" className="btn meal-add" onClick={() => onToggle(meal)}>
+                  <Icon name="plus" size={17} />
+                  Registrar {label.toLowerCase()}
+                </button>
+              </div>
+            ) : (
+              <button type="button" className="meal-head" aria-expanded={isOpen} aria-controls={panelId} onClick={() => onToggle(meal)}>
+                <span className="meal-name">{label}</span>
+                <span className="meal-summary num">
+                  {empty ? 'Nada registrado ainda' : `${count} · P ${fmtNum(macros.protein)} · C ${fmtNum(macros.carbs)} · G ${fmtNum(macros.fat)}`}
+                </span>
+                <span className="meal-kcal num">{fmtInt(kcal)} kcal</span>
+                <Icon name={isOpen ? 'chevron-up' : 'chevron-down'} size={18} className="meal-chevron" />
+              </button>
+            )}
+            {isOpen && (
+              <div className="active-meal-panel" id={panelId}>
+                <FoodSection key={`${meal}-${focusAction || 'default'}`} meal={meal} entries={entries} onChange={onChange} initialAction={focusAction} dayKcal={dayKcal} kcalGoal={kcalGoal} />
+              </div>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }
 
 export default function Dashboard({ theme, accent, preset, setTheme, setAccent, setPreset }) {
   const { user } = useAuth();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const day = today();
   const [profile, setProfile] = useState(null);
   const [waterEntries, setWaterEntries] = useState([]);
@@ -232,6 +223,7 @@ export default function Dashboard({ theme, accent, preset, setTheme, setAccent, 
   const requestedPanel = searchParams.get('panel');
   const [activePanel, setActivePanel] = useState(() => VALID_PANELS.has(requestedPanel) ? requestedPanel : 'meals');
   const [activeMeal, setActiveMeal] = useState(() => suggestedMeal());
+  const toggleMeal = (meal) => setActiveMeal((current) => (current === meal ? null : meal));
 
   const reloadProfile = useCallback(async () => { try { setProfile(await getProfile(user.id)); } catch (e) { console.warn('getProfile falhou:', e?.message); } }, [user.id]);
   const reloadToday = useCallback(async () => { try { const [w, f] = await Promise.all([getWaterForDay(user.id, day), getFoodForDay(user.id, day)]); setWaterEntries(w); setFoodEntries(f); } catch (e) { console.warn('reloadToday falhou:', e?.message); } }, [user.id, day]);
@@ -255,12 +247,12 @@ export default function Dashboard({ theme, accent, preset, setTheme, setAccent, 
   useEffect(() => { const panel = searchParams.get('panel'); setActivePanel(VALID_PANELS.has(panel) ? panel : 'meals'); }, [searchParams]);
   useEffect(() => {
     const focus = searchParams.get('focus');
+    if ((focus === 'register' || focus === 'ai') && activePanel === 'meals') setActiveMeal((current) => current || suggestedMeal());
     if (focus === 'register' && activePanel === 'meals') { const timer = window.setTimeout(() => document.querySelector('.active-meal-panel input')?.focus(), 120); return () => window.clearTimeout(timer); }
     if (focus === 'water') { const timer = window.setTimeout(() => document.querySelector('.dashboard-vitals-water .progress-card-water')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 120); return () => window.clearTimeout(timer); }
     return undefined;
   }, [activePanel, searchParams]);
 
-  const openPanel = (panel) => { setActivePanel(panel); setSearchParams(panel === 'meals' ? { panel: 'meals' } : { panel }); };
   const kcalGoal = profile?.daily_kcal_goal || 2000;
   const waterGoal = profile?.daily_water_goal_ml || 2000;
   const macroGoals = macroGoalsFromProfile(profile);
@@ -268,7 +260,6 @@ export default function Dashboard({ theme, accent, preset, setTheme, setAccent, 
   const waterConsumed = waterEntries.reduce((s, e) => s + Number(e.ml || 0), 0);
   const kcalConsumed = foodEntries.reduce((s, e) => s + Number(e.kcal || 0), 0);
   const mealsLogged = MEALS.filter((meal) => foodEntries.some((entry) => entry.meal === meal)).length;
-  const activeMealEntries = foodEntries.filter((entry) => entry.meal === activeMeal);
   const focusAction = searchParams.get('focus') === 'ai' ? 'natural' : null;
 
   const downloadDailyReport = () => {
@@ -296,33 +287,69 @@ export default function Dashboard({ theme, accent, preset, setTheme, setAccent, 
     window.setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
 
+  const streak = Math.min(waterStreak, kcalStreak);
+  const streakLabel = streak > 0 ? `${streak} ${streak === 1 ? 'dia seguido' : 'dias seguidos'} na meta` : 'Sequência: comece hoje';
+  const title = PANEL_TITLES[activePanel] || 'Hoje';
+
   return (
-    <div className="app premium-dashboard dashboard-v3 product-dashboard">
-      <ProfessionalHeader subtitle={`${fmtDateLabel(day)} — Hoje`} theme={theme} accent={accent} preset={preset} setTheme={setTheme} setAccent={setAccent} setPreset={setPreset} />
-      <DashboardHeader day={day} kcalConsumed={kcalConsumed} kcalGoal={kcalGoal} waterConsumed={waterConsumed} waterGoal={waterGoal} mealsLogged={mealsLogged} onDownloadReport={downloadDailyReport} />
+    <div className="app-shell">
+      <ProfessionalHeader theme={theme} setTheme={setTheme} />
+      <main className="page" id="conteudo">
+        <div className="page-inner">
+          <header className="page-head">
+            <div>
+              <p className="page-date">{longDateLabel(day)}</p>
+              <h1>{title}</h1>
+            </div>
+            {activePanel === 'meals' && (
+              <div className="page-head-actions">
+                <span className={`streak-pill ${streak > 0 ? 'on' : ''}`} title={`Água: ${waterStreak} dia(s) · Calorias: ${kcalStreak} dia(s)`}>
+                  <Icon name="check" size={16} />
+                  {streakLabel}
+                </span>
+                <button type="button" className="btn" onClick={downloadDailyReport} title="Baixar o relatório do dia em TXT">
+                  <Icon name="download" size={17} />
+                  Relatório do dia
+                </button>
+              </div>
+            )}
+          </header>
 
-      <section className="dashboard-vitals-grid">
-        <div className="dashboard-vitals-left">
-          <ProgressCard title="Calorias" unit="kcal" consumed={kcalConsumed} goal={kcalGoal} variant="food" />
-          <CompactStreaks waterStreak={waterStreak} kcalStreak={kcalStreak} waterDone={waterConsumed >= waterGoal} kcalDone={kcalConsumed >= kcalGoal} />
-        </div>
-        <div className="dashboard-vitals-water">
-          <ProgressCard title="Água" unit="ml" consumed={waterConsumed} goal={waterGoal} variant="water">
-            <WaterTracker entries={waterEntries} onChange={reloadToday} />
-          </ProgressCard>
-        </div>
-      </section>
+          {activePanel === 'meals' && (
+            <>
+              <div className="vitals-grid">
+                <div className="vitals-left">
+                  <ProgressCard title="Calorias" unit="kcal" consumed={kcalConsumed} goal={kcalGoal} variant="food">
+                    <MacroRows totals={macroTotals} goals={macroGoals} />
+                  </ProgressCard>
+                </div>
+                <div className="dashboard-vitals-water vitals-right">
+                  <ProgressCard title="Água" unit="ml" consumed={waterConsumed} goal={waterGoal} variant="water">
+                    <WaterTracker entries={waterEntries} onChange={reloadToday} />
+                  </ProgressCard>
+                </div>
+              </div>
 
-      <MacroOverview totals={macroTotals} goals={macroGoals} />
+              <section className="meals-section" aria-labelledby="h-refeicoes">
+                <div className="section-head">
+                  <h2 id="h-refeicoes">Refeições</h2>
+                  <span className="muted">{mealsLogged} de {MEALS.length} registradas</span>
+                </div>
+                <MealAccordion meals={MEALS} openMeal={activeMeal} onToggle={toggleMeal} foodEntries={foodEntries} onChange={reloadToday} focusAction={focusAction} dayKcal={kcalConsumed} kcalGoal={kcalGoal} />
+              </section>
+            </>
+          )}
 
-      <section className="dashboard-workspace product-workspace">
-        <div className="dashboard-workspace-head"><div><span className="product-section-label">Painel diário</span><h2>Detalhes</h2></div><div className="dashboard-tabs" role="tablist" aria-label="Painéis do dashboard"><button className={activePanel === 'meals' ? 'active' : ''} onClick={() => openPanel('meals')}>Rotina</button><button className={activePanel === 'insights' ? 'active' : ''} onClick={() => openPanel('insights')}>Metas</button><button className={activePanel === 'history' ? 'active' : ''} onClick={() => openPanel('history')}>Histórico</button></div></div>
-        <div className="dashboard-workspace-body">
-          {activePanel === 'meals' && <div className="dashboard-panel dashboard-panel-meals dashboard-routine-panel"><MealRoutineSelector activeMeal={activeMeal} setActiveMeal={setActiveMeal} foodEntries={foodEntries} /><div className="active-meal-panel"><div className="active-meal-panel-head"><div><span>Registrando</span><strong>{MEAL_META[activeMeal].label}</strong></div><small>{activeMealEntries.length ? `${activeMealEntries.length} ${activeMealEntries.length === 1 ? 'item' : 'itens'}` : 'Nenhum item'}</small></div><FoodSection key={`${activeMeal}-${focusAction || 'default'}`} meal={activeMeal} entries={activeMealEntries} onChange={reloadToday} initialAction={focusAction} /></div></div>}
-          {activePanel === 'insights' && <div className="dashboard-panel dashboard-panel-insights"><div className="dashboard-lower-grid dashboard-lower-grid-v3"><GoalsSettings profile={profile} onSaved={reloadProfile} /><DailyInsight foodEntries={foodEntries} waterEntries={waterEntries} kcalGoal={kcalGoal} waterGoal={waterGoal} /></div></div>}
-          {activePanel === 'history' && <div className="dashboard-panel dashboard-panel-history"><HistoryChart profile={profile} /></div>}
+          {activePanel === 'insights' && (
+            <div className="goals-grid">
+              <GoalsSettings profile={profile} onSaved={reloadProfile} />
+              <DailyInsight foodEntries={foodEntries} waterEntries={waterEntries} kcalGoal={kcalGoal} waterGoal={waterGoal} />
+            </div>
+          )}
+
+          {activePanel === 'history' && <HistoryChart profile={profile} />}
         </div>
-      </section>
+      </main>
     </div>
   );
 }

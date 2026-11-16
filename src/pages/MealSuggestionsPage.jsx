@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import ProfessionalHeader from '../components/ProfessionalHeader.jsx';
+import Icon from '../components/Icon.jsx';
 import { toast } from '../components/Toast.jsx';
 import { addFood, getFoodForDay, getProfile, getRecentFoodEntries } from '../lib/supabase.js';
 import { getIngredientSwaps, getMealSuggestions } from '../lib/gemini.js';
 import { lastNDays, today } from '../lib/dates.js';
-import './MealSuggestions.css';
 
 const MEALS = [
   { id: 'breakfast', label: 'Café da manhã' },
@@ -136,7 +136,7 @@ function recalculateSuggestion(suggestion, ingredients) {
   };
 }
 
-export default function MealSuggestionsPage({ theme, accent, preset, setTheme, setAccent, setPreset }) {
+export default function MealSuggestionsPage({ theme, setTheme }) {
   const { user } = useAuth();
   const [profile, setProfile] = useState(null);
   const [todayEntries, setTodayEntries] = useState([]);
@@ -352,235 +352,224 @@ export default function MealSuggestionsPage({ theme, accent, preset, setTheme, s
     setTargetKcal(value);
   };
 
+  const mealLabel = MEALS.find((item) => item.id === meal)?.label || 'dia';
+
   return (
-    <div className="app meal-suggestions-page">
-      <ProfessionalHeader
-        subtitle="Sugestões de refeição"
-        theme={theme}
-        accent={accent}
-        preset={preset}
-        setTheme={setTheme}
-        setAccent={setAccent}
-        setPreset={setPreset}
-      />
+    <div className="app-shell">
+      <ProfessionalHeader theme={theme} setTheme={setTheme} />
 
-      <main className="meal-suggestions-shell">
-        <header className="meal-suggestions-hero">
-          <div>
-            <span className="product-section-label">Planejamento</span>
-            <h1>O que comer agora?</h1>
-            <p>Escolha quantas calorias quer comer. O Nutrix combina seu histórico, suas preferências e o que você tem em casa.</p>
-          </div>
-          <div className="meal-budget-card">
-            <span>Restante hoje</span>
-            <strong>{remainingToday.toLocaleString('pt-BR')} kcal</strong>
-            <small>{Math.round(consumedToday).toLocaleString('pt-BR')} de {dailyGoal.toLocaleString('pt-BR')} kcal consumidas</small>
-            <button type="button" onClick={useRemaining}>Usar esse valor</button>
-          </div>
-        </header>
-
-        <section className="meal-suggestion-builder">
-          <div className="meal-builder-main">
-            <div className="meal-builder-head">
-              <div><span className="product-section-label">Sua refeição</span><h2>Monte a busca</h2></div>
-              <span className="meal-history-pill">{loading ? 'Lendo histórico…' : `${history.length} alimentos frequentes`}</span>
+      <main className="page" id="conteudo">
+        <div className="page-inner">
+          <header className="page-head">
+            <div>
+              <p className="page-date">Planejamento</p>
+              <h1>O que comer agora?</h1>
+              <p className="page-lead">Escolha quantas calorias quer comer. O Nutrix combina seu histórico, suas preferências e o que você tem em casa.</p>
             </div>
+          </header>
 
-            <div className="meal-kcal-field">
-              <label htmlFor="meal-target-kcal">Quero comer aproximadamente</label>
-              <div className="meal-kcal-input-wrap">
-                <input id="meal-target-kcal" type="number" min="100" max="2000" step="25" value={targetKcal} onChange={(event) => setTargetKcal(event.target.value)} />
-                <span>kcal</span>
+          <div className="suggest-layout">
+            <section className="card suggest-form" aria-labelledby="h-busca">
+              <div className="card-head">
+                <h2 id="h-busca">Monte a busca</h2>
+                <span className="muted suggest-history-note">{loading ? 'Lendo histórico…' : `${history.length} alimentos frequentes`}</span>
               </div>
-              <div className="meal-kcal-presets">
-                {[300, 400, 500, 600, 700, 800].map((value) => (
-                  <button type="button" key={value} className={Number(targetKcal) === value ? 'active' : ''} onClick={() => setTargetKcal(value)}>{value}</button>
-                ))}
-              </div>
-            </div>
 
-            <div className="meal-builder-grid">
-              <label className="meal-builder-field">
-                <span>Refeição</span>
-                <select value={meal} onChange={(event) => setMeal(event.target.value)}>
-                  {MEALS.map((item) => <option value={item.id} key={item.id}>{item.label}</option>)}
-                </select>
-              </label>
-
-              <label className="meal-builder-field">
-                <span>Prioridade</span>
-                <select value={style} onChange={(event) => setStyle(event.target.value)}>
-                  {STYLES.map((item) => <option value={item.id} key={item.id}>{item.label}</option>)}
-                </select>
-              </label>
-            </div>
-
-            <div className="meal-mode-section">
-              <span>Tipo de sugestão</span>
-              <div className="meal-mode-grid">
-                {MODES.map((item) => (
-                  <button type="button" key={item.id} className={mode === item.id ? 'active' : ''} onClick={() => setMode(item.id)}>
-                    <strong>{item.label}</strong>
-                    <small>{item.description}</small>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="meal-pantry-section">
-              <div className="meal-pantry-head">
-                <div><span>O que tenho em casa</span><small>Separe por vírgula. O Nutrix salva esta lista.</small></div>
-                <div className="meal-pantry-policy">
-                  <button type="button" className={pantryMode === 'prefer' ? 'active' : ''} onClick={() => setPantryMode('prefer')}>Priorizar</button>
-                  <button type="button" className={pantryMode === 'only' ? 'active' : ''} onClick={() => setPantryMode('only')}>Só usar isso</button>
+              <div className="suggest-budget">
+                <div>
+                  <span className="muted">Restante hoje</span>
+                  <strong className="num">{remainingToday.toLocaleString('pt-BR')} kcal</strong>
+                  <small className="muted num">{Math.round(consumedToday).toLocaleString('pt-BR')} de {dailyGoal.toLocaleString('pt-BR')} kcal consumidas</small>
                 </div>
+                <button type="button" className="btn" onClick={useRemaining}>Usar esse valor</button>
               </div>
-              <textarea
-                rows="2"
-                value={pantryInput}
-                onChange={(event) => setPantryInput(event.target.value)}
-                placeholder="Ex.: arroz, frango, ovos, banana, aveia, queijo..."
-              />
-              {pantry.length > 0 && (
-                <div className="meal-pantry-chips">
-                  {pantry.map((item) => <button type="button" key={normalizeName(item)} onClick={() => removePantryItem(item)} title="Remover">{item}<b>×</b></button>)}
+
+              <div className="field">
+                <label htmlFor="meal-target-kcal">Quero comer aproximadamente</label>
+                <div className="goal-field-row">
+                  <input id="meal-target-kcal" type="number" min="100" max="2000" step="25" value={targetKcal} onChange={(event) => setTargetKcal(event.target.value)} />
+                  <span className="goal-field-unit muted">kcal</span>
                 </div>
-              )}
-              {history.length > 0 && (
-                <div className="meal-pantry-frequent">
-                  <span>Adicionar dos frequentes:</span>
-                  {history.slice(0, 6).map((item) => (
-                    <button type="button" key={normalizeName(item.name)} onClick={() => addPantryItem(item.name)}>+ {item.name}</button>
+                <div className="chip-row" role="group" aria-label="Valores sugeridos">
+                  {[300, 400, 500, 600, 700, 800].map((value) => (
+                    <button type="button" key={value} className={`chip-btn ${Number(targetKcal) === value ? 'selected' : ''}`} aria-pressed={Number(targetKcal) === value} onClick={() => setTargetKcal(value)}>{value}</button>
                   ))}
                 </div>
-              )}
-            </div>
+              </div>
 
-            <label className="meal-notes-field">
-              <span>Algo que você quer hoje? <small>opcional</small></span>
-              <textarea rows="3" value={notes} onChange={(event) => setNotes(event.target.value)} placeholder="Ex.: quero algo com frango, sem muita louça, algo doce..." />
-            </label>
+              <div className="suggest-grid-2">
+                <div className="field">
+                  <label htmlFor="meal-meal">Refeição</label>
+                  <select id="meal-meal" value={meal} onChange={(event) => setMeal(event.target.value)}>
+                    {MEALS.map((item) => <option value={item.id} key={item.id}>{item.label}</option>)}
+                  </select>
+                </div>
+                <div className="field">
+                  <label htmlFor="meal-style">Prioridade</label>
+                  <select id="meal-style" value={style} onChange={(event) => setStyle(event.target.value)}>
+                    {STYLES.map((item) => <option value={item.id} key={item.id}>{item.label}</option>)}
+                  </select>
+                </div>
+              </div>
 
-            <button type="button" className="meal-generate-btn" onClick={generate} disabled={generating || loading}>
-              <span>{generating ? 'Gerando sugestões…' : 'Encontrar o que comer'}</span>
-              {!generating && <b>→</b>}
-            </button>
-          </div>
-
-          <aside className="meal-history-context">
-            <span className="product-section-label">Personalização</span>
-            <h3>O Nutrix está aprendendo</h3>
-            <p>Seu histórico, o que você tem em casa e seus 👍/👎 entram nas próximas sugestões.</p>
-            <div className="meal-learning-stats">
-              <div><strong>{preferences.liked.length}</strong><span>curtidas</span></div>
-              <div><strong>{preferences.disliked.length}</strong><span>evitadas</span></div>
-              <div><strong>{pantry.length}</strong><span>em casa</span></div>
-            </div>
-            <div className="meal-history-list">
-              {history.slice(0, 6).map((item) => (
-                <div key={normalizeName(item.name)}><span>{item.name}</span><small>{item.count}x</small></div>
-              ))}
-              {!loading && history.length === 0 && <small className="meal-history-empty">Ainda não há histórico suficiente. As sugestões continuam funcionando normalmente.</small>}
-            </div>
-          </aside>
-        </section>
-
-        <section className="meal-results-section">
-          <div className="meal-results-head">
-            <div>
-              <span className="product-section-label">Sugestões</span>
-              <h2>{suggestions.length ? `Perto de ${Number(targetKcal).toLocaleString('pt-BR')} kcal` : 'Escolha uma meta e gere sugestões'}</h2>
-            </div>
-            {suggestions.length > 0 && <button type="button" className="meal-regenerate-btn" onClick={generate} disabled={generating}>Gerar outras</button>}
-          </div>
-
-          {generating ? (
-            <div className="meal-suggestion-loading">
-              {[0, 1, 2, 3].map((item) => <div key={item}><span /><i /><i /><i /></div>)}
-            </div>
-          ) : suggestions.length > 0 ? (
-            <div className="meal-suggestion-grid">
-              {suggestions.map((suggestion) => {
-                const preferenceStatus = getPreferenceStatus(suggestion);
-                return (
-                  <article className="meal-suggestion-card" key={suggestion.id}>
-                    <div className="meal-suggestion-top">
-                      <span className={`meal-suggestion-type type-${suggestion.type}`}>{TYPE_LABELS[suggestion.type] || 'Sugestão'}</span>
-                      <span className="meal-suggestion-time">{suggestion.prepMinutes} min</span>
-                    </div>
-                    <h3>{suggestion.name}</h3>
-                    <p>{suggestion.description}</p>
-
-                    <div className="meal-feedback-row">
-                      <span>Essa sugestão combina com você?</span>
-                      <div>
-                        <button type="button" className={preferenceStatus === 'liked' ? 'active' : ''} onClick={() => rememberPreference(suggestion, 'liked')} aria-label="Gostei">👍 <small>Gostei</small></button>
-                        <button type="button" className={preferenceStatus === 'disliked' ? 'active dislike' : ''} onClick={() => rememberPreference(suggestion, 'disliked')} aria-label="Não gostei">👎 <small>Não gostei</small></button>
-                      </div>
-                    </div>
-
-                    <div className="meal-suggestion-kcal">
-                      <strong>{Math.round(suggestion.kcal)} <small>kcal</small></strong>
-                      <span>{kcalDistance(suggestion.kcal, Number(targetKcal))}</span>
-                    </div>
-
-                    <div className="meal-suggestion-macros">
-                      <span><b>{Math.round(suggestion.protein)}g</b> proteína</span>
-                      <span><b>{Math.round(suggestion.carbs)}g</b> carbo</span>
-                      <span><b>{Math.round(suggestion.fat)}g</b> gordura</span>
-                    </div>
-
-                    {suggestion.reason && <div className="meal-suggestion-reason">{suggestion.reason}</div>}
-
-                    <details className="meal-suggestion-details">
-                      <summary>Ver ingredientes, trocas e preparo</summary>
-                      <div className="meal-ingredient-list">
-                        {suggestion.ingredients.map((ingredient, index) => {
-                          const swapKey = `${suggestion.id}:${index}`;
-                          const opened = swapPanel.key === swapKey;
-                          return (
-                            <div className="meal-ingredient-block" key={`${ingredient.name}-${index}`}>
-                              <div className="meal-ingredient-row">
-                                <span>{ingredient.name}</span>
-                                <div><small>{ingredient.grams}g · {Math.round(ingredient.kcal)} kcal</small><button type="button" onClick={() => requestSwap(suggestion, ingredient, index)}>Trocar</button></div>
-                              </div>
-                              {opened && (
-                                <div className="meal-swap-panel">
-                                  {swapPanel.loading ? (
-                                    <span>Buscando opções com calorias parecidas…</span>
-                                  ) : swapPanel.options.length ? (
-                                    swapPanel.options.map((option) => (
-                                      <button type="button" key={option.id} onClick={() => applySwap(suggestion.id, index, option)}>
-                                        <span><strong>{option.name}</strong><small>{option.grams}g · {option.kcal} kcal</small></span>
-                                        <em>{option.reason || 'Calorias semelhantes'}</em>
-                                      </button>
-                                    ))
-                                  ) : <span>Nenhuma troca encontrada.</span>}
-                                </div>
-                              )}
-                            </div>
-                          );
-                        })}
-                      </div>
-                      {suggestion.steps?.length > 0 && <ol>{suggestion.steps.map((step, index) => <li key={index}>{step}</li>)}</ol>}
-                      {suggestion.sourceUrl && <a href={suggestion.sourceUrl} target="_blank" rel="noreferrer">Ver receita que inspirou esta sugestão ↗</a>}
-                    </details>
-
-                    <button type="button" className="meal-add-btn" onClick={() => addSuggestion(suggestion)} disabled={addingId === suggestion.id}>
-                      {addingId === suggestion.id ? 'Registrando…' : `Adicionar ao ${MEALS.find((item) => item.id === meal)?.label || 'dia'}`}
+              <fieldset className="suggest-fieldset">
+                <legend>Tipo de sugestão</legend>
+                <div className="option-grid three">
+                  {MODES.map((item) => (
+                    <button type="button" key={item.id} aria-pressed={mode === item.id} className={`option-card ${mode === item.id ? 'active' : ''}`} onClick={() => setMode(item.id)}>
+                      <strong>{item.label}</strong>
+                      <span>{item.description}</span>
                     </button>
-                  </article>
-                );
-              })}
+                  ))}
+                </div>
+              </fieldset>
+
+              <div className="suggest-pantry">
+                <div className="suggest-pantry-head">
+                  <div className="field-title"><label htmlFor="pantry">O que tenho em casa</label><small className="muted">Separe por vírgula. O Nutrix salva esta lista.</small></div>
+                  <div className="segmented" role="group" aria-label="Como usar a lista">
+                    <button type="button" aria-pressed={pantryMode === 'prefer'} className={pantryMode === 'prefer' ? 'active' : ''} onClick={() => setPantryMode('prefer')}>Priorizar</button>
+                    <button type="button" aria-pressed={pantryMode === 'only'} className={pantryMode === 'only' ? 'active' : ''} onClick={() => setPantryMode('only')}>Só usar isso</button>
+                  </div>
+                </div>
+                <textarea id="pantry" rows="2" value={pantryInput} onChange={(event) => setPantryInput(event.target.value)} placeholder="Por exemplo: arroz, frango, ovos, banana, aveia, queijo" />
+                {pantry.length > 0 && (
+                  <ul className="tag-list" aria-label="Ingredientes em casa">
+                    {pantry.map((item) => (
+                      <li key={normalizeName(item)}>
+                        <button type="button" className="tag" onClick={() => removePantryItem(item)} aria-label={`Remover ${item}`}>{item}<Icon name="close" size={14} /></button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                {history.length > 0 && (
+                  <div className="tag-list frequent">
+                    <span className="muted">Adicionar dos frequentes:</span>
+                    {history.slice(0, 6).map((item) => (
+                      <button type="button" className="tag" key={normalizeName(item.name)} onClick={() => addPantryItem(item.name)}><Icon name="plus" size={14} />{item.name}</button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="field">
+                <label htmlFor="meal-notes">Algo que você quer hoje? <small className="muted">(opcional)</small></label>
+                <textarea id="meal-notes" rows="3" value={notes} onChange={(event) => setNotes(event.target.value)} placeholder="Por exemplo: algo com frango, sem muita louça, algo doce" />
+              </div>
+
+              <button type="button" className="btn primary suggest-generate" onClick={generate} disabled={generating || loading}>
+                {generating ? 'Gerando sugestões…' : 'Encontrar o que comer'}
+              </button>
+            </section>
+
+            <aside className="card suggest-aside" aria-labelledby="h-aprende">
+              <h2 id="h-aprende">O que o Nutrix já sabe</h2>
+              <p className="muted">Seu histórico, o que você tem em casa e suas avaliações entram nas próximas sugestões.</p>
+              <dl className="suggest-stats">
+                <div><dd className="num">{preferences.liked.length}</dd><dt>curtidas</dt></div>
+                <div><dd className="num">{preferences.disliked.length}</dd><dt>evitadas</dt></div>
+                <div><dd className="num">{pantry.length}</dd><dt>em casa</dt></div>
+              </dl>
+              <ul className="suggest-history">
+                {history.slice(0, 6).map((item) => (
+                  <li key={normalizeName(item.name)}><span>{item.name}</span><small className="muted num">{item.count}x</small></li>
+                ))}
+              </ul>
+              {!loading && history.length === 0 && <p className="muted suggest-history-empty">Ainda não há histórico suficiente. As sugestões continuam funcionando normalmente.</p>}
+            </aside>
+          </div>
+
+          <section className="suggest-results" aria-labelledby="h-sugestoes" aria-live="polite">
+            <div className="section-head">
+              <h2 id="h-sugestoes">{suggestions.length ? `Perto de ${Number(targetKcal).toLocaleString('pt-BR')} kcal` : 'Sugestões'}</h2>
+              {suggestions.length > 0 && <button type="button" className="btn" onClick={generate} disabled={generating}><Icon name="refresh" size={17} /> Gerar outras</button>}
             </div>
-          ) : (
-            <div className="meal-results-empty">
-              <span>○</span>
-              <strong>As sugestões vão aparecer aqui</strong>
-              <small>Informe suas calorias, o que tem em casa e deixe o Nutrix aprender seus gostos.</small>
-            </div>
-          )}
-        </section>
+
+            {generating ? (
+              <div className="suggest-loading" aria-hidden="true">{[0, 1, 2, 3].map((item) => <div key={item}><span /><i /><i /><i /></div>)}</div>
+            ) : suggestions.length > 0 ? (
+              <div className="suggest-cards">
+                {suggestions.map((suggestion) => {
+                  const preferenceStatus = getPreferenceStatus(suggestion);
+                  return (
+                    <article className="card suggest-card" key={suggestion.id}>
+                      <div className="suggest-card-top">
+                        <span className="pill">{TYPE_LABELS[suggestion.type] || 'Sugestão'}</span>
+                        <span className="muted num">{suggestion.prepMinutes} min</span>
+                      </div>
+                      <h3>{suggestion.name}</h3>
+                      <p className="muted">{suggestion.description}</p>
+
+                      <div className="suggest-kcal">
+                        <strong className="num">{Math.round(suggestion.kcal)} <small>kcal</small></strong>
+                        <span className="muted num">{kcalDistance(suggestion.kcal, Number(targetKcal))}</span>
+                      </div>
+                      <div className="suggest-macros num">
+                        <span><b>{Math.round(suggestion.protein)} g</b> proteína</span>
+                        <span><b>{Math.round(suggestion.carbs)} g</b> carboidratos</span>
+                        <span><b>{Math.round(suggestion.fat)} g</b> gorduras</span>
+                      </div>
+
+                      {suggestion.reason && <p className="suggest-reason">{suggestion.reason}</p>}
+
+                      <div className="feedback-row">
+                        <span className="muted">Combina com você?</span>
+                        <div>
+                          <button type="button" className={`icon-btn ${preferenceStatus === 'liked' ? 'on' : ''}`} aria-pressed={preferenceStatus === 'liked'} onClick={() => rememberPreference(suggestion, 'liked')} aria-label={`Gostei de ${suggestion.name}`} title="Gostei"><Icon name="thumb-up" size={18} /></button>
+                          <button type="button" className={`icon-btn ${preferenceStatus === 'disliked' ? 'on' : ''}`} aria-pressed={preferenceStatus === 'disliked'} onClick={() => rememberPreference(suggestion, 'disliked')} aria-label={`Não gostei de ${suggestion.name}`} title="Não gostei"><Icon name="thumb-down" size={18} /></button>
+                        </div>
+                      </div>
+
+                      <details className="suggest-details">
+                        <summary>Ver ingredientes, trocas e preparo</summary>
+                        <ul className="ingredient-list">
+                          {suggestion.ingredients.map((ingredient, index) => {
+                            const swapKey = `${suggestion.id}:${index}`;
+                            const opened = swapPanel.key === swapKey;
+                            return (
+                              <li key={`${ingredient.name}-${index}`}>
+                                <div className="ingredient-row">
+                                  <span>{ingredient.name}</span>
+                                  <span className="muted num">{ingredient.grams} g · {Math.round(ingredient.kcal)} kcal</span>
+                                  <button type="button" className="btn-link" onClick={() => requestSwap(suggestion, ingredient, index)} aria-expanded={opened}>Trocar</button>
+                                </div>
+                                {opened && (
+                                  <div className="swap-panel">
+                                    {swapPanel.loading ? (
+                                      <span className="muted">Buscando opções com calorias parecidas…</span>
+                                    ) : swapPanel.options.length ? (
+                                      swapPanel.options.map((option) => (
+                                        <button type="button" key={option.id} onClick={() => applySwap(suggestion.id, index, option)}>
+                                          <span><strong>{option.name}</strong><small className="num">{option.grams} g · {option.kcal} kcal</small></span>
+                                          <em>{option.reason || 'Calorias semelhantes'}</em>
+                                        </button>
+                                      ))
+                                    ) : <span className="muted">Nenhuma troca encontrada.</span>}
+                                  </div>
+                                )}
+                              </li>
+                            );
+                          })}
+                        </ul>
+                        {suggestion.steps?.length > 0 && <ol className="steps">{suggestion.steps.map((step, index) => <li key={index}>{step}</li>)}</ol>}
+                        {suggestion.sourceUrl && <a className="source-link" href={suggestion.sourceUrl} target="_blank" rel="noreferrer">Ver receita que inspirou esta sugestão <Icon name="external" size={14} /></a>}
+                      </details>
+
+                      <button type="button" className="btn primary" onClick={() => addSuggestion(suggestion)} disabled={addingId === suggestion.id}>
+                        {addingId === suggestion.id ? 'Registrando…' : `Adicionar ao ${mealLabel.toLowerCase()}`}
+                      </button>
+                    </article>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="card empty-state">
+                <strong>As sugestões vão aparecer aqui</strong>
+                <small>Informe suas calorias e o que tem em casa. O Nutrix aprende seus gostos conforme você avalia.</small>
+              </div>
+            )}
+          </section>
+        </div>
       </main>
     </div>
   );

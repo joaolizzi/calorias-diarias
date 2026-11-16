@@ -1,54 +1,25 @@
-import { NavLink, useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import AppearanceMenu from './AppearanceMenu.jsx';
 import NutrixLogo from './NutrixLogo.jsx';
+import Icon from './Icon.jsx';
 
 const ADMIN_EMAIL = String(import.meta.env.VITE_ADMIN_EMAIL || '').trim().toLowerCase();
 
-const navigationGroups = [
-  {
-    label: 'Visão geral',
-    items: [
-      { to: '/', icon: 'home', label: 'Hoje', description: 'Resumo do seu dia' },
-      { to: '/?panel=history', icon: 'history', label: 'Histórico', description: 'Evolução e registros' },
-    ],
-  },
-  {
-    label: 'Nutrição',
-    items: [
-      { to: '/?panel=meals&focus=ai', icon: 'sparkles', label: 'Nutrix IA', description: 'Descrever uma refeição', badge: 'IA' },
-      { to: '/sugestoes', icon: 'meal', label: 'O que comer', description: 'Sugestões por calorias' },
-      { to: '/?panel=insights', icon: 'target', label: 'Metas', description: 'Objetivos e análise' },
-    ],
-  },
-  {
-    label: 'Planejamento',
-    items: [
-      { to: '/treinos', icon: 'dumbbell', label: 'Treinos', description: 'Plano semanal' },
-      { to: '/goal', icon: 'goal', label: 'Objetivo', description: 'Calorias e ajustes' },
-    ],
-  },
+const NAV_ITEMS = [
+  { id: 'today', to: '/', icon: 'home', label: 'Hoje' },
+  { id: 'history', to: '/?panel=history', icon: 'history', label: 'Histórico' },
+  { id: 'ai', to: '/?panel=meals&focus=ai', icon: 'sparkles', label: 'Nutrix IA' },
+  { id: 'eat', to: '/sugestoes', icon: 'meal', label: 'O que comer' },
+  { id: 'goals', to: '/?panel=insights', icon: 'target', label: 'Metas' },
+  { id: 'workouts', to: '/treinos', icon: 'dumbbell', label: 'Treinos' },
+  { id: 'plan', to: '/goal', icon: 'goal', label: 'Objetivo' },
 ];
 
-function Icon({ name, size = 18 }) {
-  const common = { width: size, height: size, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.8, strokeLinecap: 'round', strokeLinejoin: 'round', 'aria-hidden': true };
+const TAB_ITEMS = ['today', 'history', 'ai'];
 
-  if (name === 'home') return <svg {...common}><path d="M3 10.5 12 3l9 7.5"/><path d="M5.5 9.5V21h13V9.5"/><path d="M9.5 21v-6h5v6"/></svg>;
-  if (name === 'history') return <svg {...common}><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/></svg>;
-  if (name === 'sparkles') return <svg {...common}><path d="m12 3 1.2 3.3L16.5 7.5l-3.3 1.2L12 12l-1.2-3.3-3.3-1.2 3.3-1.2L12 3Z"/><path d="m18.5 13 .8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8.8-2.2Z"/><path d="m5.5 14 .7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7.7-1.8Z"/></svg>;
-  if (name === 'target') return <svg {...common}><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3M22 12h-3M12 22v-3M2 12h3"/></svg>;
-  if (name === 'meal') return <svg {...common}><path d="M4 11h16"/><path d="M6 11a6 6 0 0 1 12 0"/><path d="M12 5V3"/><path d="M5 15h14"/><path d="M7 19h10"/></svg>;
-  if (name === 'dumbbell') return <svg {...common}><path d="M6 7v10M3.5 9v6M18 7v10M20.5 9v6M6 12h12M2 12h1.5M20.5 12H22"/></svg>;
-  if (name === 'goal') return <svg {...common}><path d="M6 3h12v18H6z"/><path d="M9 7h6M9 11h6M9 15h4"/></svg>;
-  if (name === 'plus') return <svg {...common}><path d="M12 5v14M5 12h14"/></svg>;
-  if (name === 'water') return <svg {...common}><path d="M12 3s5 5.5 5 10a5 5 0 0 1-10 0c0-4.5 5-10 5-10Z"/><path d="M9.5 14.5c.6 1.1 1.5 1.6 2.5 1.6"/></svg>;
-  if (name === 'admin') return <svg {...common}><path d="M12 3 4.5 6v5.5c0 4.5 3 7.6 7.5 9.5 4.5-1.9 7.5-5 7.5-9.5V6L12 3Z"/><path d="M9.5 12 11 13.5l3.5-3.5"/></svg>;
-  if (name === 'logout') return <svg {...common}><path d="M10 5H5v14h5"/><path d="m14 8 4 4-4 4M8 12h10"/></svg>;
-  return null;
-}
-
-export default function ProfessionalHeader({ subtitle, theme, accent, preset, setTheme, setAccent, setPreset }) {
+export default function ProfessionalHeader({ theme, setTheme }) {
   const { user, signOut } = useAuth();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -60,94 +31,118 @@ export default function ProfessionalHeader({ subtitle, theme, accent, preset, se
     document.body.classList.toggle('sidebar-open', mobileOpen);
     return () => document.body.classList.remove('sidebar-open');
   }, [mobileOpen]);
+  useEffect(() => {
+    if (!mobileOpen) return undefined;
+    const onKey = (event) => { if (event.key === 'Escape') setMobileOpen(false); };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [mobileOpen]);
 
   if (!user) return null;
 
   const emailInitial = String(user.email || 'N').charAt(0).toUpperCase();
-  const currentUrl = `${location.pathname}${location.search}`;
-  const isActive = (to) => {
-    if (to === '/') return location.pathname === '/' && !location.search;
-    if (to.startsWith('/?')) return currentUrl === to;
-    return location.pathname === to;
+  const params = new URLSearchParams(location.search);
+  const panel = params.get('panel');
+  const focus = params.get('focus');
+
+  const isActive = (id) => {
+    if (location.pathname === '/') {
+      if (id === 'today') return (!panel || panel === 'meals') && focus !== 'ai';
+      if (id === 'ai') return panel === 'meals' && focus === 'ai';
+      if (id === 'history') return panel === 'history';
+      if (id === 'goals') return panel === 'insights';
+      return false;
+    }
+    if (id === 'eat') return location.pathname === '/sugestoes';
+    if (id === 'workouts') return location.pathname === '/treinos';
+    if (id === 'plan') return location.pathname === '/goal';
+    return false;
   };
+
+  const linkClass = (id) => `nav-link ${isActive(id) ? 'active' : ''}`;
+  const tabItems = NAV_ITEMS.filter((item) => TAB_ITEMS.includes(item.id));
+  const moreActive = !TAB_ITEMS.some(isActive) && location.pathname !== '/admin';
 
   return (
     <>
-      <div className="mobile-appbar">
-        <NavLink to="/" className="mobile-brand" aria-label="Nutrix dashboard">
-          <NutrixLogo className="brand-logo-mark" size={34} decorative />
-          <span>Nutrix<span className="brand-accent">.</span></span>
-        </NavLink>
-        <button type="button" className="sidebar-mobile-toggle" onClick={() => setMobileOpen(true)} aria-label="Abrir menu" aria-expanded={mobileOpen}>
-          <span /><span /><span />
+      <header className="mobile-appbar">
+        <Link to="/" className="brand" aria-label="Nutrix, ir para Hoje">
+          <NutrixLogo className="brand-mark" size={28} decorative />
+          <span className="brand-name">Nutrix<span className="brand-dot">.</span></span>
+        </Link>
+        <button type="button" className="avatar-btn" onClick={() => setMobileOpen(true)} aria-label="Abrir conta e aparência" aria-expanded={mobileOpen}>
+          {emailInitial}
         </button>
-      </div>
+      </header>
 
-      <button type="button" className={`sidebar-backdrop ${mobileOpen ? 'show' : ''}`} onClick={() => setMobileOpen(false)} aria-label="Fechar menu" />
+      <button type="button" className={`sidebar-backdrop ${mobileOpen ? 'show' : ''}`} onClick={() => setMobileOpen(false)} aria-label="Fechar menu" tabIndex={mobileOpen ? 0 : -1} />
 
-      <aside className={`app-sidebar ${mobileOpen ? 'open' : ''}`}>
+      <aside className={`app-sidebar ${mobileOpen ? 'open' : ''}`} aria-label="Menu">
         <div className="sidebar-top">
-          <NavLink to="/" className="sidebar-brand">
-            <NutrixLogo className="brand-logo-mark" size={40} decorative />
-            <span className="sidebar-brand-copy">
-              <strong>Nutrix<span className="brand-accent">.</span></strong>
-              <small>Nutrição pessoal</small>
-            </span>
-          </NavLink>
-          <button type="button" className="sidebar-close" onClick={() => setMobileOpen(false)} aria-label="Fechar menu">×</button>
+          <Link to="/" className="brand" aria-label="Nutrix, ir para Hoje">
+            <NutrixLogo className="brand-mark" size={30} decorative />
+            <span className="brand-name">Nutrix<span className="brand-dot">.</span></span>
+          </Link>
+          <button type="button" className="icon-btn sidebar-close" onClick={() => setMobileOpen(false)} aria-label="Fechar menu">
+            <Icon name="close" size={20} />
+          </button>
         </div>
 
-        <div className="sidebar-day-card">
-          <div><span>Hoje</span><strong>{subtitle || 'Seu painel pessoal'}</strong></div>
-          <span className="sidebar-day-dot" />
-        </div>
-
-        <div className="sidebar-quick-actions">
-          <NavLink to="/?panel=meals&focus=register" className="sidebar-primary-action">
-            <Icon name="plus" size={17} />
+        <div className="sidebar-actions">
+          <Link to="/?panel=meals&focus=register" className="btn primary sidebar-register">
+            <Icon name="plus" size={18} />
             <span>Registrar refeição</span>
-          </NavLink>
-          <NavLink to="/?focus=water" className="sidebar-water-action" title="Registrar água" aria-label="Registrar água">
-            <Icon name="water" size={17} />
-          </NavLink>
+          </Link>
         </div>
 
-        <nav className="sidebar-nav sidebar-nav-expanded" aria-label="Navegação principal">
-          {navigationGroups.map((group) => (
-            <div className="sidebar-nav-group" key={group.label}>
-              <span className="sidebar-nav-label">{group.label}</span>
-              {group.items.map((item) => (
-                <NavLink key={item.to} to={item.to} className={`sidebar-link ${isActive(item.to) ? 'active' : ''}`}>
-                  <span className="sidebar-link-icon"><Icon name={item.icon} /></span>
-                  <span className="sidebar-link-copy"><strong>{item.label}</strong><small>{item.description}</small></span>
-                  {item.badge ? <span className="sidebar-link-badge">{item.badge}</span> : <span className="sidebar-link-arrow">›</span>}
-                </NavLink>
-              ))}
-            </div>
+        <nav className="sidebar-nav" aria-label="Navegação principal">
+          {NAV_ITEMS.map((item) => (
+            <Link key={item.id} to={item.to} className={linkClass(item.id)} aria-current={isActive(item.id) ? 'page' : undefined}>
+              <Icon name={item.icon} size={19} />
+              <span>{item.label}</span>
+            </Link>
           ))}
-
           {isAdmin && (
-            <div className="sidebar-nav-group">
-              <span className="sidebar-nav-label">Sistema</span>
-              <NavLink to="/admin" className={`sidebar-link ${location.pathname === '/admin' ? 'active' : ''}`}>
-                <span className="sidebar-link-icon"><Icon name="admin" /></span>
-                <span className="sidebar-link-copy"><strong>Admin</strong><small>Painel interno</small></span>
-                <span className="sidebar-link-arrow">›</span>
-              </NavLink>
-            </div>
+            <Link to="/admin" className={`nav-link ${location.pathname === '/admin' ? 'active' : ''}`} aria-current={location.pathname === '/admin' ? 'page' : undefined}>
+              <Icon name="admin" size={19} />
+              <span>Admin</span>
+            </Link>
           )}
         </nav>
 
-        <div className="sidebar-tools sidebar-tools-top">
-          <AppearanceMenu theme={theme} accent={accent} preset={preset} setTheme={setTheme} setAccent={setAccent} setPreset={setPreset} />
-        </div>
-
-        <div className="sidebar-account">
-          <div className="sidebar-avatar">{emailInitial}</div>
-          <div className="sidebar-account-copy"><strong>Minha conta</strong><small title={user.email}>{user.email}</small></div>
-          <button type="button" className="sidebar-logout" onClick={() => signOut()} title="Sair" aria-label="Sair"><Icon name="logout" size={16} /></button>
+        <div className="sidebar-foot">
+          <AppearanceMenu theme={theme} setTheme={setTheme} />
+          <div className="sidebar-account">
+            <span className="avatar" aria-hidden="true">{emailInitial}</span>
+            <span className="sidebar-account-copy"><strong>Minha conta</strong><small title={user.email}>{user.email}</small></span>
+            <button type="button" className="icon-btn" onClick={() => signOut()} title="Sair" aria-label="Sair">
+              <Icon name="logout" size={18} />
+            </button>
+          </div>
         </div>
       </aside>
+
+      <nav className="tabbar" aria-label="Navegação principal">
+        {tabItems.slice(0, 2).map((item) => (
+          <Link key={item.id} to={item.to} className={`tab ${isActive(item.id) ? 'active' : ''}`} aria-current={isActive(item.id) ? 'page' : undefined}>
+            <Icon name={item.icon} size={22} />
+            <span>{item.label}</span>
+          </Link>
+        ))}
+        <Link to="/?panel=meals&focus=register" className="tab-register" aria-label="Registrar refeição">
+          <Icon name="plus" size={26} />
+        </Link>
+        {tabItems.slice(2).map((item) => (
+          <Link key={item.id} to={item.to} className={`tab ${isActive(item.id) ? 'active' : ''}`} aria-current={isActive(item.id) ? 'page' : undefined}>
+            <Icon name={item.icon} size={22} />
+            <span>{item.label}</span>
+          </Link>
+        ))}
+        <button type="button" className={`tab ${moreActive ? 'active' : ''}`} onClick={() => setMobileOpen(true)} aria-expanded={mobileOpen}>
+          <Icon name="more" size={22} />
+          <span>Mais</span>
+        </button>
+      </nav>
     </>
   );
 }
