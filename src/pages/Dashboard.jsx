@@ -13,6 +13,7 @@ import GoalsSettings from '../components/GoalsSettings.jsx';
 import HistoryChart from '../components/HistoryChart.jsx';
 import DailyInsight from '../components/DailyInsight.jsx';
 import Icon from '../components/Icon.jsx';
+import useGrow from '../components/useGrow.js';
 import { fmtNum, fmtInt, pctOf } from '../components/format.js';
 
 const MEALS = ['breakfast', 'lunch', 'snack', 'dinner'];
@@ -155,7 +156,7 @@ function MacroRows({ totals, goals }) {
         return (
           <div className={`macro-row macro-${row.key}`} key={row.key}>
             <span className="macro-name">{row.name}</span>
-            <div className="macro-bar" role="img" aria-label={label}><i style={{ width: `${pct}%` }} /></div>
+            <MacroBar pct={pct} label={label} />
             <span className="macro-values num">{fmtNum(row.value, 0)} / {fmtNum(row.goal, 0)} g</span>
             <span className="macro-pct num">{pct}%</span>
           </div>
@@ -163,6 +164,11 @@ function MacroRows({ totals, goals }) {
       })}
     </div>
   );
+}
+
+function MacroBar({ pct, label }) {
+  const shown = useGrow(pct);
+  return <div className="macro-bar" role="img" aria-label={label}><i style={{ width: `${shown}%` }} /></div>;
 }
 
 function MealAccordion({ meals, openMeal, onToggle, foodEntries, onChange, focusAction, dayKcal, kcalGoal }) {

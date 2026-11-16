@@ -34,7 +34,7 @@
 
 /* Calorias em tinta neutra: o verde fica reservado às ações */
 .meter { height: 10px; border-radius: 5px; background: var(--track); overflow: hidden; }
-.meter-fill { height: 100%; border-radius: 5px; background: var(--ink); transition: width 400ms var(--ease); }
+.meter-fill { height: 100%; border-radius: 5px; background: var(--ink); transition: width 900ms var(--ease-out); }
 .meter-legend { display: flex; justify-content: space-between; gap: 12px; margin: 8px 0 20px; font-size: var(--fs-ui); color: var(--text-2); }
 .meter-legend.small { margin: 8px 0 0; font-size: var(--fs-sm); color: var(--muted); }
 
@@ -57,7 +57,7 @@
 .macro-values { grid-area: values; text-align: right; font-size: var(--fs-base); }
 .macro-pct { grid-area: pct; text-align: right; font-size: var(--fs-sm); color: var(--muted); }
 .macro-bar { grid-area: bar; height: 6px; border-radius: 3px; background: var(--track); overflow: hidden; }
-.macro-bar i { display: block; height: 100%; border-radius: 3px; background: var(--macro, var(--ink)); transition: width 400ms var(--ease); }
+.macro-bar i { display: block; height: 100%; border-radius: 3px; background: var(--macro, var(--ink)); transition: width 900ms var(--ease-out); }
 .macro-protein { --macro: var(--protein); }
 .macro-carbs { --macro: var(--carbs); }
 .macro-fat { --macro: var(--fat); }
@@ -66,8 +66,10 @@
 .progress-card-water .label-hero { margin: 0; }
 
 .ruler { display: flex; gap: 3px; }
-.ruler span { flex: 1; height: 26px; border-radius: 3px; background: var(--track); }
-.ruler span.on { background: var(--water); }
+.ruler span { position: relative; flex: 1; height: 26px; border-radius: 3px; background: var(--track); overflow: hidden; }
+/* o bloco enche de baixo para cima; blocos novos entram em sequência */
+.ruler span::after { content: ''; position: absolute; inset: 0; background: var(--water); transform: scaleY(0); transform-origin: bottom; transition: transform 420ms var(--ease-out) calc(var(--i, 0) * 70ms); }
+.ruler span.on::after { transform: scaleY(1); }
 
 .quick { display: flex; flex-wrap: wrap; gap: 8px; }
 .chip-btn {

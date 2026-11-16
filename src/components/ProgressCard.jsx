@@ -1,3 +1,5 @@
+import { useEffect, useRef } from 'react';
+import useGrow from './useGrow.js';
 import { fmtInt, fmtLitres, fmtLitresNum, pctOf } from './format.js';
 
 // Cartão de progresso no formato "rótulo nutricional": número grande, régua e,
@@ -7,6 +9,17 @@ export default function ProgressCard({ title, unit, consumed, goal, variant = 'w
   const safeGoal = Number(goal) || 0;
   const pct = pctOf(safeConsumed, safeGoal);
   const over = safeGoal > 0 && safeConsumed > safeGoal;
+  const shownPct = useGrow(pct);
+
+  // Água: blocos de 250 ml (ou 500 ml em metas grandes). Calculado no topo para
+  // manter a ordem dos hooks igual nas duas variantes.
+  const BLOCK = safeGoal / 250 > 16 ? 500 : 250;
+  const blocks = Math.max(4, Math.min(24, Math.ceil(safeGoal / BLOCK) || 8));
+  const filled = Math.min(blocks, Math.floor(safeConsumed / BLOCK));
+  const shownFilled = useGrow(filled);
+  const prevShown = useRef(0);
+  const staggerFrom = prevShown.current;
+  useEffect(() => { prevShown.current = shownFilled; }, [shownFilled]);
 
   if (variant === 'food') {
     const remaining = Math.max(0, safeGoal - safeConsumed);
@@ -26,7 +39,7 @@ export default function ProgressCard({ title, unit, consumed, goal, variant = 'w
           role="img"
           aria-label={`${fmtInt(safeConsumed)} de ${fmtInt(safeGoal)} quilocalorias consumidas, ${pct}% da meta`}
         >
-          <div className="meter-fill" style={{ width: `${pct}%` }} />
+          <div className="meter-fill" style={{ width: `${shownPct}%` }} />
         </div>
         <div className="meter-legend">
           <span>{fmtInt(safeConsumed)} {unit} consumidas</span>
@@ -38,9 +51,6 @@ export default function ProgressCard({ title, unit, consumed, goal, variant = 'w
   }
 
   const headingId = 'h-agua';
-  const BLOCK = safeGoal / 250 > 16 ? 500 : 250;
-  const blocks = Math.max(4, Math.min(24, Math.ceil(safeGoal / BLOCK) || 8));
-  const filled = Math.min(blocks, Math.floor(safeConsumed / BLOCK));
   const remaining = Math.max(0, safeGoal - safeConsumed);
 
   return (
@@ -60,7 +70,7 @@ export default function ProgressCard({ title, unit, consumed, goal, variant = 'w
           aria-label={`${filled} de ${blocks} blocos de ${BLOCK} mililitros, ${pct}% da meta de água`}
         >
           {Array.from({ length: blocks }, (_, i) => (
-            <span key={i} className={i < filled ? 'on' : ''} />
+            <span key={i} className={i < shownFilled ? 'on' : ''} style={{ '--i': Math.max(0, i - staggerFrom) }} />
           ))}
         </div>
         <div className="meter-legend small">
