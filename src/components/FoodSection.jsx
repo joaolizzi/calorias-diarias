@@ -7,6 +7,7 @@ import { toast } from './Toast.jsx';
 import FoodSearch from './FoodSearch.jsx';
 import AddFoodModal from './AddFoodModal.jsx';
 import Icon from './Icon.jsx';
+import ConfirmDialog from './ConfirmDialog.jsx';
 import { fmtNum, fmtInt } from './format.js';
 const NaturalFoodModal = lazy(() => import('./NaturalFoodModal.jsx'));
 const CameraFoodModal = lazy(() => import('./CameraFoodModal.jsx'));
@@ -32,6 +33,7 @@ export default function FoodSection({ meal, entries, onChange, initialAction = n
   const { user } = useAuth();
   const [modalItem, setModalItem] = useState(null);
   const [showManual, setShowManual] = useState(false);
+  const [confirmClear, setConfirmClear] = useState(false);
   const [showNatural, setShowNatural] = useState(false);
   const [showCamera, setShowCamera] = useState(false);
 
@@ -47,8 +49,8 @@ export default function FoodSection({ meal, entries, onChange, initialAction = n
   };
 
   const clearMeal = async () => {
+    setConfirmClear(false);
     if (!entries.length) return;
-    if (!confirm(`Apagar todos os registros de ${MEAL_LABELS[meal]}?`)) return;
     try {
       await clearFoodMeal(user.id, entries[0]?.day || new Date().toISOString().slice(0, 10), meal);
       await onChange();
@@ -109,10 +111,19 @@ export default function FoodSection({ meal, entries, onChange, initialAction = n
           <span className="meal-total-name">Total de {MEAL_LABELS[meal].toLowerCase()}</span>
           <span className="meal-total-macros num">P {fmtNum(macros.protein)} g · C {fmtNum(macros.carbs)} g · G {fmtNum(macros.fat)} g</span>
           <span className="meal-total-kcal num">{fmtInt(total)} kcal</span>
-          <button type="button" className="btn-quiet" onClick={clearMeal}>Limpar refeição</button>
+          <button type="button" className="btn-quiet" onClick={() => setConfirmClear(true)}>Limpar refeição</button>
         </div>
       )}
 
+      {confirmClear && (
+        <ConfirmDialog
+          title="Limpar refeição?"
+          message={`Todos os registros de ${MEAL_LABELS[meal].toLowerCase()} de hoje serão apagados. Isso não pode ser desfeito.`}
+          confirmLabel="Apagar registros"
+          onConfirm={clearMeal}
+          onCancel={() => setConfirmClear(false)}
+        />
+      )}
       {modalItem && <AddFoodModal item={modalItem} meal={meal} onClose={() => setModalItem(null)} onSaved={onChange} />}
       {showManual && <AddFoodModal item={null} meal={meal} onClose={() => setShowManual(false)} onSaved={onChange} />}
       <Suspense fallback={null}>

@@ -139,3 +139,9 @@
   .ai-actions .back { margin-right: 0; }
   .camera-edit-btn, .camera-editor { margin-left: 0; }
 }
+
+/* ---------- Confirmação ---------- */
+.confirm-modal { width: min(420px, 100%); }
+.confirm-text { margin-top: 4px; color: var(--text-2); font-size: var(--fs-base); line-height: 1.5; }
+.btn.danger-solid { background: var(--danger); border-color: var(--danger); color: var(--bg); font-weight: var(--fw-semibold); }
+.btn.danger-solid:hover:not(:disabled) { background: var(--danger); filter: brightness(1.08); }

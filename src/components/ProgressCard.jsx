@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import useGrow from './useGrow.js';
+import useCountUp from './useCountUp.js';
 import { fmtInt, fmtLitres, fmtLitresNum, pctOf } from './format.js';
 
 // Cartão de progresso no formato "rótulo nutricional": número grande, régua e,
@@ -10,6 +11,9 @@ export default function ProgressCard({ title, unit, consumed, goal, variant = 'w
   const pct = pctOf(safeConsumed, safeGoal);
   const over = safeGoal > 0 && safeConsumed > safeGoal;
   const shownPct = useGrow(pct);
+  // "restantes" começa na meta inteira e desce enquanto a barra enche
+  const heroKcal = useCountUp(over ? safeConsumed - safeGoal : Math.max(0, safeGoal - safeConsumed), 900, over ? 0 : safeGoal);
+  const heroWater = useCountUp(safeConsumed);
 
   // Água: blocos de 250 ml (ou 500 ml em metas grandes). Calculado no topo para
   // manter a ordem dos hooks igual nas duas variantes.
@@ -31,7 +35,7 @@ export default function ProgressCard({ title, unit, consumed, goal, variant = 'w
           <span className="muted">Meta de {fmtInt(safeGoal)} {unit}</span>
         </div>
         <div className="label-hero">
-          <span className="label-hero-num">{fmtInt(over ? safeConsumed - safeGoal : remaining)}</span>
+          <span className="label-hero-num">{fmtInt(heroKcal)}</span>
           <span className="label-hero-unit">{over ? `${unit} acima da meta` : `${unit} restantes`}</span>
         </div>
         <div
@@ -60,7 +64,7 @@ export default function ProgressCard({ title, unit, consumed, goal, variant = 'w
         <span className="muted">Meta de {fmtLitres(safeGoal)}</span>
       </div>
       <div className="label-hero label-hero-sm">
-        <span className="label-hero-num">{fmtLitresNum(safeConsumed)}</span>
+        <span className="label-hero-num">{fmtLitresNum(heroWater)}</span>
         <span className="label-hero-unit">litros</span>
       </div>
       <div>

@@ -3,12 +3,14 @@ import { useAuth } from '../contexts/AuthContext.jsx';
 import { addWater, clearWaterDay } from '../lib/supabase.js';
 import { today, fmtTime } from '../lib/dates.js';
 import { toast } from './Toast.jsx';
+import ConfirmDialog from './ConfirmDialog.jsx';
 
 const QUICK = [100, 200, 250, 500, 600, 700, 1000];
 
 export default function WaterTracker({ entries, onChange }) {
   const { user } = useAuth();
   const [custom, setCustom] = useState('');
+  const [confirmClear, setConfirmClear] = useState(false);
   const day = today();
 
   const add = async (mlRaw) => {
@@ -32,8 +34,8 @@ export default function WaterTracker({ entries, onChange }) {
   };
 
   const clearDay = async () => {
+    setConfirmClear(false);
     if (!entries.length) return;
-    if (!confirm('Apagar todas as entradas de água de hoje?')) return;
     try {
       await clearWaterDay(user.id, day);
       await onChange();
@@ -86,9 +88,18 @@ export default function WaterTracker({ entries, onChange }) {
           </ul>
         )}
         <div className="water-log-foot">
-          <button type="button" className="btn-quiet" onClick={clearDay} disabled={!entries.length}>Limpar água do dia</button>
+          <button type="button" className="btn-quiet" onClick={() => setConfirmClear(true)} disabled={!entries.length}>Limpar água do dia</button>
         </div>
       </div>
+      {confirmClear && (
+        <ConfirmDialog
+          title="Limpar água do dia?"
+          message="Todas as entradas de água de hoje serão apagadas. Isso não pode ser desfeito."
+          confirmLabel="Apagar entradas"
+          onConfirm={clearDay}
+          onCancel={() => setConfirmClear(false)}
+        />
+      )}
     </>
   );
 }

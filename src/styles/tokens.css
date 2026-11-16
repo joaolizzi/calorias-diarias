@@ -63,6 +63,7 @@ html[data-theme='dark'] {
   --active: #26303a;
   --line: #232b30;
   --line-strong: #2c363c;
+  --field-line: #5f6c73;
   --ink: #eceeec;
   --text: #eceeec;
   --text-2: #b4bdb8;
@@ -97,6 +98,7 @@ html[data-theme='light'] {
   --active: #e3e7e2;
   --line: #e1e4e0;
   --line-strong: #cbd1cc;
+  --field-line: #8a948f;
   --ink: #14171a;
   --text: #14171a;
   --text-2: #3a4540;
@@ -131,6 +133,7 @@ html[data-theme='light'] {
     --active: #e3e7e2;
     --line: #e1e4e0;
     --line-strong: #cbd1cc;
+    --field-line: #8a948f;
     --ink: #14171a;
     --text: #14171a;
     --text-2: #3a4540;
@@ -163,6 +166,7 @@ html[data-theme='light'] {
     --active: #26303a;
     --line: #232b30;
     --line-strong: #2c363c;
+    --field-line: #5f6c73;
     --ink: #eceeec;
     --text: #eceeec;
     --text-2: #b4bdb8;

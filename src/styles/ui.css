@@ -85,7 +85,7 @@
   width: 100%;
   min-height: var(--tap);
   padding: 0 var(--sp-3);
-  border: 1px solid var(--line-strong);
+  border: 1px solid var(--field-line);
   border-radius: var(--r-md);
   background: var(--bg);
   color: var(--text);
