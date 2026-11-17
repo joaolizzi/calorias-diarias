@@ -72,6 +72,13 @@
 .exercise-option.selected { border-color: var(--accent); background: var(--accent-soft); }
 .exercise-option-name { font-weight: var(--fw-medium); }
 .exercise-option .muted { font-size: var(--fs-sm); }
+.create-exercise-btn { justify-self: start; }
+.custom-exercise-form { display: grid; gap: 12px; padding: 16px; }
+.custom-exercise-form h3 { margin: 0; font-size: var(--fs-ui); font-weight: var(--fw-semibold); }
+.custom-exercise-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.custom-exercise-form .actions { display: flex; justify-content: flex-end; gap: 8px; }
+@media (max-width: 560px) { .custom-exercise-row { grid-template-columns: 1fr; } }
+.exercise-picker-grid .empty-state { display: grid; justify-items: center; gap: 10px; }
 .exercise-added { display: inline-flex; align-items: center; gap: 4px; color: var(--accent-text); font-size: var(--fs-sm); font-weight: var(--fw-medium); }
 
 .import-workout-modal { width: min(640px, 100%); }

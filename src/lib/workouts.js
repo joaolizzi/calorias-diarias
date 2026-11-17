@@ -54,10 +54,22 @@ export const getExerciseHistory = (exerciseId) => read().flatMap(w => (w.exercis
 export const calculateWorkoutStats = (workout) => { const sets = (workout.exercises || []).flatMap(e => e.sets || []); return { exercises: workout.exercises?.length || 0, sets: sets.length, volume: Math.round(sets.reduce((sum, s) => sum + (Number(s.weight ?? s.kg) || 0) * (Number(s.reps) || 0), 0)), duration: workout.startedAt && workout.finishedAt ? Math.max(1, Math.round((new Date(workout.finishedAt) - new Date(workout.startedAt)) / 60000)) : 0 }; };
 export const getPersonalBest = (exerciseId) => getExerciseHistory(exerciseId).flatMap(e => e.sets || []).reduce((best, s) => (Number(s.weight ?? s.kg) || 0) > (Number(best?.weight ?? best?.kg) || 0) ? s : best, null);
 
-// Catálogo fixo em português (padrões + catálogo completo), sem depender de API externa.
+// Exercícios criados pelo usuário (quando não existem no catálogo).
+const CUSTOM_EXERCISES_KEY = 'nutrix-custom-exercises-v1';
+export const getCustomExercises = () => {
+  try { const saved = JSON.parse(localStorage.getItem(CUSTOM_EXERCISES_KEY) || '[]'); return Array.isArray(saved) ? saved : []; } catch { return []; }
+};
+export const addCustomExercise = ({ name, muscle, equipment }) => {
+  const exercise = { id: `custom-${Date.now()}`, name: String(name).trim(), muscle: muscle || 'Geral', equipment: equipment || 'Diversos', custom: true };
+  try { localStorage.setItem(CUSTOM_EXERCISES_KEY, JSON.stringify([exercise, ...getCustomExercises()])); } catch {}
+  return exercise;
+};
+export const findExerciseByName = (catalog, name) => catalog.find((item) => normalizeText(item.name) === normalizeText(name));
+
+// Catálogo fixo em português (personalizados + padrões + catálogo completo), sem depender de API externa.
 export const getExerciseCatalog = async () => {
   try { localStorage.removeItem('nutrix-exercise-catalog-v4'); } catch {}
-  return [...DEFAULT_EXERCISES, ...EXERCISE_CATALOG]
+  return [...getCustomExercises(), ...DEFAULT_EXERCISES, ...EXERCISE_CATALOG]
     .filter((item, index, all) => all.findIndex((x) => x.id === item.id || normalizeText(x.name) === normalizeText(item.name)) === index);
 };
 export const emptyWorkoutPlan = () => Object.fromEntries(WORKOUT_PLAN_DAYS.map(day => [day.id, { name: '', restSeconds: 90, exercises: [] }]));

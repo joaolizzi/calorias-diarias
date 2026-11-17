@@ -12,6 +12,8 @@ import {
   getWorkoutPlan,
   saveWorkoutPlan,
   localizeExerciseName,
+  addCustomExercise,
+  findExerciseByName,
 } from '../lib/workouts.js';
 
 const makeSet = (source = {}) => ({ kg: source.kg ?? '', reps: source.reps ?? '', done: Boolean(source.done) });
@@ -28,10 +30,45 @@ const prepareWorkoutText = (value) => String(value || '')
   .join('\n')
   .slice(0, 30000);
 
-function ExercisePicker({ catalog, selectedIds, onAdd, onClose }) {
+const EQUIPMENT_OPTIONS = ['Máquina', 'Polia', 'Barra', 'Barra W', 'Halteres', 'Smith', 'Kettlebell', 'Anilha', 'Elástico', 'TRX', 'Peso corporal', 'Barra fixa', 'Paralelas', 'Aparelho de cardio', 'Diversos'];
+
+function CustomExerciseForm({ initialName, muscles, catalog, onCreate, onCancel }) {
+  const [name, setName] = useState(initialName);
+  const [muscle, setMuscle] = useState(muscles[0] || 'Geral');
+  const [equipment, setEquipment] = useState('Máquina');
+  const [error, setError] = useState('');
+
+  const submit = (event) => {
+    event.preventDefault();
+    const clean = name.trim();
+    if (clean.length < 2) { setError('Digite o nome do exercício.'); return; }
+    if (findExerciseByName(catalog, clean)) { setError('Esse exercício já existe na lista. Use a busca para encontrá-lo.'); return; }
+    onCreate({ name: clean, muscle, equipment });
+  };
+
+  return (
+    <form className="custom-exercise-form card" onSubmit={submit}>
+      <h3>Criar exercício</h3>
+      <div className="field"><label htmlFor="cx-name">Nome</label><input id="cx-name" autoFocus maxLength={80} placeholder="Por exemplo: Remada articulada unilateral" value={name} onChange={(e) => { setName(e.target.value); setError(''); }} /></div>
+      <div className="custom-exercise-row">
+        <div className="field"><label htmlFor="cx-muscle">Músculo</label><select id="cx-muscle" value={muscle} onChange={(e) => setMuscle(e.target.value)}>{muscles.map((m) => <option key={m}>{m}</option>)}</select></div>
+        <div className="field"><label htmlFor="cx-equip">Equipamento</label><select id="cx-equip" value={equipment} onChange={(e) => setEquipment(e.target.value)}>{EQUIPMENT_OPTIONS.map((eq) => <option key={eq}>{eq}</option>)}</select></div>
+      </div>
+      {error && <div className="err" role="alert">{error}</div>}
+      <div className="actions">
+        <button type="button" className="btn" onClick={onCancel}>Cancelar</button>
+        <button type="submit" className="btn primary"><Icon name="plus" size={16} /> Criar e adicionar</button>
+      </div>
+    </form>
+  );
+}
+
+function ExercisePicker({ catalog, selectedIds, onAdd, onCreate, onClose }) {
   const [query, setQuery] = useState('');
   const [muscle, setMuscle] = useState('Todos');
-  const muscles = useMemo(() => ['Todos', ...Array.from(new Set(catalog.map((e) => e.muscle).filter(Boolean))).sort()], [catalog]);
+  const [creating, setCreating] = useState(false);
+  const muscleList = useMemo(() => Array.from(new Set(catalog.map((e) => e.muscle).filter(Boolean))).sort(), [catalog]);
+  const muscles = useMemo(() => ['Todos', ...muscleList], [muscleList]);
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return catalog.filter((e) => (!q || `${e.name} ${e.muscle} ${e.equipment}`.toLowerCase().includes(q)) && (muscle === 'Todos' || e.muscle === muscle));
@@ -39,7 +76,18 @@ function ExercisePicker({ catalog, selectedIds, onAdd, onClose }) {
 
   return (
     <Modal title="Escolha os exercícios" onClose={onClose} className="exercise-picker-modal">
-      <p className="modal-sub">Pesquise por nome ou músculo.</p>
+      <p className="modal-sub">Pesquise por nome ou músculo. Não achou? Crie o seu.</p>
+      {creating ? (
+        <CustomExerciseForm
+          initialName={query.trim()}
+          muscles={muscle !== 'Todos' ? [muscle, ...muscleList.filter((m) => m !== muscle)] : muscleList}
+          catalog={catalog}
+          onCreate={(data) => { onCreate(data); setCreating(false); setQuery(''); }}
+          onCancel={() => setCreating(false)}
+        />
+      ) : (
+        <button type="button" className="btn ghost create-exercise-btn" onClick={() => setCreating(true)}><Icon name="plus" size={16} /> Criar exercício que não está na lista</button>
+      )}
       <div className="exercise-picker-filters">
         <label className="sr-only" htmlFor="ex-q">Buscar exercício</label>
         <input id="ex-q" placeholder="Por exemplo: supino, tríceps, costas" value={query} onChange={(e) => setQuery(e.target.value)} />
@@ -47,12 +95,17 @@ function ExercisePicker({ catalog, selectedIds, onAdd, onClose }) {
         <select id="ex-m" value={muscle} onChange={(e) => setMuscle(e.target.value)}>{muscles.map((m) => <option key={m}>{m}</option>)}</select>
       </div>
       <div className="exercise-picker-grid">
-        {filtered.length === 0 ? <div className="empty-state">Nenhum exercício encontrado.</div> : filtered.map((exercise) => {
+        {filtered.length === 0 ? (
+          <div className="empty-state">
+            <p>Nenhum exercício encontrado{query.trim() ? <> para <strong>{query.trim()}</strong></> : ''}.</p>
+            {!creating && <button type="button" className="btn primary" onClick={() => setCreating(true)}><Icon name="plus" size={16} /> Criar {query.trim() ? `"${query.trim()}"` : 'exercício'}</button>}
+          </div>
+        ) : filtered.map((exercise) => {
           const selected = selectedIds.has(exercise.id);
           return (
             <button type="button" className={`exercise-option ${selected ? 'selected' : ''}`} key={exercise.id} onClick={() => onAdd(exercise)} aria-pressed={selected}>
               <span className="exercise-option-name">{exercise.name}</span>
-              <span className="muted">{exercise.muscle} · {exercise.equipment}</span>
+              <span className="muted">{exercise.muscle} · {exercise.equipment}{exercise.custom ? ' · criado por você' : ''}</span>
               {selected && <strong className="exercise-added"><Icon name="check" size={14} /> Adicionado</strong>}
             </button>
           );
@@ -207,6 +260,11 @@ export default function WorkoutsPage({ theme, setTheme }) {
     if (selectedIds.has(exercise.id)) return;
     updateDay({ exercises: [...currentDay.exercises, { ...exercise, notes: '', sets: [makeSet(), makeSet(), makeSet()] }] });
   };
+  const createExercise = (data) => {
+    const exercise = addCustomExercise(data);
+    setCatalog((previous) => [exercise, ...previous]);
+    addExercise(exercise);
+  };
   const removeExercise = (index) => updateDay({ exercises: currentDay.exercises.filter((_, i) => i !== index) });
   const updateExercise = (index, next) => updateDay({ exercises: currentDay.exercises.map((exercise, i) => i === index ? next : exercise) });
 
@@ -328,7 +386,7 @@ export default function WorkoutsPage({ theme, setTheme }) {
             : currentDay.exercises.map((exercise, index) => <ExerciseCard key={`${exercise.id}-${index}`} exercise={exercise} index={index} onChange={(next) => updateExercise(index, next)} onRemove={() => removeExercise(index)} />)}
         </div>
       </main>
-      {picker && <ExercisePicker catalog={catalog} selectedIds={selectedIds} onAdd={addExercise} onClose={() => setPicker(false)} />}
+      {picker && <ExercisePicker catalog={catalog} selectedIds={selectedIds} onAdd={addExercise} onCreate={createExercise} onClose={() => setPicker(false)} />}
       {confirmClear && (
         <ConfirmDialog
           title={confirmClear === 'week' ? 'Apagar a semana inteira?' : `Apagar o treino de ${dayLabel}?`}
