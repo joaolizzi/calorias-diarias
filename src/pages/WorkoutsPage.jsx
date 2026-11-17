@@ -14,11 +14,12 @@ import {
   localizeExerciseName,
   addCustomExercise,
   findExerciseByName,
+  matchExercise,
 } from '../lib/workouts.js';
+import { parseWorkoutText } from '../lib/workoutParser.js';
 
 const makeSet = (source = {}) => ({ kg: source.kg ?? '', reps: source.reps ?? '', done: Boolean(source.done) });
 const clone = (value) => JSON.parse(JSON.stringify(value));
-const normalize = (value) => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
 const prepareWorkoutText = (value) => String(value || '')
   .replace(/\r\n?/g, '\n')
   .replace(/[•●▪◦]/g, '-')
@@ -160,6 +161,11 @@ function ImportWorkoutModal({ catalog, onImport, onClose }) {
   const submit = async () => {
     setBusy(true); setError('');
     try {
+      // Texto no formato "SEGUNDA - PUSH / 1. Exercício - 3 x 8-12" é lido direto, sem IA.
+      if (!window.__nutrixWorkoutImportImage) {
+        const local = parseWorkoutText(text);
+        if (local) { onImport(local, catalog); return; }
+      }
       const { data: sessionData } = await supabase.auth.getSession();
       const token = sessionData?.session?.access_token;
       if (!token) throw new Error('Sessão expirada. Entre novamente no aplicativo.');
@@ -277,9 +283,7 @@ export default function WorkoutsPage({ theme, setTheme }) {
         restSeconds: incoming.restSeconds || 90,
         exercises: (incoming.exercises || []).map((incomingExercise, index) => {
           const localizedName = localizeExerciseName(incomingExercise.name);
-          const key = normalize(localizedName);
-          const match = exerciseCatalog.find((item) => normalize(item.name) === key)
-            || exerciseCatalog.find((item) => normalize(item.name).includes(key) || key.includes(normalize(item.name)));
+          const match = matchExercise(exerciseCatalog, localizedName);
           return {
             ...(match || { id: `import-${day.id}-${index}-${Date.now()}`, name: localizedName, muscle: incomingExercise.muscle || 'Geral', equipment: incomingExercise.equipment || 'Diversos' }),
             notes: incomingExercise.notes || '',

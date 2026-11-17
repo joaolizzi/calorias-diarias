@@ -66,6 +66,38 @@ export const addCustomExercise = ({ name, muscle, equipment }) => {
 };
 export const findExerciseByName = (catalog, name) => catalog.find((item) => normalizeText(item.name) === normalizeText(name));
 
+// Liga um nome digitado ("Hack 45°", "Adutora", "Tríceps francês") ao exercício do catálogo.
+const STOPWORDS = new Set(['de', 'da', 'do', 'na', 'no', 'com', 'a', 'o', 'e', 'ou', 'em', 'para', 'pra', 'the']);
+const SYNONYMS = [
+  [/\babdomen\b/g, 'abdominal'], [/\bcabo\b/g, 'polia'], [/\bpec deck\b/g, 'peck deck'], [/\bombro\b/g, 'ombros'],
+  [/\bhalter\b/g, 'halteres'], [/^hack\b/, 'agachamento hack'], [/^(adutora|adutor)$/, 'cadeira adutora'],
+  [/^(abdutora|abdutor)$/, 'cadeira abdutora'], [/^extensora$/, 'cadeira extensora'], [/^flexora$/, 'cadeira flexora'],
+  [/\bterra romeno\b/g, 'romeno'], [/\bpanturrilha em pe\b/g, 'panturrilha'],
+];
+const exerciseTokens = (value) => {
+  let text = normalizeText(value);
+  for (const [regex, replacement] of SYNONYMS) text = text.replace(regex, replacement);
+  return text.split(' ').filter((token) => token && !STOPWORDS.has(token) && !/^\d+$/.test(token));
+};
+export const matchExercise = (catalog, name) => {
+  const exact = findExerciseByName(catalog, name) || findExerciseByName(catalog, localizeExerciseName(name));
+  if (exact) return exact;
+  const wanted = exerciseTokens(localizeExerciseName(name));
+  if (!wanted.length) return null;
+  let best = null;
+  let bestScore = 0;
+  for (const item of catalog) {
+    const tokens = exerciseTokens(item.name);
+    if (!tokens.length) continue;
+    const hits = wanted.filter((token) => tokens.includes(token)).length;
+    if (!hits) continue;
+    // Prioriza cobrir o nome digitado; desempata pelo nome do catálogo com menos palavras sobrando.
+    const score = hits / wanted.length + (hits / tokens.length) * 0.5;
+    if (score > bestScore) { best = item; bestScore = score; }
+  }
+  return bestScore >= 0.75 ? best : null;
+};
+
 // Catálogo fixo em português (personalizados + padrões + catálogo completo), sem depender de API externa.
 export const getExerciseCatalog = async () => {
   try { localStorage.removeItem('nutrix-exercise-catalog-v4'); } catch {}

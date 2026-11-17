@@ -75,7 +75,16 @@ function promptInsight(payload) {
 }
 
 function promptWorkout(text) {
-  return `Converta o treino abaixo em plano semanal. Retorne SOMENTE JSON válido no formato {"days":{"monday":{"name":string,"restSeconds":number,"exercises":[{"name":string,"muscle":string,"equipment":string,"notes":string,"sets":[{"kg":string,"reps":string}]}]},"tuesday":{},"wednesday":{},"thursday":{},"friday":{},"saturday":{},"sunday":{}}}. Todos os nomes em pt-BR. Preserve ordem, séries e repetições. Não invente exercícios. Dias sem treino devem ter name vazio, restSeconds 90 e exercises []. Texto:\n${text}`;
+  return `Você organiza fichas de treino de academia. Leia o treino abaixo (texto ou imagem) e devolva SOMENTE JSON válido, sem markdown, neste formato:
+{"days":{"monday":{"name":"PUSH","restSeconds":90,"exercises":[{"name":"Supino inclinado máquina","notes":"","sets":3,"reps":"8-12","kg":""}]},"tuesday":{...},"wednesday":{...},"thursday":{...},"friday":{...},"saturday":{...},"sunday":{...}}}
+Regras:
+- Segunda=monday, Terça=tuesday, Quarta=wednesday, Quinta=thursday, Sexta=friday, Sábado=saturday, Domingo=sunday. Se o treino usar letras (A, B, C...) em vez de dias, distribua a partir de segunda.
+- "name" do dia: o rótulo escrito (ex.: PUSH, Pernas). Dia de descanso ou ausente: {"name":"","restSeconds":90,"exercises":[]}.
+- Em "3 x 8-12": sets=3 (número de séries) e reps="8-12" (texto). Sem indicação, sets=3 e reps="".
+- Texto entre parênteses vai para "notes"; tire do "name". Copie o nome do exercício como está escrito, em pt-BR.
+- Não invente, não junte e não pule exercícios. Mantenha a ordem.
+Treino:
+${text}`;
 }
 
 function shapeSearch(parsed) {
@@ -132,6 +141,14 @@ function shapeInsight(parsed) {
   return title && body ? { title, body } : null;
 }
 
+// Aceita "sets": 3 + "reps": "8-12" (formato atual) ou uma lista de séries (formato antigo).
+function shapeSets(exercise) {
+  const text = (value) => String(value ?? '').trim().slice(0, 30);
+  if (Array.isArray(exercise?.sets)) return exercise.sets.slice(0, 12).map((set) => ({ kg: text(set?.kg), reps: text(set?.reps), done: false }));
+  const count = Math.min(12, Math.max(1, Math.round(Number(exercise?.sets)) || 3));
+  return Array.from({ length: count }, () => ({ kg: text(exercise?.kg), reps: text(exercise?.reps), done: false }));
+}
+
 function shapeWorkout(parsed) {
   const keys = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
   if (!parsed?.days || typeof parsed.days !== 'object') return null;
@@ -146,7 +163,7 @@ function shapeWorkout(parsed) {
         muscle: String(exercise?.muscle || 'Geral').trim().slice(0, 60),
         equipment: String(exercise?.equipment || 'Diversos').trim().slice(0, 80),
         notes: String(exercise?.notes || '').trim().slice(0, 400),
-        sets: Array.isArray(exercise?.sets) ? exercise.sets.slice(0, 12).map((set) => ({ kg: String(set?.kg ?? '').trim().slice(0, 30), reps: String(set?.reps ?? '').trim().slice(0, 30), done: false })) : [],
+        sets: shapeSets(exercise),
       })).filter((exercise) => exercise.name) : [],
     };
   }
