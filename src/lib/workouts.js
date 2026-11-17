@@ -1,4 +1,5 @@
 import { supabase } from './supabase.js';
+import { EXERCISE_CATALOG } from './exerciseCatalog.js';
 
 export const WORKOUT_STORAGE_KEY = 'nutrix-workouts-v1';
 export const WORKOUT_PLAN_DAYS = [
@@ -25,8 +26,6 @@ export const DEFAULT_EXERCISES = [
   { id: 'cable-crunch', name: 'Abdominal na polia', muscle: 'Abdômen', equipment: 'Polia' },
 ];
 
-const cacheKey = 'nutrix-exercise-catalog-v4';
-const API_URLS = ['https://wger.de/api/v2/exerciseinfo/?limit=1000'];
 const PT_EXERCISE_ALIASES = {
   'bench press': 'Supino reto', 'barbell bench press': 'Supino reto', 'incline bench press': 'Supino inclinado', 'incline dumbbell press': 'Supino inclinado com halteres',
   'chest fly': 'Voador', 'machine chest fly': 'Voador', 'pec deck': 'Peck deck', 'cable crossover': 'Crossover na polia', 'lat pulldown': 'Puxada alta',
@@ -55,15 +54,11 @@ export const getExerciseHistory = (exerciseId) => read().flatMap(w => (w.exercis
 export const calculateWorkoutStats = (workout) => { const sets = (workout.exercises || []).flatMap(e => e.sets || []); return { exercises: workout.exercises?.length || 0, sets: sets.length, volume: Math.round(sets.reduce((sum, s) => sum + (Number(s.weight ?? s.kg) || 0) * (Number(s.reps) || 0), 0)), duration: workout.startedAt && workout.finishedAt ? Math.max(1, Math.round((new Date(workout.finishedAt) - new Date(workout.startedAt)) / 60000)) : 0 }; };
 export const getPersonalBest = (exerciseId) => getExerciseHistory(exerciseId).flatMap(e => e.sets || []).reduce((best, s) => (Number(s.weight ?? s.kg) || 0) > (Number(best?.weight ?? best?.kg) || 0) ? s : best, null);
 
-const translationLanguageText = (translation) => { const language = translation?.language; if (!language) return ''; if (typeof language === 'string') return language; if (typeof language === 'object') return [language.short_name, language.shortName, language.iso_code, language.code, language.name, language.full_name].filter(Boolean).join(' '); return String(language); };
-const chooseTranslation = (translations = []) => translations.find((t) => /pt[_-]?br|portugu[eê]s\s*\(?brasil|brazilian\s*portuguese/i.test(translationLanguageText(t))) || translations.find((t) => /^pt(?:\s|$)/i.test(translationLanguageText(t)));
-const normalizeExercise = (exercise) => { const translation = chooseTranslation(exercise.translations); if (!translation?.name) return null; const name = localizeExerciseName(translation.name); const muscle = exercise.muscles?.[0]?.name || exercise.muscles?.[0]?.name_en || 'Geral'; const equipment = exercise.equipment?.map((e) => e.name || e.name_en).filter(Boolean).join(', ') || 'Diversos'; return { id: `wger-${exercise.id}`, sourceId: exercise.id, name: name.trim(), muscle: String(muscle).trim(), equipment: equipment.trim(), category: exercise.category?.name || 'Força', image: exercise.images?.[0]?.image || exercise.images?.[0]?.url || null }; };
+// Catálogo fixo em português (padrões + catálogo completo), sem depender de API externa.
 export const getExerciseCatalog = async () => {
-  try { const cached = JSON.parse(localStorage.getItem(cacheKey) || 'null'); if (Array.isArray(cached) && cached.length >= DEFAULT_EXERCISES.length) return cached; } catch {}
-  for (const url of API_URLS) {
-    try { const response = await fetch(url, { headers: { Accept: 'application/json' } }); if (!response.ok) continue; const payload = await response.json(); const remote = (payload.results || []).map(normalizeExercise).filter(Boolean); const merged = [...DEFAULT_EXERCISES, ...remote].filter((item, index, all) => all.findIndex((x) => normalizeText(x.name) === normalizeText(item.name)) === index); if (merged.length) { localStorage.setItem(cacheKey, JSON.stringify(merged)); return merged; } } catch {}
-  }
-  return DEFAULT_EXERCISES;
+  try { localStorage.removeItem('nutrix-exercise-catalog-v4'); } catch {}
+  return [...DEFAULT_EXERCISES, ...EXERCISE_CATALOG]
+    .filter((item, index, all) => all.findIndex((x) => x.id === item.id || normalizeText(x.name) === normalizeText(item.name)) === index);
 };
 export const emptyWorkoutPlan = () => Object.fromEntries(WORKOUT_PLAN_DAYS.map(day => [day.id, { name: '', restSeconds: 90, exercises: [] }]));
 
