@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import ProfessionalHeader from '../components/ProfessionalHeader.jsx';
 import Modal from '../components/Modal.jsx';
+import ConfirmDialog from '../components/ConfirmDialog.jsx';
 import Icon from '../components/Icon.jsx';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { supabase } from '../lib/supabase.js';
@@ -184,6 +185,8 @@ export default function WorkoutsPage({ theme, setTheme }) {
   const [saving, setSaving] = useState(false);
   const [savedAt, setSavedAt] = useState(null);
   const [error, setError] = useState('');
+  const [confirmClear, setConfirmClear] = useState(null); // 'day' | 'week' | null
+  const [clearing, setClearing] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -237,6 +240,23 @@ export default function WorkoutsPage({ theme, setTheme }) {
     finally { setSaving(false); }
   };
 
+  // Apaga o treino do dia selecionado ou a semana inteira e já salva.
+  const clearWorkout = async () => {
+    const scope = confirmClear;
+    const empty = emptyWorkoutPlan();
+    const next = scope === 'week' ? empty : { ...days, [activeDay]: empty[activeDay] };
+    setClearing(true); setError('');
+    try {
+      await saveWorkoutPlan(user.id, clone(next));
+      setDays(next);
+      if (scope === 'week') setActiveDay('monday');
+      setSavedAt(new Date());
+      setConfirmClear(null);
+    } catch (e) {
+      setError(`Não foi possível apagar: ${e?.message || 'verifique o Supabase.'}`);
+    } finally { setClearing(false); }
+  };
+
   const shell = (content) => (
     <div className="app-shell">
       <ProfessionalHeader theme={theme} setTheme={setTheme} />
@@ -247,6 +267,8 @@ export default function WorkoutsPage({ theme, setTheme }) {
   if (loading) return shell(<div className="route-loading">Carregando banco de exercícios e seus treinos…</div>);
 
   const dayLabel = WORKOUT_PLAN_DAYS.find((d) => d.id === activeDay)?.label;
+  const dayHasWorkout = currentDay.exercises.length > 0 || Boolean(currentDay.name);
+  const weekHasWorkout = WORKOUT_PLAN_DAYS.some((d) => days[d.id]?.exercises?.length > 0 || days[d.id]?.name);
 
   return (
     <div className="app-shell">
@@ -259,6 +281,7 @@ export default function WorkoutsPage({ theme, setTheme }) {
               <h1>Treinos</h1>
             </div>
             <div className="page-head-actions">
+              <button type="button" className="btn danger" onClick={() => setConfirmClear('week')} disabled={!weekHasWorkout}><Icon name="trash" size={17} /> Apagar semana</button>
               <button type="button" className="btn" onClick={() => setImporter(true)}><Icon name="sparkles" size={17} /> Importar treino</button>
               <button type="button" className="btn primary" onClick={save} disabled={saving}>{saving ? 'Salvando…' : 'Salvar semana'}</button>
             </div>
@@ -282,7 +305,10 @@ export default function WorkoutsPage({ theme, setTheme }) {
           <section className="card workout-plan-editor" aria-labelledby="h-treino">
             <div className="workout-plan-heading">
               <div><p className="page-date">{dayLabel}</p><h2 id="h-treino">Configuração do treino</h2></div>
-              <button type="button" className="btn" onClick={() => setPicker(true)}><Icon name="plus" size={17} /> Adicionar exercício</button>
+              <div className="page-head-actions">
+                <button type="button" className="btn danger" onClick={() => setConfirmClear('day')} disabled={!dayHasWorkout}><Icon name="trash" size={17} /> Apagar treino</button>
+                <button type="button" className="btn" onClick={() => setPicker(true)}><Icon name="plus" size={17} /> Adicionar exercício</button>
+              </div>
             </div>
             <div className="workout-name-row">
               <div className="field"><label htmlFor="w-name">Nome do treino</label><input id="w-name" placeholder="Por exemplo: Push A, Peito e tríceps" value={currentDay.name} onChange={(e) => updateDay({ name: e.target.value })} /></div>
@@ -303,6 +329,18 @@ export default function WorkoutsPage({ theme, setTheme }) {
         </div>
       </main>
       {picker && <ExercisePicker catalog={catalog} selectedIds={selectedIds} onAdd={addExercise} onClose={() => setPicker(false)} />}
+      {confirmClear && (
+        <ConfirmDialog
+          title={confirmClear === 'week' ? 'Apagar a semana inteira?' : `Apagar o treino de ${dayLabel}?`}
+          message={confirmClear === 'week'
+            ? 'Todos os treinos de segunda a domingo serão removidos. Você poderá montar ou importar um treino novo em seguida.'
+            : `O nome e todos os exercícios de ${dayLabel} serão removidos. Os outros dias continuam como estão.`}
+          confirmLabel={clearing ? 'Apagando…' : (confirmClear === 'week' ? 'Apagar semana' : 'Apagar treino')}
+          busy={clearing}
+          onConfirm={clearWorkout}
+          onCancel={() => { if (!clearing) setConfirmClear(null); }}
+        />
+      )}
       {importer && <ImportWorkoutModal catalog={catalog} onImport={importPlan} onClose={() => setImporter(false)} />}
     </div>
   );
